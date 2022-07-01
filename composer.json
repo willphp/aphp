@@ -1,0 +1,31 @@
+{
+    "name": "willphp/easywill",
+    "description": "一鱼PHP框架willphp framework",
+    "type": "project",
+    "keywords": [
+	"willphp",
+	"一鱼框架",
+	"framework",
+	"ORM"
+    ],
+    "homepage": "http://www.113344.com/",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "无念",
+            "email": "24203741@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+	"php": ">=5.6.0"
+    },
+    "autoload": {
+	"psr-4": {
+		"app\\": "app",
+		"willphp\\core\\": "willphp/core",
+		"middleware\\": "middleware",
+		"extend\\": "extend"
+	}
+    }  
+}
