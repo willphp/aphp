@@ -48,7 +48,7 @@ a{color:#428bca;}
 			<h3><strong>Σ( ° △ °|||)︴</strong>欢迎使用WillPHP__VERSION__</h3>	
 			<div class="willphp-page-foot cl">
 				<a href="https://qm.qq.com/cgi-bin/qm/qr?k=U7SzseDDXSbG9sB1CTEf5U10oFJOKR8-&jump_from=webapi" target="_blank" class="red">Q群:325825297</a>
-				<a href="https://gitee.com/willphp/willphpv2" target="_blank" class="blue">下载新版</a>
+				<a href="https://gitee.com/willphp/yiyu" target="_blank" class="blue">下载新版</a>
 				<a href="https://willphp.gitee.io/" target="_blank" class="green">开发手册</a>				
 			</div>				
 			<div class="willphp-page-menu">
