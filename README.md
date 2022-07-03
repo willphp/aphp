@@ -13,15 +13,15 @@
 
 ###下载安装
 
-Gitee地址： [https://gitee.com/willphp/willphpv2](https://gitee.com/willphp/willphpv2)
+Gitee地址： [https://gitee.com/willphp/yiyu](https://gitee.com/willphp/yiyu)
 
-GitHub地址： [https://github.com/willphp/easywill](https://github.com/willphp/easywill)
+GitHub地址： [https://github.com/willphp/yiyu](https://github.com/willphp/yiyu)
 
 ###composer安装
 
 可以使用 composer 命令进行安装：
 
-    composer create-project willphp/easywill myapp --prefer-dist
+    composer create-project willphp/yiyu blog --prefer-dist
 
 >可删除vendor目录，使用框架自动加载！
 
