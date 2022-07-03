@@ -23,7 +23,7 @@ GitHub地址： [https://github.com/willphp/yiyu](https://github.com/willphp/yiy
 
     composer create-project willphp/yiyu blog --prefer-dist
 
->可删除vendor目录，使用框架自动加载！
+>如无需composer加载，可删除vendor目录，使用框架自动加载！
 
 ###版本特性
 
