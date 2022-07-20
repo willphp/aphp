@@ -104,7 +104,7 @@ abstract class Model implements \ArrayAccess, \Iterator {
 	 * 更新widget缓存
 	 */
 	public function updateWidget() {		
-		Cache::clear('widget/'.$this->table);
+		Cache::clearAll('widget/'.$this->table);
 	}
 	/**
 	 * 用于读取数据成功时的对字段的处理后返回

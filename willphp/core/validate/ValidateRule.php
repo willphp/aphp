@@ -27,7 +27,7 @@ class ValidateRule {
 	}	
 	//必须有字段，不能为空
 	public function required($value, $field, $params, $data) {
-		return isset($data[$field]) && trim($data[$field]) !== '';
+		return isset($data[$field]) && !empty($data[$field]);
 	}
 	//必须有字段
 	public function exists($value, $field, $params, $data) {

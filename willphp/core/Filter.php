@@ -49,11 +49,13 @@ class FilterBuilder {
 		} elseif (!empty($funcExceptHtml)) {
 			$value = batch_functions($funcExceptHtml, $value);
 		}
-		$fieldIn = Config::get('filter.field_in', []);
-		foreach ($fieldIn as $field => $func) {
-			if ($key == $field || in_array($key, explode(',', $field))) {
-				$value = batch_functions($func, $value);
-			}			
+		if (!is_numeric($key)) {
+			$fieldIn = Config::get('filter.field_in', []);
+			foreach ($fieldIn as $field => $func) {
+				if ($key == $field || in_array($key, explode(',', $field))) {
+					$value = batch_functions($func, $value);
+				}
+			}	
 		}		
 	}	
 	//输出处理
