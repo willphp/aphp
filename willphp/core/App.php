@@ -33,7 +33,7 @@ class AppBuilder {
 		return $this;	
 	}
 	//解析应用(模块)名
-	protected function parseName($name) {
+	protected function parseName($name = '') {
 		if (is_array($name)) {
 			$keys = [__HOST__, explode('.', __HOST__)[0], '*'];
 			foreach ($keys as $key) {

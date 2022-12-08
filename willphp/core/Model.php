@@ -79,7 +79,10 @@ abstract class Model implements \ArrayAccess, \Iterator {
 	 * 动作类型(新增或更新)
 	 * @return int
 	 */
-	final public function action() {		
+	final public function action() {	
+		if (empty($this->data) && isset($this->original[$this->pk])) {
+			$this->data[$this->pk] = $this->original[$this->pk];
+		}		
 		return empty($this->data[$this->pk])? IN_INSERT : IN_UPDATE;
 	}
 	/**
@@ -175,21 +178,22 @@ abstract class Model implements \ArrayAccess, \Iterator {
 	 * @return bool
 	 * @throws \Exception
 	 */
-	final public function save(array $data = []) {	
-		$this->fieldFillCheck($data); //自动填充数据处理	
+	final public function save(array $data = []) {			
+		$this->fieldFillCheck($data); //自动填充数据处理
 		//自动验证
 		if (!$this->autoValidate()) {
 			return false;
 		}			
 		$this->autoOperation(); //自动完成	
 		$this->autoFilter(); //自动过滤	
-		$this->formatFields(); //处理时间字段
-		if ($this->action() == IN_UPDATE) {
+		$this->formatFields(); //处理时间字段		
+		$action = $this->action(); //当前操作			
+		if ($action == IN_UPDATE) {
 			$this->original = array_merge($this->data, $this->original);			
 		}		
 		//更新条件检测
 		$res = null;			
-		switch ($this->action()) {				
+		switch ($action) {				
 			case IN_UPDATE:
 				//更新前置		
 				$this->_before_update($this->original);				
@@ -197,12 +201,14 @@ abstract class Model implements \ArrayAccess, \Iterator {
 					Validate::respond($this->errors);	
 					return false;
 				}
+				
 				$res = $this->db->where($this->pk, $this->data[$this->pk])->update($this->original);
 				if ($res) {
 					$old = $this->data;
 					$this->setData($this->db->find($this->data[$this->pk]));
-					//更新后置				
-					$this->_after_update($old, $this->data);
+					//更新后置	
+					$new = array_merge($this->original, $this->data);
+					$this->_after_update($old, $new);
 					$this->updateWidget(); //更新widget缓存
 				}
 				break;
@@ -314,7 +320,7 @@ abstract class Model implements \ArrayAccess, \Iterator {
 	 * 删除数据
 	 * @return bool
 	 */
-	final public function destory() {		
+	final public function destory($id = 0) {		
 		$id = $this->data[$this->pk];
 		if (!empty($id)) {
 			$data = $this->data;

@@ -251,8 +251,12 @@ class RouteBuilder {
 			if (0 === strpos($action, '_')) {				
 				return App::halt($path.' 不可访问');
 			}
-		}
-		if (!method_exists($class, $action)) {
+		}		
+		if (!method_exists($class, $action)) {			
+			$viewFile = THEME_PATH.'/'.$path.Config::get('view.prefix', '.html');
+			if (IS_GET && file_exists($viewFile)) {
+				return view($path);
+			}			
 			return $isCall? false : App::halt($path, 'empty');
 		}
 		$class = App::make($class);
@@ -398,7 +402,10 @@ class RouteBuilder {
 		}		
 		$params = array_merge($args, $params);
 		if (!empty($params)) {
-			$params = array_filter($params); //过滤空值和0
+			$filter_empty = Config::get('route.filter_empty', true);
+			if ($filter_empty) {
+				$params = array_filter($params); //过滤空值和0
+			}			
 			$params = str_replace(['&', '='], '/', http_build_query($params));
 			$route = trim($route.'/'.$params, '/');
 		}

@@ -42,31 +42,35 @@ class FilterBuilder {
 	}	
 	//输入处理
 	public static function parseIn(&$value, $key) {		
-		$funcHtml = Config::get('filter.func_html', '');
-		$funcExceptHtml = Config::get('filter.func_except_html', '');		
-		if (!empty($funcHtml) && self::isHtmlField($key)) {
-			$value = batch_functions($funcHtml, $value);
-		} elseif (!empty($funcExceptHtml)) {
-			$value = batch_functions($funcExceptHtml, $value);
-		}
-		if (!is_numeric($key)) {
-			$fieldIn = Config::get('filter.field_in', []);
-			foreach ($fieldIn as $field => $func) {
-				if ($key == $field || in_array($key, explode(',', $field))) {
-					$value = batch_functions($func, $value);
+		if (!empty($value)) {
+			$funcHtml = Config::get('filter.func_html', '');
+			$funcExceptHtml = Config::get('filter.func_except_html', '');
+			if (!empty($funcHtml) && self::isHtmlField($key)) {
+				$value = batch_functions($funcHtml, $value);
+			} elseif (!empty($funcExceptHtml)) {
+				$value = batch_functions($funcExceptHtml, $value);
+			}
+			if (!is_numeric($key)) {
+				$fieldIn = Config::get('filter.field_in', []);
+				foreach ($fieldIn as $field => $func) {
+					if ($key == $field || in_array($key, explode(',', $field))) {
+						$value = batch_functions($func, $value);
+					}
 				}
 			}	
-		}		
+		}	
 	}	
 	//输出处理
 	public static function parseOut(&$value, $key) {
-		$funcOut = Config::get('filter.func_out', '');
-		$funcExceptHtmlOut = Config::get('filter.func_except_html_out', '');		
-		if (!empty($funcExceptHtmlOut) && is_scalar($value) && !is_numeric($value) && !self::isHtmlField($key)) {
-			$value = batch_functions($funcExceptHtmlOut, $value);
-		}
-		if (!empty($funcOut) && is_scalar($value) && !is_numeric($value)) {
-			$value = batch_functions($funcOut, $value);
+		if (!empty($value)) {
+			$funcOut = Config::get('filter.func_out', '');
+			$funcExceptHtmlOut = Config::get('filter.func_except_html_out', '');
+			if (!empty($funcExceptHtmlOut) && is_scalar($value) && !is_numeric($value) && !self::isHtmlField($key)) {
+				$value = batch_functions($funcExceptHtmlOut, $value);
+			}
+			if (!empty($funcOut) && is_scalar($value) && !is_numeric($value)) {
+				$value = batch_functions($funcOut, $value);
+			}
 		}
 	}
 }

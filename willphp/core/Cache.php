@@ -88,7 +88,7 @@ class CacheBuilder {
 		return Dir::del($dir.'/'.$type);
 	}
 	//清除所有
-	public function clearAll($type, $apps = []) {
+	public function clearAll($type = '', $apps = []) {
 		if (empty($apps)) {
 			$apps = Config::get('app.app_list', []);
 		}
