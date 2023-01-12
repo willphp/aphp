@@ -36,7 +36,7 @@ class Build {
 			$module = APP_NAME;			
 			//生成路由
 			if (!file_exists(ROOT_PATH.'/route/'.$module.'.php')) {
-				file_put_contents(ROOT_PATH.'/route/'.$module.'.php', "<?php\nreturn [\n\t'index' => 'index/index',\n\t'index_p(:num)' => 'index/index/p/\${1}',\n];");
+				file_put_contents(ROOT_PATH.'/route/'.$module.'.php', "<?php\nreturn [\n\t'index' => 'index/index',\n];");
 			}
 			//首页模板
 			$t_index = file_get_contents(ROOT_PATH.'/willphp/tpl/index.tpl'); 

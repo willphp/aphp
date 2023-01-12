@@ -1,8 +1,11 @@
 <?php
+/**
+ * 调试配置
+ */
 return [
 		'level' => [
 				'base' => '基本',
-				'file' => '文件', //文件加载
+				'file' => '文件', //去掉不显示文件加载
 				'sql' => 'SQL',
 				'debug' => '调试',
 				'post' => 'POST',

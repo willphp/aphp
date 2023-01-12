@@ -414,7 +414,7 @@ function clear_html($string){
  * @return string 返回清除结果
  */
 function remove_xss($val) {
-	$val = preg_replace('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/', '', $val);
+	$val = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $val);
 	$search = 'abcdefghijklmnopqrstuvwxyz';
 	$search .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	$search .= '1234567890!@#$%^&*()';
@@ -422,7 +422,7 @@ function remove_xss($val) {
 	for ($i = 0; $i < strlen($search); $i++) {
 		$val = preg_replace('/(&#[xX]0{0,8}'.dechex(ord($search[$i])).';?)/i', $search[$i], $val);
 		$val = preg_replace('/(�{0,8}'.ord($search[$i]).';?)/', $search[$i], $val);
-	}
+	}	
 	$ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
 	$ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
 	$ra = array_merge($ra1, $ra2);
@@ -450,4 +450,38 @@ function remove_xss($val) {
 		}
 	}
 	return $val;
+}
+/**
+ * 获取应用版本号
+ * @return string 返回应用版本号
+ */
+function get_ver(){
+	return APP_DEBUG? time() : config('app.version');
+}
+/**
+ * 字符串截取
+ * @param string $str 字符串
+ * @param number $length 截取长度
+ * @param number $start 开始位置
+ * @param string $suffix 是否显示...
+ * @param string $charset 字符集
+ * @return string 返回截取结果
+ */
+function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8') {
+	if(function_exists("mb_substr")) {
+		$slice = mb_substr($str, $start, $length, $charset);
+	} elseif (function_exists('iconv_substr')) {
+		$slice = iconv_substr($str, $start, $length, $charset);
+		if(false === $slice) {
+			$slice = '';
+		}
+	} else {
+		$re['utf-8']  = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+		$re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
+		$re['gbk']    = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+		$re['big5']   = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+		preg_match_all($re[$charset], $str, $match);
+		$slice = join('', array_slice($match[0], $start, $length));
+	}
+	return $suffix ? $slice.'...' : $slice;
 }

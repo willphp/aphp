@@ -1,9 +1,12 @@
 <?php
+/**
+ * 中间件配置
+ */
 return [		
 	//全局中间件
 	'global' => [			
 		\middleware\Boot::class, //框架启动		
-	],		
+	],			
 	//控制器中间件(可自行定义)
 	'controller' => [
 			'auth' => [

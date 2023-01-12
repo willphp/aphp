@@ -66,7 +66,7 @@ class ErrorBuilder {
 		if (PHP_SAPI == 'cli') {
 			die(PHP_EOL."\033[;36m ".$info['msg']." \x1B[0m\n".PHP_EOL);
 		}
-		if (!APP_DEBUG) Log::write($info['msg'], $info['type']); //写入日志
+		if (!APP_DEBUG || IS_AJAX) Log::write($info['msg'], $info['type']); //写入日志
 		$msg = APP_DEBUG? $info['msg'] : Config::get('error.msg', '系统错误，请稍候访问');
 		ob_clean();
 		if (IS_AJAX) {

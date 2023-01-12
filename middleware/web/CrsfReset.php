@@ -11,7 +11,7 @@ namespace middleware\web;
 //重置crsf_token
 class CrsfReset {
 	public function run($next){
-		if (config('view.csrf_check')) session('csrf_token', null);
+		if (config('view.csrf_check') && !IS_AJAX) session('csrf_token', null);
         $next();
 	}
 }

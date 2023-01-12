@@ -23,7 +23,7 @@ class Template {
 		$var_name = '([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)'; //匹配变量名
 		$key_name = '([a-zA-Z0-9_\x7f-\xff]*)'; //匹配键名
 		$pattern = [
-				'/__(\w+)__/i', //__ROOT__常量
+				'/__(\w+)__/i', //__ROOT__常量				
 				'/'.$left.'\s*\$'.$var_name.'\s*'.$right.'/i', //$变量名
 				'/'.$left.'\s*\$'.$var_name.'\.'.$key_name.'\s*'.$right.'/i', //$变量名.键名
 				'/'.$left.'\s*\$'.$var_name.'\[[\'"]?'.$key_name.'[\'"]?\]\s*'.$right.'/i', //$变量名[键名]
@@ -48,9 +48,10 @@ class Template {
 				'/'.$left.'\s*\$'.$var_name.'\.'.$key_name.'\|'.$var_name.'=(.+?)\s*'.$right.'/i', //$变量名.变量名|函数=参数				
 				'/'.$left.'\s*:'.$var_name.'\((.*?)\)\->'.$var_name.'\((.*?)\)\s*'.$right.'/i', //:函数()->方法()
 				'/'.$left.'\s*\$'.$var_name.'\->'.$var_name.'\((.*?)\)\s*'.$right.'/i', //$对象名->方法()
+				'/'.$left.'#\s*(.+?)\s*#'.$right.'/i', // {# #}
 		]; //正则
 		$replace = [
-				'<?php echo __\\1__; ?>',
+				'<?php echo __\\1__; ?>',				
 				'<?php echo $\\1; ?>',
 				'<?php echo $\\1[\'\\2\']; ?>',
 				'<?php echo $\\1[\'\\2\']; ?>',
@@ -75,7 +76,7 @@ class Template {
 				'<?php echo \\3($\\1[\'\\2\'],\\4); ?>',
 				'<?php echo \\1(\\2)->\\3(\\4); ?>',
 				'<?php echo $\\1->\\2(\\3); ?>',
-				
+				stripslashes($left).'\\1'.stripslashes($right),				
 		]; //替换
 		$content = preg_replace($pattern, $replace, $content);
 		return $content;
@@ -85,8 +86,8 @@ class Template {
 	 * @return $this
 	 */
 	protected static function parseInclude($content) {
-		$left = Config::get('view.left_delimiter', '\{\{');
-		$right = Config::get('view.right_delimiter', '\}\}');			
+		$left = Config::get('view.left_delimiter', '\{');
+		$right = Config::get('view.right_delimiter', '\}');			
 		$content = preg_replace_callback('/'.$left.'\s*include\s+[\"\']?(.+?)[\"\']?\s*'.$right.'/i', function ($match) {
 			return is_file(THEME_PATH.'/'.$match[1])? file_get_contents(THEME_PATH.'/'.$match[1]) : '['.$match[1].']';
 		}, $content);

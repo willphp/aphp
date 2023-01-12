@@ -10,7 +10,6 @@
 namespace willphp\core;
 trait Jump {
 	protected $codes = [200=>'请求成功',204=>'暂无记录',400=>'未知错误',401=>'请先登录',403=>'验证失败',404=>'页面未找到',500=>'服务器内部错误'];
-	protected $isApi = false; //是否api模式
 	/**
 	 * 显示json信息
 	 * @param number $code
@@ -37,7 +36,7 @@ trait Jump {
 			$msg = current($msg);
 		}
 		$url = is_null($url)? '' : Route::buildUrl($url);		
-		if ($this->isApi || IS_AJAX) {
+		if (IS_API || IS_AJAX) {
 			$this->json(200, $msg, null, ['url'=>$url]);
 		}
 		$res = ['status' => 1, 'msg' => $msg, 'url' => $url];
@@ -57,7 +56,7 @@ trait Jump {
 			$msg = current($msg);
 		}
 		$url = is_null($url)? 'javascript:history.back(-1);' : Route::buildUrl($url);
-		if ($this->isApi || IS_AJAX) {
+		if (IS_API || IS_AJAX) {
 			$this->json($code, $msg, null, ['url'=>$url]);
 		}
 		$res = ['status' => 0, 'msg' => $msg, 'url' => $url];		
@@ -103,7 +102,7 @@ trait Jump {
 	 * @return bool
 	 */
 	protected function isAjax(){
-		return IS_AJAX? true : $this->isApi;
+		return IS_AJAX? true : IS_API;
 	}
 	/**
 	 * 是否POST提交

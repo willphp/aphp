@@ -245,8 +245,8 @@ class RouteBuilder {
 		$params = $route['params'];	
 		$path = $route['controller'].'/'.$route['action'];
 		if (!$isCall) {
-			if (!in_array($module, Config::get('app.app_list', ['home']))) {				
-				return App::halt($module.' 模块禁止');
+			if (!in_array($module, Config::get('app.app_list', ['index']))) {				
+				return App::halt($module.' 模块禁止访问，请在配置中添加');
 			}
 			if (0 === strpos($action, '_')) {				
 				return App::halt($path.' 不可访问');

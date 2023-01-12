@@ -183,7 +183,8 @@ class ViewBuilder {
 			throw new \Exception($file.' 模板文件不存在');
 		}
 		$this->viewFile = $viewFile;
-		$this->compileFile = RUNTIME_PATH.'/view/'.preg_replace('/[^\w]/', '_', $file).'_'.substr(md5($file), 0, 5).'.php';
+		$theme = THEME_ON ? __THEME__.'/' : '';
+		$this->compileFile = RUNTIME_PATH.'/view/'.$theme.preg_replace('/[^\w]/', '_', $file).'_'.substr(md5($file), 0, 5).'.php';
 		return $this;
 	}
 	/**

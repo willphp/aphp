@@ -12,7 +12,7 @@ namespace middleware\controller;
 class Auth {	
 	public function run($next){	
 		if (!session('user_id')) {
-			header('Location:'.url('login/index'));			
+			header('Location:'.url('login/login'));			
 		} 		
         $next();
 	}

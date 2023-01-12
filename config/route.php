@@ -1,4 +1,7 @@
 <?php
+/**
+ * 路由配置
+ */
 return [
 		'default_controller' => 'index', //默认控制器
 		'default_action' => 'index', //默认方法
@@ -6,4 +9,5 @@ return [
 		'validate_get' => '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#', //路由$_GET变量验证正则
 		'url_suffix' => '.html', //url函数自动添加后缀
 		'del_suffix' => ['.html','.php'], //路由解析自动删除后缀	
+		'filter_empty' => false, //是否过滤空值和0
 ];

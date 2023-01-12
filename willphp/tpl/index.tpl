@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>欢迎使用一鱼PHP框架</title>
-<link rel="shortcut icon" href="__ROOT__/favicon.ico" type="image/x-icon" />
+<title>欢迎使用{:site('site_title')}</title>
+<link rel="shortcut icon" href="__ROOT__/favicon.ico" type="image/x-icon"/>
+<meta name="keywords" content="{:site('site_kw')}"/>
+<meta name="description" content="{:site('site_desc')}"/>
 <style type="text/css">
 body,code,dd,div,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,input,legend,li,ol,p,pre,td,textarea,th,ul{margin:0;padding:0}
 body{background:#f0f1f3;font-size:16px;font-family:Tahoma,Arial,sans-serif;color:#111;}
@@ -24,11 +26,11 @@ a{color:#428bca;}
 .willphp-page-head a{font-size:14px;color:#999}
 .willphp-page-menu{padding:10px;}
 .willphp-page-body{}
-.willphp-page-body p{font-size:14px;padding:10px 0;color:#666;line-height:25px;}
+.willphp-page-body p{font-size:14px;padding:5px 0;color:#666;line-height:25px;}
 .willphp-page-body ol{padding-left:15px;}
 .willphp-page-body ul{padding-left:15px;}
 .willphp-page-body li{font-size:14px;padding:5px 0;color:#666;line-height:20px;}
-.willphp-page-body h4{font-size:14px;padding:10px 0 15px 0;font-weight:400;border-top:1px dashed #999}
+.willphp-page-body h4{font-size:16px;padding:10px 0;font-weight:400;border-top:1px dashed #999}
 .willphp-page-foot{padding:0 0 10px 0;border-bottom:1px dashed #999}
 .willphp-page-foot a{float:right;height:30px;line-height:30px;padding:0 15px;margin:0;font-size:14px;border:none;margin-left:5px;text-decoration:none}
 .willphp-page-foot a.green{background:#89bf43;color:#fff}
@@ -39,12 +41,13 @@ a{color:#428bca;}
 .willphp-page-actions:before{content:'';display:block;position:absolute;z-index:-1;bottom:17px;left:50px;width:200px;height:10px;-moz-box-shadow:4px 5px 31px 11px #999;-webkit-box-shadow:4px 5px 31px 11px #999;box-shadow:4px 5px 31px 11px #999;-moz-transform:rotate(-4deg);-webkit-transform:rotate(-4deg);-ms-transform:rotate(-4deg);-o-transform:rotate(-4deg);transform:rotate(-4deg)}
 .willphp-page-actions:after{content:'';display:block;position:absolute;z-index:-1;bottom:17px;right:50px;width:200px;height:10px;-moz-box-shadow:4px 5px 31px 11px #999;-webkit-box-shadow:4px 5px 31px 11px #999;box-shadow:4px 5px 31px 11px #999;-moz-transform:rotate(4deg);-webkit-transform:rotate(4deg);-ms-transform:rotate(4deg);-o-transform:rotate(4deg);transform:rotate(4deg)}
 </style>
+<link rel="stylesheet" href="__STATIC__/css/style.css?v={:get_ver()}"/>
 </head>
 <body>
 <div class="willphp-page">
     <div class="willphp-page-container">    	
         <div class="willphp-page-main">
-        	<div class="willphp-page-head"><a href="http://www.113344.com" title="willphp官网" target="_blank">WillPHP__VERSION__</a></div>	
+        	<div class="willphp-page-head"><a href="http://www.113344.com" title="willphp官网" target="_blank">一鱼PHP框架</a></div>	
 			<h3><strong>Σ( ° △ °|||)︴</strong>欢迎使用WillPHP__VERSION__</h3>	
 			<div class="willphp-page-foot cl">
 				<a href="https://qm.qq.com/cgi-bin/qm/qr?k=U7SzseDDXSbG9sB1CTEf5U10oFJOKR8-&jump_from=webapi" target="_blank" class="red">Q群:325825297</a>
@@ -55,20 +58,22 @@ a{color:#428bca;}
 				<a href="{:url('index/index')}">首页</a> | <a href="{:url('abc/abc')}">测试</a>
 			</div>
 			<div class="willphp-page-body cl">				
-				<h3>开始使用</h3>
+				<h4>开始使用</h4>
 				<ol>	
-					<li>进入项目： 重命名env.example.env：<code class="blue">rename env.example.env .env</code></li>
-					<li>修改配置：打开<code class="blue">.env</code>文件修改本地数据库配置</li>				
-					<li>访问地址：<a href="__URL__">__URL__</a></li>
-				</ol>	
-				<p>{:site('site_title')} 日期：{:date('Y-m-d H:i:s')} IP：{:get_ip()} 验证码：<img src="__URL__/api/captcha" style="cursor:pointer;" onclick="this.src='__URL__/api/captcha?'+Math.random();" /></p>									
+					<li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>
+					<li>[本地]打开<code class="blue">.env</code>文件配置本地数据库</li>	
+					<li>[上线]打开<code class="blue">config/database.php</code>配置服务器数据库</li>
+					<li>[上线]删除<code class="blue">.env</code>文件或不上传<code class="blue">.env</code>文件</li>
+				</ol>
+				{var $about=site('site_title')}				
+				<p>{$about|str_substr=5} 日期：{:date('Y-m-d H:i:s')} IP：{:get_ip()} 验证码：<img src="__URL__/api/captcha" style="cursor:pointer;" onclick="this.src='__URL__/api/captcha?'+Math.random();" /></p>									
 			</div>
 			<div class="willphp-copyright cl">
-				CopyRight &copy; 2020-{:date('Y')} <a href="http://www.113344.com" title="willphp官网" target="_blank">113344.com</a> by 无念
+				CopyRight &copy; 2020-{:date('Y')} <a href="http://www.113344.com" title="willphp官网" target="_blank">113344.com</a> by 无念 | 主题：__THEME__
 			</div>					
 		</div>
 		<div class="willphp-page-actions"></div>		
 	</div>		
 </div>
 </body>
-</html>			
+</html>

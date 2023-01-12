@@ -10,7 +10,7 @@
 defined('ROOT_PATH') or die('Access Denied');
 define('START_MEMORY', memory_get_usage()); //开始内存
 define('START_TIME', microtime(true)); //开始时间
-const __VERSION__ = 'v3.2.5'; //框架版本
+const __VERSION__ = 'v3.3.1'; //框架版本
 const AT_MUST = 1; //必须
 const AT_NOT_NULL = 2; //有值
 const AT_NULL = 3; //空值

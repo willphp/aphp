@@ -1,4 +1,7 @@
 <?php
+/**
+ * 分页配置
+ */
 return [
 		'page_var' => 'p', //分页$_GET变量
 		'page_size' => 10, //每页显示数量

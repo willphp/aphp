@@ -40,7 +40,7 @@ class AppBuilder {
 				if (isset($name[$key])) return $name[$key];
 			}
 		}
-		return (is_string($name) && '' !== $name)? strtolower($name) : basename($_SERVER['SCRIPT_FILENAME'], '.php');
+		return (is_string($name) && preg_match('/^[a-zA-Z]+$/', $name))? strtolower($name) : basename($_SERVER['SCRIPT_FILENAME'], '.php');
 	}	
 	//启动
 	public function bootstrap() {
@@ -65,10 +65,21 @@ class AppBuilder {
 		define('URL_REWRITE', !empty($config['app']['url_rewrite'])? $config['app']['url_rewrite'] : false);		
 		define('__WEB__', URL_REWRITE? str_replace('/index.php', '', $_SERVER['SCRIPT_NAME']) : $_SERVER['SCRIPT_NAME']);
 		define('__URL__', IS_HTTPS? 'https://'.__HOST__.__WEB__ : 'http://'.__HOST__.__WEB__);	
-		define('VIEW_PATH', !empty($config['site']['view_path'])? $config['site']['view_path'] : APP_PATH.'/view');
-		define('THEME_ON', !empty($config['site']['theme_on'])? $config['site']['theme_on'] : false);
-		define('__THEME__', !empty($config['site']['theme'])? $config['site']['theme'] : 'default');
+		define('VIEW_PATH', !empty($config['app']['view_path'][APP_NAME])? ROOT_PATH.'/'.$config['app']['view_path'][APP_NAME] : APP_PATH.'/view');
+		define('THEME_ON', !empty($config['app']['theme_on'])? in_array(APP_NAME, $config['app']['theme_on']) : false);		
+		define('IS_API', !empty($config['app']['api_list'])? in_array(APP_NAME, $config['app']['api_list']) : false);		
+		define('__THEME__', $this->getTheme($config['app']['theme_get']));			
 		define('THEME_PATH', THEME_ON? VIEW_PATH.'/'.__THEME__ : VIEW_PATH);
+	}
+	//获取当前主题
+	protected function getTheme($t = 't') {				
+		$theme = input('get.'.$t, '', 'clear_html'); 
+		if (preg_match('/^[a-z0-9]+$/', $theme) && is_dir(VIEW_PATH.'/'.$theme)) {
+			cookie('theme_willphp', $theme);			
+		} elseif (!cookie('theme_willphp')) {
+			cookie('theme_willphp', site('theme'));			
+		}
+		return cookie('theme_willphp');		
 	}
 	//加载配置
 	protected function loadConfig() {

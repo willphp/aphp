@@ -76,14 +76,19 @@ class Connection {
 		if (!isset($this->config['pdo_params'])) {
 			$this->config['pdo_params'] = [];
 		}
-		try{
+		try{			
 			$this->link = new \PDO($this->config['dsn'], $this->config['db_user'], $this->config['db_pwd'], $this->config['pdo_params']);
 			if (in_array($this->config['db_type'], ['pdo', 'mysql', 'mysqli'])) {
 				$this->execute("SET sql_mode = ''");
 			}
-		} catch(\PDOException $e){
-			throw new \Exception('ERROR: '.$e->getMessage());
+		} catch(\PDOException $e){			
+			throw new \Exception('ERROR: '.$this->str_to_utf8($e->getMessage()));
 		}		
+	}
+	private function str_to_utf8 ($str = '') {		
+		$current_encode = mb_detect_encoding($str, ['ASCII','GB2312','GBK','BIG5','UTF-8']);
+		$encoded_str = mb_convert_encoding($str, 'UTF-8', $current_encode);	
+		return $encoded_str;		
 	}
 	/**
 	 * 获取DB链接

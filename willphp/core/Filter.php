@@ -47,7 +47,7 @@ class FilterBuilder {
 			$funcExceptHtml = Config::get('filter.func_except_html', '');
 			if (!empty($funcHtml) && self::isHtmlField($key)) {
 				$value = batch_functions($funcHtml, $value);
-			} elseif (!empty($funcExceptHtml)) {
+			} elseif (!empty($funcExceptHtml) && !self::isHtmlField($key)) {
 				$value = batch_functions($funcExceptHtml, $value);
 			}
 			if (!is_numeric($key)) {
