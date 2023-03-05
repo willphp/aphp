@@ -1,446 +1,439 @@
 <?php
-/*--------------------------------------------------------------------------
+/*----------------------------------------------------------------
  | Software: [WillPHP framework]
- | Site: www.113344.com
- |--------------------------------------------------------------------------
+ | Site: 113344.com
+ |----------------------------------------------------------------
  | Author: 无念 <24203741@qq.com>
  | WeChat: www113344
- | Copyright (c) 2020-2022, www.113344.com. All Rights Reserved.
- |-------------------------------------------------------------------------*/
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+declare(strict_types=1);
+
 namespace willphp\core;
-use willphp\core\model\Verify;
-use willphp\core\model\Auto;
-use willphp\core\model\Filter;
-use willphp\core\Db;
+
+use ArrayAccess;
+use Iterator;
+use ReflectionFunction;
 use willphp\core\db\Query;
-use willphp\core\Collection;
-abstract class Model implements \ArrayAccess, \Iterator {
-	use Verify, Auto, Filter;
-	protected $table; //表名
-	protected $pk = 'id'; //表自增主键
-	protected $db; //数据库连接
-	protected $dbConfig = []; //数据库配置	
-	protected $allowFill = ['*']; //允许填充字段	
-	protected $denyFill = []; //禁止填充字段	
-	protected $data = []; //模型数据	
-	protected $fields = []; //读取字段	
-	protected $original = []; //构建数据
-	protected $autoTimestamp = 'int'; //自动写入时间戳字段类型(false不自动写入)：int|date|datetime|timestamp 
-	protected $createTime = 'ctime'; //创建时间字段
-	protected $updateTime = 'uptime'; //更新时间字段
-	protected $prefix; //表前缀
-	/**
-	 * 构造函数
-	 */
-	public function __construct() {
-		if (!$this->table) {
-			$this->setTable($this->table);
-		}
-		$this->db = Db::connect($this->dbConfig, $this->table);
-		if (!$this->prefix) {
-			$this->prefix = $this->db->getConfig('db_prefix');
-		}
-	}
-	/**
-	 * 设置表名
-	 * @param $table
-	 * @return $this
-	 */
-	protected function setTable($table) {
-		if (empty($table)) {
-			$model = basename(str_replace('\\', '/', get_class($this)));			
-			$table = name_snake($model);
-		}
-		$this->table = $table;
-		return $this;
-	}
-	/**
-	 * 获取表名
-	 * @return string
-	 */
-	public function getTable() {
-		return $this->table;
-	}
-	/**
-	 * 获取表前缀
-	 * @return string
-	 */
-	public function getPrefix() {
-		return $this->prefix;
-	}
-	/**
-	 * 获取主键
-	 * @return mixed
-	 */
-	public function getPk() {
-		return $this->pk;
-	}
-	/**
-	 * 动作类型(新增或更新)
-	 * @return int
-	 */
-	final public function action() {	
-		if (empty($this->data) && isset($this->original[$this->pk])) {
-			$this->data[$this->pk] = $this->original[$this->pk];
-		}		
-		return empty($this->data[$this->pk])? IN_INSERT : IN_UPDATE;
-	}
-	/**
-	 * 获取数据
-	 * @return array
-	 */
-	public function getData() {
-		return $this->data;
-	}
-	/**
-	 * 设置data 记录信息属性
-	 * @param array $data
-	 * @return $this
-	 */
-	public function setData(array $data) {
-		$this->data = array_merge($this->data, $data);
-		$this->fields = $this->data;
-		$this->getFormatAttribute();		
-		return $this;
-	}
-	/**
-	 * 更新widget缓存
-	 */
-	public function updateWidget() {		
-		Cache::clearAll('widget/'.$this->table);
-	}
-	/**
-	 * 用于读取数据成功时的对字段的处理后返回
-	 * @param $field
-	 * @return mixed
-	 */
-	protected function getFormatAttribute()	{
-		foreach ($this->fields as $name => $val) {			
-			$method = 'get'.name_camel($name).'Attr';
-			if (method_exists($this, $method)) {
-				$this->fields[$name] = $this->$method($val);
-			}
-		}		
-		return $this->fields;
-	}
-	/**
-	 * 对象数据转为数组
-	 * @return array
-	 */
-	final public function toArray() {
-		$data = $this->fields;
-		foreach ($data as $k => $v) {
-			if (is_object($v) && method_exists($v, 'toArray')) {
-				$data[$k] = $v->toArray();
-			}
-		}		
-		return $data;
-	}
-	/**
-	 * 更新模型的时间戳
-	 * @return bool
-	 */
-	final public function touch() {
-		if ($this->action() == IN_UPDATE && $this->autoTimestamp && $this->updateTime) { 
-			$data = [];
-			$data[$this->updateTime] = $this->getFormatTime($this->autoTimestamp);
-			return $this->db->where($this->pk, $this->data[$this->pk])->update($data);
-		}		
-		return false;
-	}
-	/**
-	 * 新增前置
-	 */
-	protected function _before_insert(array &$data) {}
-	/**
-	 * 更新前置
-	 */
-	protected function _before_update(array &$data) {}
-	/**
-	 * 删除前置
-	 */
-	protected function _before_delete(array $data) {}
-	/**
-	 * 新增后置
-	 */
-	protected function _after_insert(array $data) {}
-	/**
-	 * 更新后置
-	 */
-	protected function _after_update(array $old, array $new) {}
-	/**
-	 * 删除后置
-	 */
-	protected function _after_delete(array $data) {}
-	/**
-	 * 更新或添加数据
-	 * @param array $data 批量添加的数据
-	 * @return bool
-	 * @throws \Exception
-	 */
-	final public function save(array $data = []) {			
-		$this->fieldFillCheck($data); //自动填充数据处理
-		//自动验证
-		if (!$this->autoValidate()) {
-			return false;
-		}			
-		$this->autoOperation(); //自动完成	
-		$this->autoFilter(); //自动过滤	
-		$this->formatFields(); //处理时间字段		
-		$action = $this->action(); //当前操作			
-		if ($action == IN_UPDATE) {
-			$this->original = array_merge($this->data, $this->original);			
-		}		
-		//更新条件检测
-		$res = null;			
-		switch ($action) {				
-			case IN_UPDATE:
-				//更新前置		
-				$this->_before_update($this->original);				
-				if (!$this->original) {
-					Validate::respond($this->errors);	
-					return false;
-				}
-				
-				$res = $this->db->where($this->pk, $this->data[$this->pk])->update($this->original);
-				if ($res) {
-					$old = $this->data;
-					$this->setData($this->db->find($this->data[$this->pk]));
-					//更新后置	
-					$new = array_merge($this->original, $this->data);
-					$this->_after_update($old, $new);
-					$this->updateWidget(); //更新widget缓存
-				}
-				break;
-			case IN_INSERT:
-				if (isset($this->original[$this->pk])) {
-					unset($this->original[$this->pk]);	
-				}
-				//新增前置			
-				$this->_before_insert($this->original);				
-				if (!$this->original) {
-					Validate::respond($this->error);
-					return false;
-				}
-				$res = $this->db->insertGetId($this->original);
-				if ($res) {
-					if (is_numeric($res) && $this->pk) {
-						$this->setData($this->db->find($res));
-						//新增后置						
-						$new = array_merge($this->original, $this->data);
-						$this->_after_insert($new);	
-						$this->updateWidget(); //更新widget缓存
-					}
-				}
-				break;
-		}
-		$this->original = [];		
-		return $res ? $this : false;
-	}	
-	/**
-	 * 批量设置做准备数据
-	 * @return $this
-	 */
-	final private function formatFields() {		
-		if ($this->action() == IN_UPDATE) {
-			$this->original[$this->pk] = $this->data[$this->pk];			
-		}
-		//自动填充创建时间和更新时间
-		if ($this->autoTimestamp) {
-			if ($this->updateTime) {
-				$this->original[$this->updateTime] = $this->getFormatTime($this->autoTimestamp);
-			}			
-			if ($this->action() == IN_INSERT && $this->createTime) {
-				$this->original[$this->createTime] = $this->getFormatTime($this->autoTimestamp);
-			}
-		}		
-		return $this;
-	}	
-	/**
-	 * 根据类型获取时间  类型：int|date|datetime|timestamp
-	 * @return 格式时间
-	 */
-	protected function getFormatTime($type = '') {
-		$time = $_SERVER['REQUEST_TIME'];
-		if ($type == 'date') {
-			return date('Y-m-d', $time);
-		} elseif ($type == 'datetime') {
-			return date('Y-m-d H:i:s', $time);
-		} elseif ($type == 'timestamp') {
-			return date('Ymd His', $time);
-		}
-		return $time;		
-	}
-	/**
-	 * 自动填充数据处理
-	 * @param array $data
-	 * @throws \Exception
-	 */
-	final private function fieldFillCheck(array $data) {
-		if (empty($this->allowFill) && empty($this->denyFill)) {
-			return;
-		}
-		//允许填充的数据
-		if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
-			$data = $this->filterKeys($data, $this->allowFill, 0);
-		}
-		//禁止填充的数据
-		if (!empty($this->denyFill)) {
-			if ($this->denyFill[0] == '*') {
-				$data = [];
-			} else {
-				$data = $this->filterKeys($data, $this->denyFill, 1);
-			}
-		}
-		$this->original = array_merge($this->original, $data);
-	}
-	/**
-	 * 根据下标过滤数据元素
-	 * @param array $data 原数组数据
-	 * @param       $keys 参数的下标
-	 * @param int   $type 1 存在在$keys时过滤  0 不在时过滤
-	 * @return array
-	 */
-	public function filterKeys(array $data, $keys, $type = 1) {
-		$tmp = $data;
-		foreach ($data as $k => $v) {
-			if ($type == 1) {				
-				if (in_array($k, $keys)) {
-					unset($tmp[$k]);
-				}
-			} else {				
-				if (!in_array($k, $keys)) {
-					unset($tmp[$k]);
-				}
-			}
-		}		
-		return $tmp;
-	}
-	/**
-	 * 删除数据
-	 * @return bool
-	 */
-	final public function destory($id = 0) {		
-		$id = $this->data[$this->pk];
-		if (!empty($id)) {
-			$data = $this->data;
-			//删除前置
-			$this->_before_delete($data);
-			if ($this->db->delete($id)) {			
-				$this->setData([]);	
-				//删除后置
-				$this->_after_delete($data);
-				$this->updateWidget(); //更新widget缓存
-				return true;
-			}
-		}		
-		return false;
-	}
-	/**
-	 * 获取模型值
-	 * @param $name
-	 * @return mixed
-	 */
-	public function __get($name)	{
-		if (isset($this->fields[$name])) {
-			return $this->fields[$name];
-		}
-		if (method_exists($this, $name)) {
-			return $this->$name();
-		}
-	}
-	/**
-	 * 设置模型数据值
-	 * @param $name
-	 * @param $value
-	 */
-	public function __set($name, $value) {
-		$this->original[$name] = $value;
-		$this->data[$name] = $value;
-	}
-	/**
-	 * 魔术方法
-	 * @param $method
-	 * @param $params
-	 * @return mixed
-	 */
-	public function __call($method, $params) {		
-		$before = '_before_'.$method;
-		if (method_exists($this, $before)) {
-			$this->$before($params);
-		}	
-		$res = call_user_func_array([$this->db, $method], $params);
-		return $this->returnParse($method, $res);
-	}	
-	protected function returnParse($method, $result) {
-		if (!empty($result)) {
-			$after = '_after_'.$method;
-			if (method_exists($this, $after) && is_array($result)) {
-				$this->$after($result);
-			}			
-			switch (strtolower($method)) {
-				case 'find':	
-					$result = \willphp\core\Filter::output($result);
-					return $this->setData($result);
-				case 'paginate':
-					$collection = Collection::make([]);
-					foreach ($result as $k => $v) {
-						$instance = new static();
-						$collection[$k] = $instance->setData($v);
-					}					
-					return $collection;
-				default:
-					if ($result instanceof Query) {
-						return $this;
-					}
-			}
-		}		
-		return $result;
-	}
-	/**
-	 * 调用静态方法
-	 * @param $method
-	 * @param $params
-	 * @return mixed
-	 */
-	public static function __callStatic($method, $params) {
-		return call_user_func_array([new static(), $method], $params);
-	}
-	public function offsetSet($key, $value) {
-		$this->original[$key] = $value;
-		$this->data[$key] = $value;
-		$this->fields[$key] = $value;
-	}
-	public function offsetGet($key)	{
-		return isset($this->fields[$key]) ? $this->fields[$key] : null;
-	}
-	public function offsetExists($key) {
-		return isset($this->data[$key]);
-	}
-	public function offsetUnset($key) {
-		if (isset($this->original[$key])) {
-			unset($this->original[$key]);
-		}
-		if (isset($this->data[$key])) {
-			unset($this->data[$key]);
-		}
-		if (isset($this->fields[$key])) {
-			unset($this->fields[$key]);
-		}
-	}
-	function rewind() {
-		reset($this->data);
-	}
-	public function current() {
-		return current($this->fields);
-	}
-	public function next() {
-		return next($this->fields);
-	}
-	public function key() {
-		return key($this->fields);
-	}
-	public function valid()	{
-		return current($this->fields);
-	}
+
+abstract class Model implements ArrayAccess, Iterator
+{
+    use Single;
+
+    protected string $table = ''; //表名
+    protected string $pk = ''; //主键
+    protected string $dbConfig = ''; //数据库连接配置
+    protected array $allowFill = ['*']; //允许填充字段
+    protected array $denyFill = []; //禁止填充字段
+    protected string $autoTimeType = 'int'; //自动写入时间类型int|date|datetime|timestamp
+    protected string $createTime = 'create_time'; //创建时间字段
+    protected string $updateTime = 'update_time'; //更新时间字段
+    protected bool $isBatch = false; //是否批量验证
+    protected string $showError = 'show'; //错误响应show|redirect
+    protected array $validate = []; //验证规则
+    protected array $auto = []; //自动处理
+    protected array $filter = []; //自动过滤字段
+    protected object $db; //数据库连接对象
+    protected array $original = []; //表单预处理数据
+    protected array $data = []; //模型数据
+    protected array $fields = []; //处理后的展示用数据
+    protected array $errors = []; //错误信息
+
+    private function __construct()
+    {
+        if (empty($this->table)) {
+            $this->table = name_snake(basename(strtr(get_class($this), '\\', '/')));
+        }
+        $this->db = Db::connect($this->dbConfig, $this->table);
+        if (empty($this->pk)) {
+            $this->pk = $this->db->getPk();
+        }
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    public function getPk(): string
+    {
+        return $this->pk;
+    }
+
+    public function getPrefix(): string
+    {
+        return $this->db->getPrefix();
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    public function setData(array $data): Model
+    {
+        $this->data = array_merge($this->data, $data);
+        $this->fields = $this->getFieldAuto($this->data);
+        return $this;
+    }
+
+    protected function getFieldAuto(array $data = []): array
+    {
+        foreach ($data as $key => $val) {
+            $method = 'get' . name_camel($key) . 'Attr';
+            if (method_exists($this, $method)) {
+                $data[$key] = $this->$method($val);
+            }
+        }
+        return $data;
+    }
+
+    public function updateWidget(): bool
+    {
+        return Cache::driver()->flush('widget/' . $this->table);
+    }
+
+    final public function toArray(): array
+    {
+        $data = $this->fields;
+        foreach ($data as $k => $v) {
+            if (is_object($v) && method_exists($v, 'toArray')) {
+                $data[$k] = $v->toArray();
+            }
+        }
+        return $data;
+    }
+
+    public function getError(): array
+    {
+        return $this->errors;
+    }
+
+    public function isFail(): bool
+    {
+        return !empty($this->errors);
+    }
+
+    protected function respond()
+    {
+        if (!empty($this->errors)) {
+            if ($this->showError == 'show') {
+                Response::validate($this->errors);
+            } elseif ($this->showError == 'redirect' && isset($_SERVER['HTTP_REFERER']) && !IS_AJAX) {
+                header('Location:' . $_SERVER['HTTP_REFERER']);
+                exit();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    final public function save(array $data = [])
+    {
+        $this->fieldFillCheck($data); //字段填充检测
+        //自动验证
+        if (!$this->autoValidate()) {
+            return $this->respond();
+        }
+        //自动处理
+        if (!$this->autoOperation()) {
+            return $this->respond();
+        }
+        $this->autoFilter(); //自动过滤
+        $action = $this->handle(); //当前操作
+        if (in_array($this->autoTimeType, ['int', 'date', 'datetime', 'timestamp'])) {
+            if (!empty($this->updateTime)) {
+                $this->original[$this->updateTime] = $this->getFormatTime($this->autoTimeType);
+            }
+            if ($action == IN_INSERT && !empty($this->createTime)) {
+                $this->original[$this->createTime] = $this->getFormatTime($this->autoTimeType);
+            }
+        }
+        $res = false;
+        if ($action == IN_UPDATE) {
+            $this->original = array_merge($this->data, $this->original);
+            $this->_before_update($this->original);
+            if (!empty($this->errors)) {
+                return $this->respond();
+            }
+            $res = $this->db->where($this->pk, $this->data[$this->pk])->update($this->original);
+            if ($res) {
+                $old = $this->data;
+                $this->setData($this->db->find($this->data[$this->pk]));
+                //更新后置
+                $new = array_merge($this->original, $this->data);
+                $this->_after_update($old, $new);
+                $this->updateWidget(); //更新widget缓存
+            }
+        } elseif ($action == IN_INSERT) {
+            if (isset($this->original[$this->pk])) {
+                unset($this->original[$this->pk]);
+            }
+            $this->_before_insert($this->original);
+            if (!empty($this->errors)) {
+                return $this->respond();
+            }
+            $res = $this->db->insertGetId($this->original);
+            if (is_numeric($res)) {
+                $this->setData($this->db->find($res));
+                $this->_after_insert(array_merge($this->original, $this->data));
+                $this->updateWidget(); //更新widget缓存
+            }
+        }
+        $this->original = [];
+        return $res ? $this : false;
+    }
+
+    final public function del(int $id = 0): bool
+    {
+        $id = ($id == 0) ? (int)$this->data[$this->pk] : $id;
+        if ($id > 0) {
+            $data = $this->data;
+            $this->_before_delete($data);
+            if ($this->db->delete($id)) {
+                $this->setData([]);
+                $this->_after_delete($data);
+                $this->updateWidget(); //更新widget缓存
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function _before_insert(array &$data): void
+    {
+    }
+
+    protected function _before_update(array &$data): void
+    {
+    }
+
+    protected function _before_delete(array $data): void
+    {
+    }
+
+    protected function _after_insert(array $data): void
+    {
+    }
+
+    protected function _after_update(array $old, array $new): void
+    {
+    }
+
+    protected function _after_delete(array $data): void
+    {
+    }
+
+    //根据类型获取时间
+    protected function getFormatTime(string $type = '')
+    {
+        //int|date|datetime|timestamp
+        $time = $_SERVER['REQUEST_TIME'];
+        if ($type == 'date') {
+            return date('Y-m-d', $time);
+        } elseif ($type == 'datetime') {
+            return date('Y-m-d H:i:s', $time);
+        } elseif ($type == 'timestamp') {
+            return date('Ymd His', $time);
+        }
+        return $time;
+    }
+
+    //字段填充检测
+    private function fieldFillCheck(array $data = []): void
+    {
+        if (empty($this->allowFill) && empty($this->denyFill)) {
+            return;
+        }
+        if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
+            $data = $this->filterKeys($data, $this->allowFill, 0);
+        }
+        if (!empty($this->denyFill)) {
+            $data = ($this->denyFill[0] == '*') ? [] : $this->filterKeys($data, $this->denyFill);
+        }
+        $this->original = array_merge($this->original, $data);
+    }
+
+    public function filterKeys(array $data, array $keys, int $type = 1): array
+    {
+        $tmp = $data;
+        foreach ($data as $k => $v) {
+            if ($type == 1) {
+                if (in_array($k, $keys)) unset($tmp[$k]);
+            } else {
+                if (!in_array($k, $keys)) unset($tmp[$k]);
+            }
+        }
+        return $tmp;
+    }
+
+    //当前操作类型
+    final public function handle(): int
+    {
+        if (empty($this->data) && isset($this->original[$this->pk])) {
+            $this->data[$this->pk] = $this->original[$this->pk];
+        }
+        return empty($this->data[$this->pk]) ? IN_INSERT : IN_UPDATE;
+    }
+
+    //自动验证
+    final public function autoValidate(): bool
+    {
+        if (!empty($this->validate)) {
+            $this->errors = Validate::init($this)->make($this->validate, $this->original, $this->isBatch)->getError();
+            return empty($this->errors);
+        }
+        return true;
+    }
+
+    //自动处理
+    final public function autoOperation(): bool
+    {
+        if (empty($this->auto)) {
+            return true;
+        }
+        $data = &$this->original;
+        foreach ($this->auto as $auto) {
+            $auto[2] ??= 'string';
+            $auto[3] ??= AT_SET;
+            $auto[4] ??= IN_BOTH;
+            [$field, $rule, $type, $at, $action] = $auto;
+            if (is_continue($at, $data, $field)) {
+                continue;
+            }
+            if ($action == $this->handle() || $action == IN_BOTH) {
+                if (empty($data[$field])) {
+                    $data[$field] = '';
+                }
+                if ($type == 'method') {
+                    $data[$field] = call_user_func_array([$this, $rule], [$data[$field], $data]);
+                } elseif ($type == 'function') {
+                    $batchFunc = get_batch_func($rule);
+                    foreach ($batchFunc as $func) {
+                        if (!function_exists($func)) {
+                            $this->errors[] = '自动处理失败：' . $func . ' 函数不存在';
+                            return false;
+                        }
+                        $data[$field] = !empty((new ReflectionFunction($func))->getParameters()) ? $func($data[$field]) : $func();
+                    }
+                } else {
+                    $data[$field] = $rule;
+                }
+            }
+        }
+        return true;
+    }
+
+    //自动过滤字段
+    final public function autoFilter(): bool
+    {
+        if (empty($this->filter)) {
+            return true;
+        }
+        $data = &$this->original;
+        foreach ($this->filter as $filter) {
+            $filter[1] ??= AT_SET;
+            $filter[2] ??= IN_BOTH;
+            [$field, $at, $action] = $filter;
+            if (is_continue($at, $data, $field)) {
+                continue;
+            }
+            if ($action == $this->handle() || $action == IN_BOTH) {
+                unset($data[$field]);
+            }
+        }
+        return true;
+    }
+
+    public function __get($name)
+    {
+        if (isset($this->fields[$name])) {
+            return $this->fields[$name];
+        }
+        if (method_exists($this, $name)) {
+            return $this->$name();
+        }
+        return $name;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->original[$name] = $value;
+        $this->data[$name] = $value;
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+
+        if (method_exists($this, '_before_' . $name)) {
+            $this->{'_before_' . $name}($name);
+        }
+        $res = call_user_func_array([$this->db, $name], $arguments);
+        if (!empty($res) && is_array($res)) {
+            if (method_exists($this, '_after_' . $name)) {
+                $this->{'_after_' . $name}($res);
+            }
+            if ($name == 'find') {
+                return $this->setData($res);
+            }
+        }
+        if ($res instanceof Query) {
+            return $this;
+        }
+        return $res;
+    }
+
+    public static function __callStatic(string $name, array $arguments)
+    {
+        return call_user_func_array([static::init(), $name], $arguments);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->original[$offset] = $value;
+        $this->data[$offset] = $value;
+        $this->fields[$offset] = $value;
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->fields[$offset] ?? null;
+    }
+
+    public function offsetExists($offset): bool
+    {
+        return isset($this->data[$offset]);
+    }
+
+    public function offsetUnset($offset)
+    {
+        if (isset($this->original[$offset])) unset($this->original[$offset]);
+        if (isset($this->data[$offset])) unset($this->data[$offset]);
+        if (isset($this->fields[$offset])) unset($this->fields[$offset]);
+    }
+
+    function rewind()
+    {
+        reset($this->data);
+    }
+
+    public function current()
+    {
+        return current($this->fields);
+    }
+
+    public function next()
+    {
+        return next($this->fields);
+    }
+
+    public function key()
+    {
+        return key($this->fields);
+    }
+
+    public function valid()
+    {
+        return current($this->fields);
+    }
 }

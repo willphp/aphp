@@ -1,69 +1,42 @@
 <?php
-/*--------------------------------------------------------------------------
+/*----------------------------------------------------------------
  | Software: [WillPHP framework]
- | Site: www.113344.com
- |--------------------------------------------------------------------------
+ | Site: 113344.com
+ |----------------------------------------------------------------
  | Author: 无念 <24203741@qq.com>
  | WeChat: www113344
- | Copyright (c) 2020-2022, www.113344.com. All Rights Reserved.
- |-------------------------------------------------------------------------*/
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+declare(strict_types=1);
+
 namespace willphp\core;
-/**
- * 部件基类
- */
-abstract class Widget {
-	protected $table; //表名标识
-	protected $expire = 0; //秒 有效时间 0.永久	
-	/**
-	 * 设置缓存
-	 * @param string $id ID
-	 * @param array $options 选项
-	 * @return mixed
-	 */
-	abstract public function set($id = '', $options = []);
-	/**
-	 * 获取缓存
-	 * @param string $id ID
-	 * @param array $options 选项
-	 * @return mixed
-	 */
-	public function get($id = '', $options = []) {
-		$name = $this->getName($id, $options);
-		$data = Cache::get($name);
-		if (!$data) {
-			$data = $this->set($id, $options);
-			if ($data) {
-				Cache::set($name, $data, $this->expire);
-			}
-		}
-		return $data;
-	}
-	/**
-	 * 更新缓存
-	 * @return bool
-	 */
-	public function update() {
-		return Cache::flush($this->getType());
-	}
-	/**
-	 * 获取缓存标识
-	 * @param string $id ID
-	 * @param array $options 选项
-	 * @return string
-	 */
-	protected function getName($id = '', $options = []) {
-		$name = basename(str_replace('\\', '/', get_class($this))).$id;
-		if (!empty($options)) {
-			ksort($options);
-			$name .= http_build_query($options);
-		}
-		return $this->getType().'.'.md5($name);
-	}
-	/**
-	 * 获取类型
-	 * @return string
-	 */
-	protected function getType() {
-		return ($this->table)? 'widget/'.$this->table : 'widget';	
-	}
+abstract class Widget
+{
+    protected string $table;
+    protected int $expire = 0;
+
+    abstract public function set($id = '', array $options = []);
+
+    public function get($id = '', array $options = [])
+    {
+        $signId = $this->getSignId($id, $options);
+        return get_cache($signId, fn() => $this->set($id, $options), $this->expire);
+    }
+
+    public function update(): bool
+    {
+        $type = !empty($this->table) ? 'widget/' . $this->table : 'widget';
+        return Cache::driver()->flush($type);
+    }
+
+    protected function getSignId($id = '', array $options = []): string
+    {
+        $sign = basename(strtr(get_class($this), '\\', '/')) . $id;
+        if (!empty($options)) {
+            ksort($options);
+            $sign .= http_build_query($options);
+        }
+        $type = !empty($this->table) ? 'widget/' . $this->table : 'widget';
+        return $type . '.' . md5($sign);
+    }
 }

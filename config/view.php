@@ -1,12 +1,15 @@
 <?php
-/**
- * 模板配置
- */
-return [		
-		'left_delimiter' => '\{', //模板左标识符
-		'right_delimiter' => '\}', //模板右标识符
-		'prefix' => '.html', //模板文件后缀
-		'view_cache' => false, //是否开启模板缓存
-		'cache_time' => 10, //缓存时间(0,永久)秒
-		'csrf_check' => false, //是否开启csrf表单令牌验证(开启后更安全)
+/*----------------------------------------------------------------
+ | Software: [WillPHP framework]
+ | Site: 113344.com
+ |----------------------------------------------------------------
+ | Author: 无念 <24203741@qq.com>
+ | WeChat: www113344
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+return [
+    'prefix' => '.html', //模板文件后缀
+    'cache' => false, //是否开启模板缓存
+    'expire' => 30, //缓存时间(0,永久)秒
+    'csrf_check' => false, //是否开启csrf表单令牌验证
 ];

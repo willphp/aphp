@@ -1,162 +1,169 @@
 <?php
-/*--------------------------------------------------------------------------
+/*----------------------------------------------------------------
  | Software: [WillPHP framework]
- | Site: www.113344.com
- |--------------------------------------------------------------------------
+ | Site: 113344.com
+ |----------------------------------------------------------------
  | Author: 无念 <24203741@qq.com>
  | WeChat: www113344
- | Copyright (c) 2020-2022, www.113344.com. All Rights Reserved.
- |-------------------------------------------------------------------------*/
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+declare(strict_types=1);
+
 namespace willphp\core;
-use willphp\core\validate\ValidateRule;
-class Validate {
-	protected static $link;
-	public static function single()	{
-		if (!self::$link) {
-			self::$link = new ValidateBuilder();
-		}
-		return self::$link;
-	}
-	public function __call($method, $params) {
-		return call_user_func_array([self::single(), $method], $params);
-	}
-	public static function __callStatic($name, $arguments) {
-		return call_user_func_array([self::single(), $name], $arguments);
-	}
-}
-class ValidateBuilder extends ValidateRule { 
-	protected $extend = []; //扩展规则
-	protected $errors = []; //错误信息
-	/**
-	 * 设置扩展规则
-	 * @param $name
-	 * @param $callback
-	 */
-	public function extend($name, $callback) {
-		if ($callback instanceof \Closure) {
-			$this->extend[$name] = $callback;
-		}
-	}
-	/**
-	 * 是否验证失败
-	 * @return bool
-	 */
-	public function isFail() {
-		return !empty($this->errors);
-	}
-	/**
-	 * 获取错误
-	 * @return array
-	 */
-	public function getError() {
-		return $this->errors;
-	}
-	/**
-	 * 数据验证
-	 * @param array $validates 验证规则
-	 * @param array $data 数据
-	 * @param bool	$isBatch 是否批量验证
-	 * @return $this
-	 */
-	public function make(array $validates, array $data = [], $isBatch = false) {
-		$this->errors = [];
-		if (empty($data)) {
-			$data = $_POST;
-		}		
-		$regex = Config::get('regex', []); //正则配置
-		foreach ($validates as $validate) {
-			$field = $validate[0]; //字段
-			if (!isset($this->errors[$field])) {
-				$this->errors[$field] = '';
-			}
-			$at = isset($validate[3]) ? $validate[3] : AT_MUST; //验证条件
-			if ($at == AT_NOT_NULL && empty($data[$field])) {
-				continue;
-			}
-			if ($at == AT_NULL && !empty($data[$field])) {
-				continue;
-			}
-			if ($at == AT_SET && !isset($data[$field])) {
-				continue;
-			}
-			if ($at == AT_NOT_SET && isset($data[$field])) {
-				continue;
-			}
-			$value = isset($data[$field]) ? $data[$field] : ''; //字段值
-			$rule = $validate[1]; //验证规则
-			if ($rule instanceof \Closure) {	
-				//直接函数 
-				if ($rule($value) !== true) {
-					$this->errors[$field] = $validate[2];
-				}
-			} else {
-				$rule = explode('|', $rule); //规则列表
-				$info = explode('|', $validate[2]); //提示信息
-				foreach ($rule as $k=>$action) {
-					$msg = isset($info[$k])? $info[$k] : $info[0]; //提示					
-					list($method, $params) = explode(':', $action); //方法与参数					
-					if (method_exists($this, $method)) {	
-						//当前方法
-						if ($this->$method($value, $field, $params, $data) !== true) {
-							$this->errors[$field] .= '|'.$msg;
-						}
-					} elseif (isset($this->extend[$method])) {
-						//扩展方法
-						$callback = $this->extend[$method];
-						if ($callback instanceof \Closure) {
-							if ($callback($value, $field, $params, $data) !== true) {
-								$this->errors[$field] .= '|'.$msg;
-							}
-						}
-					} elseif (substr($method, 0, 1) == '/') {
-						//正则
-						if (!preg_match($method, $value)) {
-							$this->errors[$field] .= '|'.$msg;
-						}
-					} elseif (array_key_exists($method, $regex)) {
-						//正则
-						if (!preg_match($regex[$method], $value)) {
-							$this->errors[$field] .= '|'.$msg;
-						}
-					} elseif (in_array($method, ['url','email','ip','float','int','boolean'])) {
-						//filter_var
-						if ($this->filter($value, $field, $method, $data) !== true) {
-							$this->errors[$field] .= '|'.$msg;
-						}
-					} elseif (function_exists($method)) {
-						//函数
-						if (!$method($value)) {
-							$this->errors[$field] .= '|'.$msg;
-						}
-					} else {
-						$this->errors[$field] .= '|'.$action.' 验证方法不存在';
-					}
-					$this->errors[$field] = trim($this->errors[$field], '|');
-					if (!$isBatch && !empty($this->errors[$field])) break;
-				}
-			}
-			if (!$isBatch && !empty($this->errors[$field])) break;
-		}
-		
-		$this->errors = array_filter($this->errors);
-		return $this->respond($this->errors);
-	}
-	/**
-	 * 错误验证处理
-	 * @param array $errors 错误
-	 * @return bool
-	 */
-	public function respond(array $errors) {
-		if (!empty($errors)) {
-			$dispose = Config::get('app.validate_dispose', 'show');
-			if ($dispose == 'redirect' && isset($_SERVER['HTTP_REFERER']) && !IS_AJAX) {				
-				header('Location:'.$_SERVER['HTTP_REFERER']);
-				die;
-			} elseif ($dispose == 'show') {
-				App::halt($errors, 'validate');		
-			}				
-			return false;
-		}
-		return true;
-	}
+
+use Closure;
+
+class Validate
+{
+    use Single;
+
+    protected ?object $model = null; //验证模型
+    protected int $handle = 0;
+    protected array $errors = []; //错误信息
+
+    private function __construct(?object $model = null)
+    {
+        if (!is_null($model)) {
+            $this->model = $model;
+            $this->handle = $model->handle();
+        }
+    }
+
+    public function make(array $validate, array $data = [], bool $isBatch = false): Validate
+    {
+        if (empty($data)) $data = $_POST;
+        $regex = get_config('validate', []); //正则配置
+        foreach ($validate as $val) {
+            $val[2] ??= ''; //提示信息
+            $val[3] ??= ($this->handle == 0) ? AT_MUST : AT_SET; //验证条件
+            $val[4] ??= IN_BOTH; //验证时机
+            [$field, $rules, $msgs, $at, $action] = $val;
+            if (is_continue($at, $data, $field)) {
+                continue;
+            }
+            if ($action > IN_BOTH && $action != $this->handle) {
+                continue;
+            }
+            $this->errors[$field] ??= '';
+            $value = strval($data[$field]) ?? '';
+            if ($rules instanceof Closure) {
+                if ($rules($value) !== true) {
+                    $this->errors[$field] = $msgs;
+                }
+            } else {
+                $rules = explode('|', $rules); //规则列表
+                $msgs = explode('|', $msgs); //错误提示
+                foreach ($rules as $k => $rule) {
+                    $msg = $msgs[$k] ?? $msgs[0]; //提示
+                    $rule = explode(':', $rule);
+                    $rule[1] ??= '';
+                    [$func, $params] = $rule; //方法与参数
+                    $flag = false;
+                    if ($this->model && method_exists($this->model, $func)) {
+                        $flag = $this->model->$func($value, $field, $params, $data); //模型方法
+                    } elseif (method_exists($this, $func)) {
+                        $flag = $this->$func($value, $field, $params, $data); //类方法
+                    } elseif (str_starts_with($func, '/')) {
+                        $flag = (bool)preg_match($func, $value); //正则表达式
+                    } elseif (array_key_exists($func, $regex)) {
+                        $flag = (bool)preg_match($regex[$func], $value);//正则配置
+                    } elseif (in_array($func, ['url', 'email', 'ip', 'float', 'int', 'bool'])) {
+                        $flag = $this->filterVar($value, $field, $func, $data); //filter_var
+                    } elseif (function_exists($func)) {
+                        $flag = $func($value); //内置函数
+                    } else {
+                        $msg = $func . ' 验证方法不存在';
+                    }
+                    if (empty($msg)) {
+                        $msg = 'not_msg';
+                    }
+                    if (!$flag) $this->errors[$field] .= '|' . $msg;
+                    $this->errors[$field] = trim($this->errors[$field], '|');
+                    if (!$isBatch && !empty($this->errors[$field])) break;
+                }
+            }
+            if (!$isBatch && !empty($this->errors[$field])) break;
+        }
+        $this->errors = array_filter($this->errors);
+        return $this;
+    }
+
+    public function getError(): array
+    {
+        return $this->errors;
+    }
+
+    public function isFail(): bool
+    {
+        return !empty($this->errors);
+    }
+
+    public function show(): object
+    {
+        if (!empty($this->errors)) {
+            Response::validate($this->errors);
+        }
+        return $this;
+    }
+
+    public function unique(string $value, string $field, string $params, array $data): bool
+    {
+        if (!empty($params) && str_contains($params, ',')) {
+            [$table, $pk] = explode(',', $params);
+        } elseif (!is_null($this->model)) {
+            $table = $this->model->getTable();
+            $pk = $this->model->getPk();
+        } else {
+            return false;
+        }
+        $map = [];
+        $map[$field] = $value;
+        if (($this->handle == 0 && isset($data[$pk])) || $this->handle == IN_UPDATE) {
+            $map[] = [$pk, '<>', $data[$pk]];
+        }
+        $isFind = db($table)->field($pk)->where($map)->find();
+        return !$isFind || empty($value);
+    }
+
+    public function required(string $value, string $field, string $params, array $data): bool
+    {
+        return isset($data[$field]) && !empty($data[$field]);
+    }
+
+    public function exists(string $value, string $field, string $params, array $data): bool
+    {
+        return isset($data[$field]);
+    }
+
+    public function notExists(string $value, string $field, string $params, array $data): bool
+    {
+        return !isset($data[$field]);
+    }
+
+    public function confirm(string $value, string $field, string $params, array $data): bool
+    {
+        return ($value == $data[$params]);
+    }
+
+    public function regex(string $value, string $field, string $params, array $data): bool
+    {
+        return (bool)preg_match($params, $value);
+    }
+
+    public function filterVar($value, string $field, string $params, array $data): bool
+    {
+        $params = strtolower($params);
+        $types = [];
+        $types['url'] = FILTER_VALIDATE_URL;
+        $types['email'] = FILTER_VALIDATE_EMAIL;
+        $types['ip'] = FILTER_VALIDATE_IP;
+        $types['float'] = FILTER_VALIDATE_FLOAT;
+        $types['int'] = FILTER_VALIDATE_INT;
+        return isset($types[$params]) && filter_var($value, $types[$params]);
+    }
+
+    public function captcha($value, string $field, string $params, array $data): bool
+    {
+        return isset($data[$field]) && strtoupper($data[$field]) == session('captcha');
+    }
 }

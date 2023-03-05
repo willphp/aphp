@@ -1,419 +1,285 @@
 <?php
-/*--------------------------------------------------------------------------
+/*----------------------------------------------------------------
  | Software: [WillPHP framework]
- | Site: www.113344.com
- |--------------------------------------------------------------------------
+ | Site: 113344.com
+ |----------------------------------------------------------------
  | Author: 无念 <24203741@qq.com>
  | WeChat: www113344
- | Copyright (c) 2020-2022, www.113344.com. All Rights Reserved.
- |-------------------------------------------------------------------------*/
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+declare(strict_types=1);
+
 namespace willphp\core;
-class Route {
-	protected static $link;
-	public static function single()	{
-		if (!self::$link) {
-			self::$link = new RouteBuilder();
-		}
-		return self::$link;
-	}
-	public function __call($method, $params) {
-		return call_user_func_array([self::single(), $method], $params);
-	}
-	public static function __callStatic($name, $arguments) {
-		return call_user_func_array([self::single(), $name], $arguments);
-	}
-}
-class RouteBuilder {
-	protected $module; //当前模块
-	protected $controller; //当前控制器
-	protected $action; //当前方法	
-	protected $uri; //当前uri
-	protected $route; //当前路由+参数(array)
-	protected $path; //当前路径+参数(string)
-	protected $rule; //路由规则
-	public function __construct() {
-		$this->module = strtolower(APP_NAME);
-		$this->controller = Config::get('route.default_controller', 'index');
-		$this->action = Config::get('route.default_action', 'index');	
-		$this->rule = $this->parseRuleFile();
-	}
-	/**
-	 * 路由启动
-	 */
-	public function bootstrap() {
-		$this->uri = $this->getUri();
-		if (!$this->route) {
-			$route = $this->parseUri($this->uri, $_GET);
-			$this->route = $route;
-			$this->module = $route['module'];
-			$this->controller = $route['controller'];
-			$this->action = $route['action'];
-			$this->path = $route['path'];
-		}
-		return $this;
-	}
-	/**
-	 * 获取路由+参数
-	 * @param string $route
-	 * @return array
-	 */
-	public function getRoute($route = '') {
-		return empty($route)? $this->route : $this->parseUri($route);
-	}
-	/**
-	 * 获取路径+参数
-	 * @param string $route
-	 * @return string
-	 */
-	public function getPath($route = '') {
-		return empty($route)? $this->path : $this->parseUri($route, [], true);
-	}
-	/**
-	 * 获取控制器
-	 * @return string
-	 */
-	public function getController() {
-		return $this->controller;
-	}
-	/**
-	 * 获取方法
-	 * @return string
-	 */
-	public function getAction() {
-		return $this->action;
-	}
-	//处理路由规则
-	protected function parseRuleFile() {
-		$rule = ['just' => [], 'flip' => []];
-		$mtime = 0;
-		$file = ROOT_PATH.'/route/'.$this->module.'.php';
-		if (!file_exists($file)) {
-			return $rule;
-		}
-		$mtime = filemtime($file);
-		$rule = Cache::get('route.'.$mtime); //获取缓存
-		if (!$rule) {
-			$conf = include $file;
-			if (empty($conf)) {
-				return ['just' => [], 'flip' => []];
-			}
-			Cache::flush('route');
-			$expkey = [':num', ':float', ':string', ':alpha', ':page', ':any'];
-			$expval = ['[0-9\-]+', '[0-9\.\-]+', '[a-zA-Z0-9\-_]+', '[a-zA-Z\x7f-\xff0-9-_]+', '[0-9]+', '.*'];
-			$just = $flip = [];
-			foreach ($conf as $k => $v) {
-				if (strpos($k, ':') !== false) {
-					$k = str_replace($expkey, $expval, $k);
-				}
-				$k = trim(strtolower($k), '/');
-				$just[$k] = trim(strtolower($v), '/');
-			}
-			$tmp = array_flip($just);
-			foreach ($tmp as $k => $v) {
-				if (preg_match_all('/\(.*?\)/i', $v, $res)) {
-					$exp = [];
-					$count = count($res[0]);
-					for ($i=1;$i<=$count;$i++) {
-						$exp[] = '/\$\{'.$i.'\}/i';
-					}
-					$k = preg_replace($exp, $res[0], $k);
-					$i = 0;
-					$v = preg_replace_callback('/\(.*?\)/i',function ($matches) use(&$i) {
-						$i ++;
-						return '${'.$i.'}';
-					}, $v);
-				}
-				$flip[$k] = $v;
-			}
-			$rule = ['just' => $just, 'flip' => $flip];
-			Cache::set('route.'.$mtime, $rule);
-		}
-		return $rule;
-	}
-	/**
-	 * 获取当前访问的Uri路径
-	 * @return string
-	 */
-	protected function getUri() {		
-		$uri = $this->controller.'/'.$this->action;
-		$pathinfo = '';
-		$pathinfo_var = Config::get('route.pathinfo_var', 's');		
-		if (isset($_SERVER['PATH_INFO'])) {
-			$pathinfo = preg_replace('/\/+/', '/', trim($_SERVER['PATH_INFO'], '/'));
-		} elseif (isset($_GET[$pathinfo_var])) {
-			$pathinfo = preg_replace('/\/+/', '/', trim($_GET[$pathinfo_var], '/'));
-			unset($_GET[$pathinfo_var]);
-		}	
-		$validate_get = Config::get('route.validate_get', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');		
-		if ($pathinfo && preg_match($validate_get, $pathinfo)) {
-			$del_suffix = Config::get('route.del_suffix', '.html');		
-			$uri = str_replace($del_suffix, '', $pathinfo);
-		}
-		$uri = $this->ruleReplace($uri, $this->rule['just']);
-		return $uri;
-	}
-	/**
-	 * 处理uri成route
-	 * @param string $uri 要处理的uri
-	 * @param array $params 参数
-	 * @param bool $getPath 是否只返回路径
-	 * @return array|string
-	 */
-	public function parseUri($uri, $params = [], $getPath = false) {
-		$args1 = $args2 = []; //参数
-		$route = [];
-		$route['module'] = $this->module;
-		$route['controller'] = $this->controller;
-		$route['action'] = $this->action;
-		if (false !== strpos($uri, '?')) {
-			list($uri, $args2) = explode('?', $uri);
-			parse_str($args2, $args2);
-		}
-		$uri = trim($uri, '/');
-		$path = explode('/', $uri);
-		$isCurrent = true; //是否在当前模块
-		if (false !== strpos($path[0], '.')) {
-			list($route['module'], $path[0]) = explode('.', $path[0]);
-			$isCurrent = false;
-		}
-		$count = count($path);
-		if ($count == 1) {
-			if ($isCurrent) {
-				$route['action'] = array_shift($path);
-			} else {
-				$route['controller'] = array_shift($path);
-			}
-		} elseif ($count >= 2) {
-			$route['controller'] = array_shift($path);
-			$route['action'] = array_shift($path);
-			$over = count($path);
-			for($i=0;$i<$over;$i+=2) {
-				$args1[$path[$i]] = isset($path[$i+1])? $path[$i+1] : '';
-			}
-		}
-		$route['controller'] = name_snake($route['controller']);
-		$route['params'] = array_merge($args1, $args2, $params);
-		$route['path'] = $route['module'].'/'.$route['controller'].'/'.$route['action'];
-		if (!empty($route['params'])) {
-			ksort($route['params']);
-			$route['path'] .= '?'.http_build_query($route['params']);
-		}		
-		$this->array_change_value_case_recursive($route); 
-		return $getPath? $route['path'] : $route;
-	}
-	/**
-	 * 值转换成小写
-	 * @param array $array
-	 * @param string $case
-	 */
-	protected function array_change_value_case_recursive(&$array, $case = CASE_LOWER) {
-		foreach ($array as $k => $v) {
-			if (is_array($v)) {
-				$this->array_change_value_case_recursive($array[$k], $case);
-				continue;
-			}			
-			$array[$k] = ($case == CASE_LOWER)? strtolower($v) : strtoupper($v);				
-		}
-	}
-	/**
-	 * 获取页面缓存
-	 * @return string
-	 */
-	protected function getViewCache() {
-		if (IS_GET && Config::get('view.view_cache')) {			
-			return Cache::get('view.'.md5($this->path));
-		}
-		return false;
-	}
-	/**
-	 * 执行控制器方法
-	 * @param string $uri
-	 * @param array $params
-	 * @throws \Exception
-	 * @return boolean|mixed
-	 */
-	public function executeControllerAction($uri = '', $params = []) {
-		$isCall = !empty($uri); //是否是调用
-		if (!$isCall && ($cache = $this->getViewCache())) {
-			return $cache;
-		}
-		$route = !$isCall? $this->route : $this->parseUri($uri, $params);
-		$module = $route['module'];
-		$controller = name_camel($route['controller']);
-		$class = 'app\\'.$module.'\\controller\\'.$controller;	
-		$action = $route['action'];
-		$params = $route['params'];	
-		$path = $route['controller'].'/'.$route['action'];
-		if (!$isCall) {
-			if (!in_array($module, Config::get('app.app_list', ['index']))) {				
-				return App::halt($module.' 模块禁止访问，请在配置中添加');
-			}
-			if (0 === strpos($action, '_')) {				
-				return App::halt($path.' 不可访问');
-			}
-		}		
-		if (!method_exists($class, $action)) {			
-			$viewFile = THEME_PATH.'/'.$path.Config::get('view.prefix', '.html');
-			if (IS_GET && file_exists($viewFile)) {
-				return view($path);
-			}			
-			return $isCall? false : App::halt($path, 'empty');
-		}
-		$class = App::make($class);
-		try {
-			$class_method = new \ReflectionMethod($class, $action);
-			if (!$class_method->isPublic()) {
-				return App::halt($path.' 不可访问');
-			}
-			$method_args = $class_method->getParameters(); //参数
-			$isReq = false;
-			$binds = $extend = [];
-			foreach ($method_args as $arg) {
-				$arg_name = $arg->getName();
-				if ('req' == $arg_name) {
-					$isReq = true;
-					continue;
-				}
-				$dependency = $arg->getClass();
-				if (isset($params[$arg_name])) {
-					$binds[$arg_name] = $params[$arg_name];
-				} elseif ($dependency) {
-					$binds[$arg_name] = App::make($dependency->name);
-				} elseif ($arg->isDefaultValueAvailable()) {
-					$binds[$arg_name] = $extend[$arg_name] = $arg->getDefaultValue();					
-				} elseif (isset($_POST[$arg_name])) {
-					$binds[$arg_name] = $_POST[$arg_name];
-				} else {
-					return App::halt($path.' 参数不足');
-				}
-			}
-			if (!$isCall) {
-				Request::setGet(array_merge($params, $extend));	
-				Middleware::web('controller_start');
-				$this->exeMiddleware($class); //处理控制器中间件
-				if ($isReq) {
-					$binds['req'] = $this->getReq();
-				}
-				if (method_exists($class, '_before')) $class->_before($action);
-				if (method_exists($class, '_before_'.$action)) $class->{'_before_'.$action}();
-			}
-			$res = $class_method->invokeArgs($class, $binds);
-			if (!$isCall) {				
-				if (method_exists($class, '_after_'.$action)) $class->{'_before_'.$action}();
-				if (method_exists($class, '_after')) $class->_after($action);
-			}
-			return $res;
-		} catch (\ReflectionException $e) {			
-			throw new \Exception($e->getMessage());
-		}
-	}
-	/**
-	 * 获取请求参数
-	 * @return array
-	 */
-	protected function getReq() {
-		$req = Request::all();
-		if ('req' == Config::get('filter.filter_in')) {			
-			$req = Filter::input($req);
-		}
-		return $req;
-	}
-	/**
-	 * 处理控制器中间件
-	 * @param string $controller
-	 */
-	protected function exeMiddleware($controller) {
-		$middlewares = [];
-		$class = new \ReflectionClass($controller);
-		if ($class->hasProperty('middleware')) {
-			$reflectionProperty = $class->getProperty('middleware');
-			$reflectionProperty->setAccessible(true);
-			$middlewares = $reflectionProperty->getValue($controller);
-			if (!is_array($middlewares)) {
-				Middleware::set($middlewares);
-			} else {
-				foreach ($middlewares as $key => $val) {
-					if (!is_int($key)) {
-						Middleware::set($key, $val);
-					} else {
-						Middleware::set($val);
-					}
-				}
-			}
-		}
-	}
-	/**
-	 * 规则替换
-	 * @param string $path
-	 * @param array $rule
-	 * @return string
-	 */
-	protected function ruleReplace($path, $rule) {
-		if (isset($rule[$path])) return $rule[$path];
-		foreach ($rule as $k => $v) {
-			if (preg_match('#^'.$k.'$#i', $path)) {
-				if (false !== strpos($v, '$') && false !== strpos($k, '(')) {
-					$v = preg_replace('#^'.$k.'$#i', $v, $path);
-				}
-				return $v;
-			}
-		}
-		return $path;
-	}
-	/**
-	 * 根据参数 生成url
-	 * @param string|array $params 参数
-	 * @return string
-	 */
-	public function pageUrl($params = []) {
-		$route = $this->controller.'/'.$this->action;
-		if ($this->module != APP_NAME) {
-			$route = $this->module.'/'.$route;
-		}
-		if (empty($params)) {
-			return $this->buildUrl($route);
-		}
-		return is_array($params)? $this->buildUrl($route, $params) : $this->buildUrl($route.'?'.$params);
-	}
-	/**
-	 * url生成
-	 * @param string $route
-	 * @param array $params
-	 * @param string $suffix
-	 * @return string
-	 */
-	public function buildUrl($route = '', $params = [], $suffix = '*') {
-		if (in_array($route, ['','@','@/','/@'])) return __URL__;
-		if (false !== filter_var($route, FILTER_VALIDATE_URL)) return $route;
-		if ($route == '[back]' || $route == 'javascript:history.back(-1);') return 'javascript:history.back(-1);';		
-		if ($route == '[history]') return isset($_SERVER['HTTP_REFERER'])? $_SERVER['HTTP_REFERER'] : 'javascript:history.back(-1);';		
-		if ($suffix == '*') $suffix = Config::get('route.url_suffix', '.html');
-		$args = [];
-		if (false !== strpos($route, '?')) {
-			list($route, $args) = explode('?', $route);
-			parse_str($args, $args);
-		}		
-		$route = trim($route, '/');
-		if (empty($route)) {
-			$route = $this->controller.'/'.$this->action;
-		}
-		if (preg_match('#^[a-zA-Z0-9\-_]+$#', $route)) {
-			$route = $this->controller.'/'.$route;
-		}		
-		$params = array_merge($args, $params);
-		if (!empty($params)) {
-			$filter_empty = Config::get('route.filter_empty', true);
-			if ($filter_empty) {
-				$params = array_filter($params); //过滤空值和0
-			}			
-			$params = str_replace(['&', '='], '/', http_build_query($params));
-			$route = trim($route.'/'.$params, '/');
-		}
-		if (substr($route, 0, 1) == '@') {
-			$route = trim($route, '@');
-			return __URL__.'/'.$route.$suffix;
-		}
-		$route = $this->ruleReplace($route, $this->rule['flip']);
-		return __URL__.'/'.$route.$suffix;
-	}	
+
+use Exception;
+use ReflectionException;
+use ReflectionMethod;
+
+class Route
+{
+    use Single;
+
+    private string $controller; //当前控制器
+    private string $action; //当前方法
+    private array $rule; //路由规则
+    private string $uri; //当前uri路径
+    private array $route; //路由信息
+    private string $path; //路由路径
+    private int $counter = 0; //fn计数器
+
+    private function __construct()
+    {
+        $this->controller = get_config('route.default_controller', 'index');
+        $this->action = get_config('route.default_action', 'index');
+        $this->rule = get_cache('__Route__', fn() => $this->parseRule());
+        $this->uri = $this->getUri();
+        $this->route = $this->parseRoute($this->uri, $_GET);
+        $this->controller = $this->route['controller'];
+        $this->action = $this->route['action'];
+        $this->path = $this->route['path'];
+    }
+
+    private function getViewCache()
+    {
+        if (IS_GET && get_config('view.cache', false)) {
+            return Cache::driver()->get('view.' . md5($this->path));
+        }
+        return false;
+    }
+
+    public function dispatch()
+    {
+        $viewCache = $this->getViewCache();
+
+        if ($viewCache) {
+            return $viewCache;
+        }
+        $module = APP_NAME;
+        $route = $this->getRoute();
+        $controller = name_camel($route['controller']);
+        $class = 'app\\' . $module . '\\controller\\' . $controller;
+        $action = $route['action'];
+        $params = $route['params'];
+        $path = $route['controller'] . '/' . $route['action'];
+        if (str_starts_with($action, '_')) {
+            Response::halt('', 405, ['path' => $path]);
+        }
+        if (!method_exists($class, $action)) {
+            if (IS_GET && View::init()->view_check() !== false) {
+                return view();
+            }
+            Response::halt('', 404, ['path' => $path]);
+        }
+        $class = App::make($class);
+        try {
+            $class_method = new ReflectionMethod($class, $action);
+            if (!$class_method->isPublic()) {
+                Response::halt('', 405, ['path' => $path]);
+            }
+            $method_args = $class_method->getParameters();
+            $isReq = false;
+            $binds = $extend = [];
+            foreach ($method_args as $arg) {
+                $arg_name = $arg->getName();
+                if ($arg_name == 'req') {
+                    $binds['req'] = [];
+                    $isReq = true;
+                    continue;
+                }
+                $type = $arg->getType();
+                if (isset($params[$arg_name])) {
+                    if (!is_null($type)) {
+                        settype($params[$arg_name], $type->getName());
+                    }
+                    $binds[$arg_name] = $params[$arg_name];
+                } elseif (!is_null($type) && !$type->isBuiltin()) {
+                    $binds[$arg_name] = App::make($type->getName());
+                } elseif ($arg->isDefaultValueAvailable()) {
+                    $binds[$arg_name] = $extend[$arg_name] = $arg->getDefaultValue();
+                } elseif (isset($_POST[$arg_name])) {
+                    $binds[$arg_name] = $_POST[$arg_name];
+                } else {
+                    Response::halt('', 416, ['path' => $path, 'param' => $arg_name]);
+                }
+            }
+            Request::init()->setGet(array_merge($params, $extend));
+            Middleware::init()->web('controller_start');
+            if (IS_POST) {
+                Request::init()->csrf_check();
+            }
+            Middleware::init()->ctrlExec($class);
+            if ($isReq) {
+                $binds['req'] = $this->getReq();
+            }
+            return $class_method->invokeArgs($class, $binds);
+        } catch (ReflectionException $exception) {
+            throw new Exception($exception->getMessage());
+        }
+    }
+
+    private function getReq(): array
+    {
+        $req = Request::init()->getRequest();
+        if (get_config('filter.filter_req', false)) {
+            $req = Filter::init()->input($req);
+        }
+        return $req;
+    }
+
+    public function getRoute(string $route = ''): array
+    {
+        return empty($route) ? $this->route : $this->parseRoute($route);
+    }
+
+    public function getPath(string $route = ''): string
+    {
+        return empty($route) ? $this->path : $this->parseRoute($route, [], true);
+    }
+
+    public function getController(): string
+    {
+        return $this->controller;
+    }
+
+    public function getAction(): string
+    {
+        return $this->action;
+    }
+
+    protected function getUri(): string
+    {
+        $uri = $this->controller . '/' . $this->action;
+        $get_var = get_config('route.get_var', 's');
+        $path_info = $_GET[$get_var] ?? $_SERVER['PATH_INFO'] ?? '';
+        if (isset($_GET[$get_var])) unset($_GET[$get_var]);
+        if (!empty($path_info)) {
+            $path_info = preg_replace('/\/+/', '/', trim($_SERVER['PATH_INFO'], '/'));
+            $check_regex = get_config('route.check_regex', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');
+            if (empty($check_regex) || preg_match($check_regex, $path_info)) {
+                $clear_suffix = get_config('route.clear_suffix', '.html');
+                $uri = !empty($clear_suffix) ? str_replace($clear_suffix, '', $path_info) : $path_info;
+            }
+        }
+        return $this->ruleReplace($uri, $this->rule['just']);
+    }
+
+    protected function ruleReplace(string $uri, array $rule): string
+    {
+        if (isset($rule[$uri])) return $rule[$uri];
+        foreach ($rule as $k => $v) {
+            if (preg_match('#^' . $k . '$#i', $uri)) {
+                if (str_contains($v, '$') && str_contains($k, '(')) {
+                    $v = preg_replace('#^' . $k . '$#i', $v, $uri);
+                }
+                return $v;
+            }
+        }
+        return $uri;
+    }
+
+    public function parseRule(): array
+    {
+        $file = ROOT_PATH . '/route/' . APP_NAME . '.php';
+        $rule = ['just' => [], 'flip' => []];
+        $route = file_exists($file) ? include $file : [];
+        if (empty($route)) {
+            return $rule;
+        }
+        $alias = get_config('route.alias', [':num' => '[0-9\-]+']);
+        $search = array_keys($alias);
+        $replace = array_values($alias);
+        foreach ($route as $k => $v) {
+            if (str_contains($k, ':')) {
+                $k = str_replace($search, $replace, $k);
+            }
+            $k = trim(strtolower($k), '/');
+            $rule['just'][$k] = trim(strtolower($v), '/');
+        }
+        $flip = array_flip($rule['just']);
+        foreach ($flip as $k => $v) {
+            if (preg_match_all('/\(.*?\)/i', $v, $res)) {
+                $pattern = array_map(fn(int $n): string => '/\$\{' . $n . '\}/i', range(1, count($res[0])));
+                $k = preg_replace($pattern, $res[0], $k);
+                $this->counter = 1;
+                $v = preg_replace_callback('/\(.*?\)/i', fn($match) => '${' . $this->counter++ . '}', $v);
+            }
+            $rule['flip'][$k] = $v;
+        }
+        return $rule;
+    }
+
+    protected function parseRoute(string $uri, array $params = [], bool $getPath = false)
+    {
+        $args1 = $args2 = []; //参数
+        $route = [];
+        $route['module'] = APP_NAME;
+        $route['controller'] = $this->controller;
+        $route['action'] = $this->action;
+        if (str_contains($uri, '?')) {
+            [$uri, $get] = explode('?', $uri);
+            parse_str($get, $args2);
+        }
+        $uri = trim($uri, '/');
+        $path_info = explode('/', $uri);
+        $count = count($path_info); //总数
+        if ($count == 1) {
+            $route['controller'] = array_shift($path_info);
+        } elseif ($count >= 2) {
+            $route['controller'] = array_shift($path_info);
+            $route['action'] = array_shift($path_info);
+            $over = count($path_info);
+            for ($i = 0; $i < $over; $i += 2) {
+                $args1[$path_info[$i]] = $path_info[$i + 1] ?? '';
+            }
+        }
+        $route['controller'] = name_snake($route['controller']);
+        $route['params'] = array_merge($args1, $args2, $params);
+        $route['path'] = $route['module'] . '/' . $route['controller'] . '/' . $route['action'];
+        if (!empty($route['params'])) {
+            ksort($route['params']);
+            $route['path'] .= '?' . http_build_query($route['params']);
+        }
+        array_value_case($route);
+        return $getPath ? $route['path'] : $route;
+    }
+
+    public function buildUrl(string $route = '', array $params = [], string $suffix = '*'): string
+    {
+        if (in_array($route, ['', '@', '@/', '/@'])) return __URL__;
+        if (false !== filter_var($route, FILTER_VALIDATE_URL)) return $route;
+        if ($route == '[back]') return 'javascript:history.back(-1);';
+        if ($route == '[history]') return $_SERVER['HTTP_REFERER'] ?? 'javascript:history.back(-1);';
+        if ($suffix == '*') $suffix = get_config('route.url_suffix', '.html');
+        $args = [];
+        if (str_contains($route, '?')) {
+            [$route, $get] = explode('?', $route);
+            parse_str($get, $args);
+        }
+        $route = trim($route, '/');
+        if (empty($route)) {
+            $route = $this->controller . '/' . $this->action;
+        }
+        if (preg_match('#^[a-zA-Z0-9\-_]+$#', $route)) {
+            $route = $this->controller . '/' . $route;
+        }
+        $params = array_merge($args, $params);
+        if (!empty($params)) {
+            $get_empty = get_config('route.get_filter_empty', true);
+            if ($get_empty) {
+                $params = array_filter($params); //过滤空值和0
+            }
+            $params = str_replace(['&', '='], '/', http_build_query($params));
+            $route = trim($route . '/' . $params, '/');
+        }
+        if (str_starts_with($route, '@')) {
+            return __URL__ . '/' . trim($route, '@') . $suffix;
+        }
+        $route = $this->ruleReplace($route, $this->rule['flip']);
+        return __URL__ . '/' . $route . $suffix;
+    }
+
+    public function pageUrl(array $params = []): string
+    {
+        return $this->buildUrl($this->controller . '/' . $this->action, $params);
+    }
 }
