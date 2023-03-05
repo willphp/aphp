@@ -20,13 +20,6 @@ class Request
     {
         $this->items['get'] = $_GET;
         $this->items['post'] = $_POST;
-        if (empty($_POST)) {
-            $input = file_get_contents('php://input');
-            $data = json_decode($input, true);
-            if ($data) {
-                $this->items['post'] = $data;
-            }
-        }
     }
 
     public function getRequest(string $name = '', $default = null, $batchFunc = [])

@@ -50,7 +50,6 @@ class Route
     public function dispatch()
     {
         $viewCache = $this->getViewCache();
-
         if ($viewCache) {
             return $viewCache;
         }

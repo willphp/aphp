@@ -86,17 +86,17 @@ class Config
     {
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         $data = [];
-        $key = '';
+        $name = '';
         if ($ext == 'php') {
-            $key = strtolower(basename($file, '.php'));
+            $name = strtolower(basename($file, '.php'));
             $data = include $file;
         } elseif ($ext == 'env') {
             $data = parse_ini_file($file, true, INI_SCANNER_TYPED) ?: [];
         }
         if ($data) {
             array_key_case($data);
-            if ($key) {
-                self::$items[$key] = isset(self::$items[$key]) ? array_replace_recursive(self::$items[$key], $data) : $data;
+            if ($name) {
+                self::$items[$name] = isset(self::$items[$name]) ? array_replace_recursive(self::$items[$name], $data) : $data;
             } else {
                 self::$items = array_replace_recursive(self::$items, $data);
             }

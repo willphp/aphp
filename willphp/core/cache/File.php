@@ -34,7 +34,7 @@ class File extends Base
     public function set(string $name, $data, int $expire = 0): bool
     {
         $file = $this->getFile($name);
-        $content = sprintf("%010d", $expire) . serialize($data);
+        $content = sprintf("%010d", $expire) . json_encode($data);
         return (bool)file_put_contents($file, $content);
     }
 
@@ -48,7 +48,7 @@ class File extends Base
             unlink($file);
             return $default;
         }
-        return unserialize(substr($content, 10));
+        return json_decode(substr($content, 10), true);
     }
 
     public function del(string $name): bool

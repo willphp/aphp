@@ -146,15 +146,9 @@ class Query implements ArrayAccess, Iterator
 
     public function getFilterData(array $data, string $table = ''): array
     {
-        $filter = [];
         $fields = $this->getFieldList($table);
         unset($fields['pri']);
-        foreach ($data as $key => $val) {
-            if (in_array($key, $fields)) {
-                $filter[$key] = $val;
-            }
-        }
-        return $filter;
+        return array_filter($data, fn($k)=>in_array($k, $fields), ARRAY_FILTER_USE_KEY);
     }
 
     public function parseExpress(): array

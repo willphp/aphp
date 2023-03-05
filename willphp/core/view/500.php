@@ -36,7 +36,7 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="http://www.113344.com" title="willphp官网" target="_blank">WillPHP框架</a>
+                <a href="http://www.113344.com" title="willphp官网" target="_blank" rel="noopenner noreferrer">WillPHP框架</a>
             </div>
             <h3><strong>:(</strong><?php echo $msg; ?></h3>
             <div class="error-page-body">

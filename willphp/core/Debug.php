@@ -98,7 +98,7 @@ class Debug
         $this->items['base']['路由参数'] = $this->path;
         $this->items['base']['内存开销'] = $this->memory . ' KB <a href="' . __URL__ . '/api/clear">清除缓存</a>';
         $this->items['base']['调试统计'] = '文件：' . $this->fileTotal . '(' . $this->filesize . ' KB)';
-        $this->items['base']['运行时间'] = $this->runtime . 's at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="http://www.113344.com" style="color:green;" target="_blank">WillPHP' . __VERSION__ . '</a>';
+        $this->items['base']['运行时间'] = $this->runtime . 's at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="http://www.113344.com" style="color:green;" target="_blank" rel="noopenner noreferrer">WillPHP' . __VERSION__ . '</a>';
         $this->items['sql'] = $this->filter($this->items['sql'], []);
         $this->items['debug'] = $this->filter($this->items['debug'], []);
         $this->items['error'] = $this->filter($this->items['error'], []);

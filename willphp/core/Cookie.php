@@ -62,8 +62,10 @@ class Cookie
         foreach ($this->items as $name => $value) {
             if (str_starts_with($name, $this->prefix)) {
                 $name = substr($name, strlen($this->prefix));
+                $data[$name] = Crypt::init()->decrypt($value);
+            } else {
+                $data[$name] = $value;
             }
-            $data[$name] = $this->get($name);
         }
         return $data;
     }
@@ -82,7 +84,8 @@ class Cookie
     public function flush(): bool
     {
         if (PHP_SAPI != 'cli') {
-            foreach ($this->items as $key => $value) {
+            $keys = array_keys($this->items);
+            foreach ($keys as $key) {
                 setcookie($key, '', 1, '/');
             }
         }

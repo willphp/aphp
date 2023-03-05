@@ -121,12 +121,14 @@ class View
 
     public function view_check(string $file = '')
     {
-        if (THEME_ON && $theme = $this->getCookieTheme()) {
-            define('__THEME__', $theme);
-        } else {
-            define('__THEME__', get_config('site.theme', 'default'));
+        if (!defined('__THEME__')) {
+            if (THEME_ON && $theme = $this->getCookieTheme()) {
+                define('__THEME__', $theme);
+            } else {
+                define('__THEME__', get_config('site.theme', 'default'));
+            }
+            define('THEME_PATH', THEME_ON ? VIEW_PATH . '/' . __THEME__ : VIEW_PATH);
         }
-        define('THEME_PATH', THEME_ON ? VIEW_PATH . '/' . __THEME__ : VIEW_PATH);
         if (empty($file)) {
             $file = $this->getViewFile($file);
         }
@@ -140,11 +142,12 @@ class View
     public function setFile(string $file = ''): View
     {
         $file = $this->getViewFile($file);
-        $this->viewFile = $this->view_check($file);
-        if ($this->viewFile === false) {
+        $viewFile = $this->view_check($file);
+        if (!$viewFile) {
             $theme = THEME_ON ? '[' . __THEME__ . ']' : '';
             throw new Exception($theme . $file . ' 模板文件不存在');
         }
+        $this->viewFile = $viewFile;
         $theme = THEME_ON ? __THEME__ . '/' : '';
         $this->compileFile = RUNTIME_PATH . '/view/' . $theme . preg_replace('/\W/', '_', $file) . '.php';
         return $this;

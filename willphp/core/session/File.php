@@ -30,13 +30,12 @@ class File implements ISession
 
     public function read(): array
     {
-        $data = is_file($this->file) ? unserialize(file_get_contents($this->file)) : [];
-        return is_array($data) ? $data : [];
+        return is_file($this->file) ? json_decode(file_get_contents($this->file), true) : [];
     }
 
     public function write()
     {
-        return file_put_contents($this->file, serialize($this->items), LOCK_EX);
+        return file_put_contents($this->file, json_encode($this->items), LOCK_EX);
     }
 
     public function gc(): void

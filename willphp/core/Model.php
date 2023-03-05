@@ -119,8 +119,8 @@ abstract class Model implements ArrayAccess, Iterator
         if (!empty($this->errors)) {
             if ($this->showError == 'show') {
                 Response::validate($this->errors);
-            } elseif ($this->showError == 'redirect' && isset($_SERVER['HTTP_REFERER']) && !IS_AJAX) {
-                header('Location:' . $_SERVER['HTTP_REFERER']);
+            } elseif ($this->showError == 'redirect' && __HISTORY__ && !IS_AJAX) {
+                header('Location:' . __HISTORY__);
                 exit();
             }
             return false;
@@ -246,7 +246,7 @@ abstract class Model implements ArrayAccess, Iterator
             return;
         }
         if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
-            $data = $this->filterKeys($data, $this->allowFill, 0);
+            $data = $this->filterKeys($data, $this->allowFill, true);
         }
         if (!empty($this->denyFill)) {
             $data = ($this->denyFill[0] == '*') ? [] : $this->filterKeys($data, $this->denyFill);
@@ -254,17 +254,12 @@ abstract class Model implements ArrayAccess, Iterator
         $this->original = array_merge($this->original, $data);
     }
 
-    public function filterKeys(array $data, array $keys, int $type = 1): array
+    public function filterKeys(array $data, array $keys, bool $allow = false): array
     {
-        $tmp = $data;
-        foreach ($data as $k => $v) {
-            if ($type == 1) {
-                if (in_array($k, $keys)) unset($tmp[$k]);
-            } else {
-                if (!in_array($k, $keys)) unset($tmp[$k]);
-            }
+        if ($allow) {
+            return array_filter($data, fn($k)=>in_array($k, $keys), ARRAY_FILTER_USE_KEY);
         }
-        return $tmp;
+        return array_filter($data, fn($k)=>!in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
     //当前操作类型

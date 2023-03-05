@@ -193,19 +193,16 @@ class Builder
         if (empty($data)) {
             return [];
         }
+        $exp = ['inc' => '+', 'dec' => '-'];
         $result = [];
         foreach ($data as $key => $val) {
             $item = $this->parseKey($key, true);
             if (is_null($val)) {
                 $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val)) {
-                switch (strtolower($val[0])) {
-                    case 'inc':
-                        $result[$item] = $item . '+' . floatval($val[1]);
-                        break;
-                    case 'dec':
-                        $result[$item] = $item . '-' . floatval($val[1]);
-                        break;
+                $k = strtolower($val[0]);
+                if (isset($exp[$k])) {
+                    $result[$item] = $item . $exp[$k] . floatval($val[1]);
                 }
             } elseif (is_scalar($val)) {
                 if (str_starts_with($val, ':') && $this->query->isBind(substr($val, 1))) {
@@ -300,12 +297,8 @@ class Builder
         $logic[$count] = 'AND';
         for ($i = 1; $i <= $count; $i++) {
             $left = $right = $link = '';
-            if ($logic[$i] != 'AND') {
-                if ($i == 1) {
-                    $left = '(';
-                } elseif ($i < $count && $logic[$i - 1] == 'AND') {
-                    $left = '(';
-                }
+            if ($logic[$i] != 'AND' && ($i == 1 || ($i < $count && $logic[$i - 1] == 'AND'))) {
+                $left = '(';
             }
             if ($i > 1 && $logic[$i - 1] != 'AND' && $logic[$i] == 'AND') {
                 $right = ')';
@@ -499,23 +492,23 @@ class Builder
         return ' ON DUPLICATE KEY UPDATE ' . implode(' , ', $updates) . ' ';
     }
 
-    protected function parseKey($key, bool $strict = false): string
+    protected function parseKey($val, bool $strict = false): string
     {
-        if (is_numeric($key)) return $key;
-        $key = trim($key);
+        if (is_numeric($val)) return $val;
+        $val = trim($val);
         $table = '';
-        if (strpos($key, '.') && !preg_match('/[,\'\"()`\s]/', $key)) {
-            [$table, $key] = explode('.', $key, 2);
+        if (str_contains($val, '.') && !preg_match('/[,\'\"()`\s]/', $val)) {
+            [$table, $val] = explode('.', $val, 2);
             $table = $this->params['alias'][$table] ?? $table;
-            if (strpos($table, '.')) {
+            if (str_contains($table, '.')) {
                 $table = str_replace('.', '`.`', $table);
             }
             $table = '`' . $table . '`.';
         }
-        if ('*' != $key && ($strict || !preg_match('/[,\'\"*()`.\s]/', $key))) {
-            $key = '`' . $key . '`';
+        if ('*' != $val && ($strict || !preg_match('/[,\'\"*()`.\s]/', $val))) {
+            $val = '`' . $val . '`';
         }
-        return $table . $key;
+        return $table . $val;
     }
 
 }
