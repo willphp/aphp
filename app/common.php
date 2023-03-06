@@ -1,5 +1,39 @@
 <?php
 //自定义函数
+
+/**
+ * 字节大小转换
+ */
+function size_format(int $size): string
+{
+    $unitByte = [' TB' => 1099511627776, ' GB' => 1073741824, ' MB' => 1048576];
+    foreach ($unitByte as $unit => $byte) {
+        if ($size >= $byte) {
+            return round($size / $byte, 2) . $unit;
+        }
+    }
+    return number_format($size / 1024, 2) . ' KB';
+}
+
+/**
+ * 格式时间
+ */
+function get_time_ago(int $time): string
+{
+    $etime = time() - $time;
+    if ($etime < 1) {
+        return '刚刚';
+    }
+    $interval = [31536000 => '年前', 2592000 => '个月前', 604800=>'星期前', 86400=>'天前', 3600=>'小时前', 60=>'分钟前', 1=>'秒前'];
+    foreach ($interval as $k => $v) {
+        $ok = floor($etime / $k);
+        if ($ok != 0) {
+            return $ok.$v;
+        }
+    }
+    return '刚刚';
+}
+
 /**
  * 调试输出
  */

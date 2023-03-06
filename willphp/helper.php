@@ -40,14 +40,43 @@ function dir_create(string $dir, int $auth = 0755): bool
 /**
  * 删除目录
  */
-function dir_del(string $dir): bool
+function dir_del(string $dir, bool $delRoot = false): bool
 {
     if (!is_dir($dir)) return true;
     $list = array_diff(scandir($dir), ['.', '..']);
     foreach ($list as $file) {
         is_dir("$dir/$file") ? dir_del("$dir/$file") : unlink("$dir/$file");
     }
-    return rmdir($dir);
+    return !$delRoot || rmdir($dir);
+}
+
+/**
+ * 获取最后修改时间
+ */
+function get_mtime(string $res): int
+{
+    if (is_dir($res)) {
+        $files = array_diff(scandir($res), ['.', '..']);
+        if (!empty($files)) {
+            $mtime = array_map(fn($v)=>filemtime($res.'/'.$v), $files);
+            return max($mtime);
+        }
+    } elseif (is_file($res)) {
+        return filemtime($res);
+    }
+    return 0;
+}
+
+/**
+ * 批量获取最后修改时间
+ */
+function get_mtime_batch(array $res): int
+{
+    if (!empty($res)) {
+        $mtime = array_map(fn($v)=>get_mtime($v), $res);
+        return max($mtime);
+    }
+    return 0;
 }
 
 /**
@@ -73,6 +102,15 @@ function array_value_case(array &$array, int $case = CASE_LOWER): void
         }
         $array[$key] = ($case == CASE_LOWER) ? strtolower($value) : strtoupper($value);
     }
+}
+
+/**
+ * 数组键名过滤
+ */
+function array_filter_key(array $array, array $keys, bool $in = false): array
+{
+    $func = fn($k) => $in ? in_array($k, $keys) : !in_array($k, $keys);
+    return array_filter($array, $func, ARRAY_FILTER_USE_KEY);
 }
 
 /**

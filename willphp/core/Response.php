@@ -61,6 +61,12 @@ class Response
         exit;
     }
 
+    public static function getRunLog(): string
+    {
+        $run = App::init()->getRunInfo();
+        return '<!--Powered By ' . __POWERED__ . ' | path:' . $run['path'] . ' | files:' . $run['total'] . '(' . $run['filesize'] . ') | memory:' . $run['memory'] . ' | runtime:' . $run['time'] . '-->';
+    }
+
     public static function output($res = null, bool $trace = false): void
     {
         if (is_object($res) && method_exists($res, '__toString')) {
@@ -73,7 +79,7 @@ class Response
                 if ($trace) {
                     $res = Debug::init()->appendTrace($res);
                 }
-                echo $res;
+                echo $res.self::getRunLog();
             }
         } elseif (is_null($res)) {
             return;

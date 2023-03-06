@@ -15,6 +15,7 @@ final class App
     use Single;
 
     private static array $instances = []; //单例列表
+    private int $filesize;
 
     private function __construct($build = '')
     {
@@ -30,7 +31,6 @@ final class App
         Middleware::init()->globals(); //执行公共中间件
         $res = Route::init()->dispatch();
         Response::output($res, APP_TRACE);
-
     }
 
     public static function make(string $class): object
@@ -76,5 +76,27 @@ final class App
             }
         }
         return current($build);
+    }
+
+    public function getRunInfo(): array
+    {
+        $this->filesize = 0;
+        $run = [];
+        $run['path'] = Route::init()->getPath();
+        $run['time'] = round((microtime(true) - START_TIME), 4).' s';
+        $run['memory'] = number_format((memory_get_usage() - START_MEMORY) / 1024, 2).' KB';
+        $files = get_included_files();
+        $run['file'] = array_map(fn($v)=>$this->getLoadFile($v), $files);
+        $run['total'] = count($files);
+        $run['filesize'] = number_format($this->filesize / 1024, 2).' KB';
+        return $run;
+    }
+
+    protected function getLoadFile(string $file): string
+    {
+        $len = strlen(ROOT_PATH) + 1;
+        $filesize = filesize($file);
+        $this->filesize += $filesize;
+        return substr($file, $len).'('.number_format($filesize / 1024, 2).' KB)';
     }
 }

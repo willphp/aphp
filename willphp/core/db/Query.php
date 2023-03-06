@@ -261,28 +261,38 @@ class Query implements ArrayAccess, Iterator
         return $this->objData;
     }
 
-    public function getField($field)
+    public function value(string $field)
     {
-        if (!is_array($field)) {
-            if (!str_contains($field, ',')) {
-                $result = $this->field($field)->find();
-                return $result[$field] ?? '';
-            }
-            $field = explode(',', $field);
-        }
-        $result = $this->field($field)->select();
+        $result = $this->field($field)->find();
         if (is_string($result) || $result instanceof PDOStatement) {
             return $result;
         }
-        $field_count = count($field);
-        $data = [];
-        foreach ($result as $row) {
-            $key = $row[$field[0]];
-            if ($field_count == 2) {
-                $data[$key] = $row[$field[1]];
-            } else {
-                $data[$key] = $row;
+        return $result[$field] ?? '';
+    }
+
+    public function column(string $fields, string $key = '')
+    {
+        $fieldHasKey = true;
+        $getOne = false;
+        if ($fields != '*') {
+            $fields = explode(',', $fields);
+            $getOne = 1 == count($fields);
+            if (!empty($key) && !in_array($key, $fields)) {
+                $fields[] = $key;
+                $fieldHasKey = false;
             }
+        }
+        $result = $this->field($fields)->select();
+        if (is_string($result) || $result instanceof PDOStatement) {
+            return $result;
+        }
+        $data = [];
+        foreach ($result as $k => $row) {
+            $k = !empty($key)? $row[$key] : $k;
+            if (!$fieldHasKey) {
+                unset($row[$key]);
+            }
+            $data[$k] = $getOne ? current($row) : $row;
         }
         return $data;
     }

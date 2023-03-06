@@ -138,21 +138,14 @@ class Builder
         $fields = $options['field'];
         $insertFields = $values = [];
         foreach ($dataSet as $data) {
-            foreach ($data as $key => $val) {
-                if (is_array($fields) && !in_array($key, $fields)) {
-                    unset($data[$key]);
-                } else if (is_null($val)) {
-                    $data[$key] = 'NULL';
-                } elseif (is_scalar($val)) {
-                    $data[$key] = $this->parseValue($val);
-                } else {
-                    unset($data[$key]);
-                }
+            if (is_array($fields)) {
+                $data = array_filter_key($data, $fields, true);
             }
-            $values[] = '( ' . implode(',', array_values($data)) . ' )';
             if (empty($insertFields)) {
                 $insertFields = array_keys($data);
             }
+            $data = array_map(fn($v)=>is_scalar($v)? $this->parseValue($v) : 'null', $data);
+            $values[] = '(' . implode(',', array_values($data)) . ')';
         }
         $sql = str_replace(
             ['%INSERT%', '%TABLE%', '%EXTRA%', '%FIELD%', '%DATA%', '%DUPLICATE%', '%COMMENT%'],
@@ -160,8 +153,8 @@ class Builder
                 $replace ? 'REPLACE' : 'INSERT',
                 $this->parseTable(),
                 $this->parseExtra(),
-                implode(' , ', $insertFields),
-                implode(' , ', $values),
+                implode(', ', $insertFields),
+                implode(', ', $values),
                 $this->parseDuplicate(),
                 $this->parseComment(),
             ],

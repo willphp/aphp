@@ -15,31 +15,9 @@ class Debug
     use Single;
 
     protected array $items = ['sql' => [], 'debug' => [], 'error' => []];
-    private string $path; //路由路径
-    private float $runtime; //运行时间
-    private string $memory; //内存开销
-    private int $fileTotal; //加载文件数
-    private string $filesize; //加载文件大小
 
     private function __construct()
     {
-        $this->path = Route::init()->getPath();
-        $this->runtime = round((microtime(true) - START_TIME), 4);
-        $this->memory = number_format((memory_get_usage() - START_MEMORY) / 1024, 2);
-        $files = get_included_files();
-        $this->fileTotal = count($files);
-        $filesize = 0;
-        $level = get_config('debug.level', []);
-        foreach ($files as $k => $file) {
-            $k++;
-            $fs = filesize($file);
-            if (isset($level['file'])) {
-                $this->items['file'][] = $k . '.' . $file . ' ( ' . number_format($fs / 1024, 2) . ' KB )';
-            }
-            $filesize += $fs;
-        }
-        $this->filesize = number_format($filesize / 1024, 2);
-
     }
 
     public function trace($msg, string $level = 'debug'): void
@@ -61,22 +39,15 @@ class Debug
         return $content;
     }
 
-    protected function getRunLog(): string
-    {
-        return '<script>console.log("Powered By ' . __POWERED__ . ' | path:' . $this->path . ' | files:' . $this->fileTotal . '(' . $this->filesize . 'KB) | memory:' . $this->memory . 'KB | runtime:' . $this->runtime . 's");</script>';
-    }
-
     protected function getTrace(): string
     {
-        if (!APP_TRACE || IS_AJAX) {
+        $trace_show = get_config('debug.trace_show', true);
+        if (IS_AJAX || !APP_TRACE || !$trace_show) {
             return '';
         }
-        $trace_show = get_config('debug.trace_show', true);
-        if (!$trace_show) {
-            return $this->getRunLog();
-        }
-        $end_time = $this->runtime;
-        $trace = $this->parseTrace();
+        $run = App::init()->getRunInfo();
+        $end_time = $run['time'];
+        $trace = $this->parseTrace($run);
         $errno = '';
         if (!empty($this->items['error'])) {
             $errno = ' <span style="color:red">' . count($this->items['error']) . '</span>';
@@ -86,19 +57,20 @@ class Debug
         return "\n" . ob_get_clean() . "\n";
     }
 
-    protected function parseTrace(): array
+    protected function parseTrace(array $run): array
     {
         $level = get_config('debug.level', []);
         if (!isset($level['base'])) {
             $level['base'] = '基本';
         }
+        $this->items['file'] = $run['file'];
         $this->items['error'] = Error::init()->getError();
         $this->items['base']['主机信息'] = $_SERVER['SERVER_SOFTWARE'];
         $this->items['base']['请求信息'] = $_SERVER['SERVER_PROTOCOL'] . ' ' . $_SERVER['REQUEST_METHOD'] . ': <a href="' . __URL__ . '" style="color:#000;">' . __URL__ . '</a>';
-        $this->items['base']['路由参数'] = $this->path;
-        $this->items['base']['内存开销'] = $this->memory . ' KB <a href="' . __URL__ . '/api/clear">清除缓存</a>';
-        $this->items['base']['调试统计'] = '文件：' . $this->fileTotal . '(' . $this->filesize . ' KB)';
-        $this->items['base']['运行时间'] = $this->runtime . 's at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="http://www.113344.com" style="color:green;" target="_blank" rel="noopenner noreferrer">WillPHP' . __VERSION__ . '</a>';
+        $this->items['base']['路由参数'] = $run['path'];
+        $this->items['base']['内存开销'] = $run['memory'] . ' <a href="' . __URL__ . '/api/clear">清除缓存</a>';
+        $this->items['base']['调试统计'] = '文件：' . $run['total'] . '(' . $run['filesize'] . ')';
+        $this->items['base']['运行时间'] = $run['time'] . 's at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="http://www.113344.com" style="color:green;" target="_blank" rel="noopenner noreferrer">WillPHP' . __VERSION__ . '</a>';
         $this->items['sql'] = $this->filter($this->items['sql'], []);
         $this->items['debug'] = $this->filter($this->items['debug'], []);
         $this->items['error'] = $this->filter($this->items['error'], []);

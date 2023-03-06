@@ -27,6 +27,8 @@
                             echo '<li>';
                             if (!is_numeric($k)) {
                                 echo $k . '：';
+                            } else {
+                                echo ($k+1) . '. ';
                             }
                             if (is_array($val)) {
                                 echo '<pre style="line-height:15px;margin:5px 0;">' . var_export($val, true), '</pre>';

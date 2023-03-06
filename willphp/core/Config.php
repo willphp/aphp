@@ -15,34 +15,37 @@ class Config
     use Single;
 
     protected static array $items = [];
-    protected string $cacheFile;
+    protected string $cacheDir;
 
     private function __construct()
     {
-        if (!is_dir(RUNTIME_PATH)) {
-            mkdir(RUNTIME_PATH, 0777, true);
+        $this->cacheDir = RUNTIME_PATH.'/config';
+        if (!is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0777, true);
         }
-        $this->cacheFile = RUNTIME_PATH . '/config.php';
         $this->loadConfig();
     }
 
     protected function loadConfig()
     {
-        if (!file_exists($this->cacheFile)) {
-            $config = [ROOT_PATH . '/config', APP_PATH . '/config', ROOT_PATH . '/.env'];
-            foreach ($config as $res) {
+        $configPath = [ROOT_PATH . '/config', APP_PATH . '/config', ROOT_PATH . '/.env'];
+        $configMtime = get_mtime_batch($configPath);
+        $cacheFile = $this->cacheDir. '/'.$configMtime.'.php';
+        if (!file_exists($cacheFile)) {
+            $this->update();
+            foreach ($configPath as $res) {
                 $this->load($res);
             }
-            file_put_contents($this->cacheFile, json_encode(self::$items));
+            file_put_contents($cacheFile, json_encode(self::$items));
         } else {
-            $data = file_get_contents($this->cacheFile);
+            $data = file_get_contents($cacheFile);
             self::$items = json_decode($data, true);
         }
     }
 
     public function update(): bool
     {
-        return !file_exists($this->cacheFile) or unlink($this->cacheFile);
+        return dir_del($this->cacheDir);
     }
 
     public function all(): array

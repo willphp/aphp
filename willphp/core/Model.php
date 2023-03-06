@@ -246,20 +246,12 @@ abstract class Model implements ArrayAccess, Iterator
             return;
         }
         if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
-            $data = $this->filterKeys($data, $this->allowFill, true);
+            $data = array_filter_key($data, $this->allowFill, true);
         }
         if (!empty($this->denyFill)) {
-            $data = ($this->denyFill[0] == '*') ? [] : $this->filterKeys($data, $this->denyFill);
+            $data = ($this->denyFill[0] == '*') ? [] : array_filter_key($data, $this->denyFill);
         }
         $this->original = array_merge($this->original, $data);
-    }
-
-    public function filterKeys(array $data, array $keys, bool $allow = false): array
-    {
-        if ($allow) {
-            return array_filter($data, fn($k)=>in_array($k, $keys), ARRAY_FILTER_USE_KEY);
-        }
-        return array_filter($data, fn($k)=>!in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
     //当前操作类型

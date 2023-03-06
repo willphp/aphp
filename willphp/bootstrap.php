@@ -10,7 +10,7 @@
 declare(strict_types=1);
 define('START_MEMORY', memory_get_usage());
 define('START_TIME', microtime(true));
-const __VERSION__ = 'v4.0.2';
+const __VERSION__ = 'v4.0.3';
 const __POWERED__ = 'WillPHP' . __VERSION__;
 version_compare(PHP_VERSION, '7.4.3', '<') and die(__POWERED__ . ' requires PHP 7.4.3 or newer.');
 const AT_MUST = 1; //必须
