@@ -8,12 +8,10 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
-
 namespace willphp\core;
 class Request
 {
     use Single;
-
     protected array $items = [];
 
     private function __construct()
@@ -33,8 +31,7 @@ class Request
         } else {
             $name = trim($name, '.');
             if (str_contains($name, '.')) {
-                [$type, $name] = explode('.', $name);
-                $value = $this->items[$type][$name] ?? $default;
+                $value = Arr::get($this->items, $name, $default);
             } else {
                 $value = $this->items['post'][$name] ?? $this->items['get'][$name] ?? $default;
             }
@@ -44,7 +41,7 @@ class Request
 
     public function setRequest(string $name, $value = ''): bool
     {
-        return array_dot_set($this->items, $name, $value);
+        return Arr::set($this->items, $name, $value);
     }
 
     public function setGet($name, $value = ''): void
@@ -53,8 +50,12 @@ class Request
             $this->items['get'] = array_merge($this->items['get'], $name);
             $_GET = $this->items['get'];
         } elseif ($value === null) {
-            if (isset($this->items['get'][$name])) unset($this->items['get'][$name]);
-            if (isset($_GET[$name])) unset($_GET[$name]);
+            if (isset($this->items['get'][$name])) {
+                unset($this->items['get'][$name]);
+            }
+            if (isset($_GET[$name])) {
+                unset($_GET[$name]);
+            }
         } else {
             $this->items['get'][$name] = $value;
             $_GET[$name] = $value;
@@ -79,7 +80,7 @@ class Request
         return $arr['host'] ?? '';
     }
 
-    public function getHeader($name = '', $default = '')
+    public function getHeader(string $name = '', ?string $default = '')
     {
         $server = $_SERVER;
         if (str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache') && function_exists('apache_response_headers')) {
@@ -87,35 +88,36 @@ class Request
             $server = array_merge($server, $response);
         }
         $headers = [];
-        foreach ($server as $key => $value) {
-            if (str_starts_with($key, 'HTTP_')) {
-                $headers[str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($key, 5))))] = $value;
+        foreach ($server as $k => $v) {
+            if (str_starts_with($k, 'HTTP_')) {
+                $k = str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($k, 5))));
+                $headers[$k] = $v;
             }
         }
-        if (empty($name)) return $headers;
-        $name = strtolower($name);
-        return $headers[$name] ?? $default;
+        if (empty($name)) {
+            return $headers;
+        }
+        return $headers[strtolower($name)] ?? $default;
     }
 
-    public function csrf_check(): void
+    public function csrfCreate(): string
     {
-        if (config('view.csrf_check') && $_SERVER['HTTP_HOST'] == $this->getHost()) {
-            $serverToken = session('csrf_token');
-            if (!$serverToken) {
-                $serverToken = md5(get_ip() . microtime(true));
-                session('csrf_token', $serverToken);
-            }
+        $serverToken = Session::init()->get('csrf_token');
+        if (!$serverToken) {
+            $serverToken = md5(get_ip() . microtime(true));
+            Session::init()->set('csrf_token', $serverToken);
+        }
+        return $serverToken;
+    }
+
+    public function csrfCheck(): void
+    {
+        if (Config::init()->get('view.csrf_check') && $_SERVER['HTTP_HOST'] == $this->getHost()) {
+            $serverToken = $this->csrfCreate();
             $clientToken = $this->getHeader('X-CSRF-TOKEN', null) ?? $this->getRequest('csrf_token');
             if ($clientToken != $serverToken) {
                 Response::halt('', 412);
             }
-        }
-    }
-
-    public function csrf_reset(): void
-    {
-        if (config('view.csrf_check') && !IS_AJAX) {
-            session('csrf_token', null);
         }
     }
 }

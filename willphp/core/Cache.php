@@ -8,17 +8,15 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
-
 namespace willphp\core;
-
 class Cache
 {
     protected static ?object $link = null;
 
-    public static function driver(?string $driver = null): object
+    public static function init(?string $driver = null): object
     {
         static $cache = [];
-        $driver ??= get_config('cache.driver', 'file');
+        $driver ??= Config::init()->get('cache.driver', 'file');
         if (!isset($cache[$driver])) {
             $class = '\\willphp\\core\\cache\\' . ucfirst($driver);
             $cache[$driver] = call_user_func([$class, 'init']);
@@ -29,7 +27,7 @@ class Cache
     public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$link)) {
-            static::driver();
+            static::init();
         }
         return call_user_func_array([static::$link, $name], $arguments);
     }

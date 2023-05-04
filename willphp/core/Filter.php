@@ -24,30 +24,41 @@ class Filter
 
     private function __construct()
     {
-        $filter = get_config('filter', []);
-        $this->htmlField = $filter['html_field'] ?? [];
-        $this->htmlFieldLike = $filter['html_field_like'] ?? '';
+        $filter = Config::init()->get('filter', []);
         $this->funcHtml = $filter['func_html'] ?? '';
         $this->funcExceptHtml = $filter['func_except_html'] ?? '';
+        $this->htmlField = $filter['html_field'] ?? [];
+        $this->htmlFieldLike = $filter['html_field_like'] ?? '';
         $this->fieldAuto = $filter['field_auto'] ?? [];
         $this->funcOut = $filter['func_out'] ?? '';
         $this->funcOutExceptHtml = $filter['func_out_except_html'] ?? '';
     }
 
-    public function input(array $data): array
+    public function input(array &$data): void
     {
-        array_walk_recursive($data, 'self::filterIn');
-        return $data;
+        foreach ($data as $key => &$val) {
+            if (is_array($val)) {
+                $this->input($data[$key]);
+                continue;
+            }
+            $this->filterIn($val, $key);
+        }
     }
 
-    public function output(array $data): array
+    public function output(array &$data): void
     {
-        array_walk_recursive($data, 'self::filterOut');
-        return $data;
+        foreach ($data as $key => &$val) {
+            if (is_array($val)) {
+                $this->output($data[$key]);
+                continue;
+            }
+            $this->filterOut($val, $key);
+        }
     }
 
-    protected function isHtmlField(string $field): bool
+    protected function isHtmlField($field): bool
     {
+        $field = strval($field);
         return in_array($field, $this->htmlField) || (!empty($this->htmlFieldLike) && str_contains($field, $this->htmlFieldLike));
     }
 
@@ -59,7 +70,6 @@ class Filter
             } elseif (!empty($this->funcExceptHtml) && !$this->isHtmlField($key)) {
                 $value = value_batch_func($value, $this->funcExceptHtml);
             }
-
             if (!is_numeric($key) && !empty($this->fieldAuto)) {
                 foreach ($this->fieldAuto as $field => $func) {
                     if ($key == $field || in_array($key, explode(',', $field))) {

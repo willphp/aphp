@@ -20,82 +20,36 @@ class Middleware
 
     protected array $params = [];
 
-    public function globals(): bool
+    public function execute($name = [], array $params = []): bool
     {
-        $middleware = array_unique(get_config('middleware.global', []));
-        return empty($middleware) || $this->exec($middleware);
+        $middleware = [];
+        if (is_string($name)) {
+            $middleware = Config::init()->get('middleware.' . $name, []);
+        } elseif (is_array($name)) {
+            $middleware = $name;
+        }
+        if (!empty($middleware)) {
+            $this->params = $params;
+            return $this->exec($middleware);
+        }
+        return true;
     }
 
     public function add(string $name, array $middleware)
     {
-        $web = get_config('middleware.web.' . $name, []);
-        foreach ($middleware as $class) {
-            $web[] = $class;
-        }
-        return Config::init()->set('middleware.web.' . $name, array_unique($web));
+        $web = Config::init()->get('middleware.' . $name . $name, []);
+        return Config::init()->set('middleware.' . $name, array_merge($web, $middleware));
     }
 
-    public function web(string $name, array $params = []): bool
+    public function exec(array $middleware = []): bool
     {
-        $web = get_config('middleware.web.' . $name, []);
-        if (!empty($web)) {
-            $this->params = $params;
-            return $this->exec($web);
-        }
+        $middleware = array_reverse(array_unique($middleware));
+        $func = array_reduce($middleware, fn(Closure $callback, string $class): Closure => fn() => $this->run($callback, $class), fn() => null);
+        $func();
         return true;
     }
 
-    public function ctrlExec(object $controller): void
-    {
-        $class = new ReflectionClass($controller);
-        if ($class->hasProperty('middleware')) {
-            $property = $class->getProperty('middleware');
-            $property->setAccessible(true);
-            $middlewares = $property->getValue($controller);
-            if (is_array($middlewares)) {
-                foreach ($middlewares as $key => $val) {
-                    if (!is_numeric($key)) {
-                        $this->set($key, $val);
-                    } else {
-                        $this->set($val);
-                    }
-                }
-            } else {
-                $this->set($middlewares);
-            }
-        }
-    }
-
-    public function set(string $name, array $mode = []): bool
-    {
-        $exe = []; //执行的控制器中间件
-        $middleware = get_config('middleware.controller.' . $name, []); //当前控制器中间件
-        if (!$mode) {
-            $exe = $middleware;
-        } else {
-            $action = Route::init()->getAction();
-            foreach ($mode as $type => $ctrlList) {
-                if ($type == 'only' && in_array($action, $ctrlList)) {
-                    $exe = array_merge($exe, $middleware);
-                }
-                if ($type == 'except' && !in_array($action, $ctrlList)) {
-                    $exe = array_merge($exe, $middleware);
-                }
-            }
-        }
-        return $this->exec(array_unique($exe));
-    }
-
-    public function exec(array $middlewares = []): bool
-    {
-        $middlewares = array_reverse(array_unique($middlewares));
-        $fn = fn(Closure $callback, string $class): Closure => fn() => $this->middlewareRun($callback, $class);
-        $dispatcher = array_reduce($middlewares, $fn, fn() => null);
-        $dispatcher();
-        return true;
-    }
-
-    protected function middlewareRun(Closure $callback, string $class)
+    protected function run(Closure $callback, string $class): void
     {
         if (method_exists($class, 'run')) {
             $content = call_user_func_array([App::make($class), 'run'], [$callback, $this->params]);
@@ -103,4 +57,42 @@ class Middleware
         }
     }
 
+    public function set(string $name, array $types = []): bool
+    {
+        $middleware = [];
+        $all = Config::init()->get('middleware.controller.' . $name, []); //所有控制器中间件
+        if (empty($types)) {
+            $middleware = $all;
+        } else {
+            $action = Route::init()->getAction();
+            if (isset($types['only']) && in_array($action, $types['only'])) {
+                $middleware = array_merge($middleware, $all);
+            }
+            if (isset($types['except']) && !in_array($action, $types['except'])) {
+                $middleware = array_merge($middleware, $all);
+            }
+        }
+        return $this->exec($middleware);
+    }
+
+    public function controller(object $controller): void
+    {
+        $class = new ReflectionClass($controller);
+        if ($class->hasProperty('middleware')) {
+            $property = $class->getProperty('middleware');
+            $property->setAccessible(true);
+            $middleware = $property->getValue($controller);
+            if (is_array($middleware)) {
+                foreach ($middleware as $k => $v) {
+                    if (!is_numeric($k)) {
+                        $this->set($k, $v);
+                    } else {
+                        $this->set($v);
+                    }
+                }
+            } else {
+                $this->set($middleware);
+            }
+        }
+    }
 }

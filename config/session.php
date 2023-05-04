@@ -8,13 +8,9 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
-    'driver' => 'file', //默认驱动
-    'name' => 'session_id', //名称
-    'domain' => '', //有效域名
-    'expire' => 86400 * 10, //过期时间
-    'file' => [
-        'path' => 'session', //文件类session保存路径
-    ],
+    'driver' => 'file', //默认驱动支持file,redis
+    'name' => 'willphp_session', //名称
+    'expire' => 86400 * 2, //过期时间 2天
     'redis' => [
         'host' => '127.0.0.1',
         'port' => 6379,

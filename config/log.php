@@ -8,5 +8,5 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
-    'database_execute_log' => true, //是否保存execute的sql到日志
+    'database_execute' => true, //是否保存execute操作的sql到日志
 ];

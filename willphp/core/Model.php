@@ -88,9 +88,10 @@ abstract class Model implements ArrayAccess, Iterator
         return $data;
     }
 
-    public function updateWidget(): bool
+    public function updateWidget(): void
     {
-        return Cache::driver()->flush('widget/' . $this->table);
+        Cache::flush(APP_NAME.'@widget/'.$this->table.'/*');
+        Cache::flush('common@widget/'.$this->table.'/*');
     }
 
     final public function toArray(): array
@@ -246,10 +247,10 @@ abstract class Model implements ArrayAccess, Iterator
             return;
         }
         if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
-            $data = array_filter_key($data, $this->allowFill, true);
+            $data = Arr::keyFilter($data, $this->allowFill, true);
         }
         if (!empty($this->denyFill)) {
-            $data = ($this->denyFill[0] == '*') ? [] : array_filter_key($data, $this->denyFill);
+            $data = ($this->denyFill[0] == '*') ? [] : Arr::keyFilter($data, $this->denyFill);
         }
         $this->original = array_merge($this->original, $data);
     }
@@ -356,16 +357,20 @@ abstract class Model implements ArrayAccess, Iterator
             $this->{'_before_' . $name}($name);
         }
         $res = call_user_func_array([$this->db, $name], $arguments);
-        if (!empty($res) && is_array($res)) {
+        if (!empty($res)) {
+            $data = !is_array($res) ? $res->toArray() : $res;
             if (method_exists($this, '_after_' . $name)) {
-                $this->{'_after_' . $name}($res);
+                $this->{'_after_' . $name}($data);
             }
             if ($name == 'find') {
-                return $this->setData($res);
+                return $this->setData($data);
             }
-        }
-        if ($res instanceof Query) {
-            return $this;
+            if ($name == 'paginate') {
+                return $res;
+            }
+            if ($res instanceof Query) {
+                return $this;
+            }
         }
         return $res;
     }

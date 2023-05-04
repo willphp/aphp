@@ -14,33 +14,31 @@ class Crypt
 {
     use Single;
 
-    private string $key;
+    protected string $salt;
 
     private function __construct()
     {
-        $key = get_config('app.key', 'willphp');
-        $this->key = $this->getkey($key);
+        $this->salt = $this->getSalt(Config::init()->get('app.app_key', 'willphp'));
     }
 
-    public function getKey(string $key): string
+    public function encrypt(string $string, string $salt = ''): string
     {
-        return base64_encode(hash('sha256', md5($key), true));
-    }
-
-    public function encrypt(string $str, string $key = ''): string
-    {
-        if (empty($key)) {
-            $this->key = $this->getKey($key);
+        if (!empty($salt)) {
+            $this->salt = $this->getSalt($salt);
         }
-
-        return base64_encode(openssl_encrypt($str, 'aes-256-cbc', $this->key, OPENSSL_RAW_DATA, substr($this->key, -16)));
+        return base64_encode(openssl_encrypt($string, 'aes-256-cbc', $this->salt, OPENSSL_RAW_DATA, substr($this->salt, -16)));
     }
 
-    public function decrypt(string $str, string $key = ''): string
+    public function decrypt(string $string, string $salt = ''): string
     {
-        if (empty($key)) {
-            $this->key = $this->getKey($key);
+        if (!empty($salt)) {
+            $this->salt = $this->getSalt($salt);
         }
-        return openssl_decrypt(base64_decode($str), 'aes-256-cbc', $this->key, OPENSSL_RAW_DATA, substr($this->key, -16));
+        return openssl_decrypt(base64_decode($string), 'aes-256-cbc', $this->salt, OPENSSL_RAW_DATA, substr($this->salt, -16));
+    }
+
+    protected function getSalt(string $salt): string
+    {
+        return base64_encode(hash('sha256', md5($salt), true));
     }
 }

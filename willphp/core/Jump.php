@@ -13,58 +13,53 @@ namespace willphp\core;
 
 trait Jump
 {
-    protected function success($msg = '', string $url = null): void
-    {
-        if (is_array($msg)) {
-            $msg = current($msg);
-        }
-        if (empty($msg)) {
-            $msg = get_config('response.msg.200');
-        }
-        $url = is_null($url) ? '' : Route::init()->buildUrl($url);
-        if (IS_API || IS_AJAX) {
-            $this->_json(200, $msg, null, ['url' => $url]);
-        }
-        $res = ['status' => 1, 'msg' => $msg, 'url' => $url];
-        echo view('public:jump', $res);
-        exit();
-    }
-
-    protected function error($msg = '', int $code = 400, string $url = null): void
-    {
-        if (empty($msg)) {
-            $msg = get_config('response.msg.' . $code);
-        }
-        if (is_array($msg)) {
-            $msg = current($msg);
-        }
-        $url = is_null($url) ? 'javascript:history.back(-1);' : Route::init()->buildUrl($url);
-        if (IS_API || IS_AJAX) {
-            $this->_json($code, $msg, null, ['url' => $url]);
-        }
-        $res = ['status' => 0, 'msg' => $msg, 'url' => $url];
-        echo view('public:jump', $res);
-        exit;
-    }
-
     protected function _json(int $code = 200, string $msg = '', array $data = null, array $extend = []): void
     {
         Response::json($code, $msg, $data, $extend);
     }
 
-    protected function _jump($info, bool $status = false, string $url = null): void
+    private function _jumpTo($msg = '', int $code = 400, string $url = null): void
     {
-        $msg = [];
+        if (is_array($msg)) {
+            $msg = current($msg);
+        }
+        if (empty($msg)) {
+            $msg = Config::init()->get('response.msgs.' . $code);
+        }
+
+        if (!is_null($url)) {
+            $url = Route::init()->buildUrl($url);
+        } else {
+            $url = ($code < 400) ? '' : 'javascript:history.back(-1);';
+        }
+        if (IS_API || IS_AJAX) {
+            $this->_json($code, $msg, null, ['url' => $url]);
+        }
+        $res = ['status' => ($code < 400) ? 1 : 0, 'msg' => $msg, 'url' => $url];
+        echo view('public:jump', $res);
+        exit();
+    }
+
+    protected function _jump($info, $status = 1, string $url = null): void
+    {
         if (is_array($info)) {
-            $msg = $info;
+            [$msg200, $msg400] = $info;
         } else {
-            $msg[0] = $msg[1] = $info;
+            $msg200 = $msg400 = $info;
         }
-        if ($status) {
-            $this->success($msg[0], $url);
-        } else {
-            $this->error($msg[1]);
-        }
+        $code = !$status ? 400 : 200;
+        $msg = !$status ? $msg400 : $msg200;
+        $this->_jumpTo($msg, $code, $url);
+    }
+
+    protected function success($msg = '', string $url = null): void
+    {
+        $this->_jumpTo($msg, 200, $url);
+    }
+
+    protected function error($msg = '', int $code = 400, string $url = null): void
+    {
+        $this->_jumpTo($msg, $code, $url);
     }
 
     protected function _url(string $url, int $time = 0): void
@@ -77,6 +72,15 @@ trait Jump
             header("refresh:$time;url=$url");
         }
         exit();
+    }
+
+    protected function _check_login(string $auth = 'cookie.user', string $url = 'login/login'): void
+    {
+        [$auth, $name] = pre_split($auth, 'cookie');
+        $func = in_array($auth, ['cookie', 'session']) ? $auth : 'cookie';
+        if (!$func('?'.$name)) {
+            $this->error('', 401, $url);
+        }
     }
 
     protected function isAjax(): bool

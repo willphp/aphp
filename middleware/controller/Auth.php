@@ -8,13 +8,18 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace middleware\controller;
-//验证Auth
-class Auth {	
-	public function run($next){	
-		if (!session('user_id')) {
-			header('Location:'.url('login/login'));			
-		} 		
+
+use Closure;
+
+class Auth
+{
+    public function run(Closure $next): void
+    {
+        if (!session('user')) {
+            header('Location:' . url('login/login'));
+        }
         $next();
-	}
+    }
 }

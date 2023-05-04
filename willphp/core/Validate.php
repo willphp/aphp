@@ -29,10 +29,10 @@ class Validate
         }
     }
 
-    public function make(array $validate, array $data = [], bool $isBatch = false): Validate
+    public function make(array $validate, array $data = [], bool $isBatch = false): object
     {
         if (empty($data)) $data = $_POST;
-        $regex = get_config('validate', []); //正则配置
+        $regex = Config::init()->get('validate', []); //正则配置
         foreach ($validate as $val) {
             $val[2] ??= ''; //提示信息
             $val[3] ??= ($this->handle == 0) ? AT_MUST : AT_SET; //验证条件
@@ -109,7 +109,7 @@ class Validate
     public function unique(string $value, string $field, string $params, array $data): bool
     {
         if (!empty($params) && str_contains($params, ',')) {
-            [$table, $pk] = explode(',', $params);
+            [$table, $pk] = explode(',', $params, 2);
         } elseif (!is_null($this->model)) {
             $table = $this->model->getTable();
             $pk = $this->model->getPk();
@@ -164,6 +164,6 @@ class Validate
 
     public function captcha($value, string $field, string $params, array $data): bool
     {
-        return isset($data[$field]) && strtoupper($data[$field]) == session('captcha');
+        return isset($data[$field]) && strtoupper($data[$field]) == session_flash('captcha');
     }
 }

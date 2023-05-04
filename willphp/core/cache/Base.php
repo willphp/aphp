@@ -33,9 +33,9 @@ abstract class Base
 
     abstract public function has(string $name): bool;
 
-    abstract public function flush(string $type = ''): bool;
+    abstract public function flush(string $prefix = '[app]'): bool;
 
-    public function getCache(string $name, ?Closure $closure = null, int $expire = 0)
+    public function make(string $name, ?Closure $closure = null, int $expire = 0)
     {
         $data = $this->get($name);
         if (empty($data) && $closure instanceof Closure) {

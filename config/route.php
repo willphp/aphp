@@ -10,7 +10,6 @@
 return [
     'default_controller' => 'index', //默认控制器
     'default_action' => 'index', //默认方法
-    'get_var' => 's', //path_info的$_GET变量
     'check_regex' => '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#', //路由path_info验证正则
     'url_suffix' => '.html', //url函数自动添加后缀
     'clear_suffix' => ['.html'], //路由解析自动清除后缀

@@ -10,10 +10,14 @@
 declare(strict_types=1);
 
 namespace middleware;
-class Boot {	
-	public function run($next): void
+
+use Closure;
+
+class Boot
+{
+    public function run(Closure $next): void
     {
-		header('X-Powered-By:'.__POWERED__);
+        trace('全局执行');
         $next();
-	}
+    }
 }

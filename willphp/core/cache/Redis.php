@@ -10,14 +10,16 @@
 declare(strict_types=1);
 
 namespace willphp\core\cache;
+
+use willphp\core\Config;
+
 class Redis extends Base
 {
-    protected static ?object $single = null;
     private object $redis;
 
     public function connect()
     {
-        $config = get_config('cache.redis');
+        $config = Config::init()->get('cache.redis');
         $this->redis = new \Redis();
         $this->redis->connect($config['host'], $config['port']);
         if (!empty($config['password'])) {
@@ -28,8 +30,8 @@ class Redis extends Base
 
     public function set(string $name, $data, int $expire = 0): bool
     {
-        $data = serialize($data);
-        if ($this->redis->set($name, $data)) {
+        $name = $this->getName($name);
+        if ($this->redis->set($name, serialize($data))) {
             return ($expire > 0) ? $this->redis->expire($name, $expire) : true;
         }
         return false;
@@ -37,22 +39,43 @@ class Redis extends Base
 
     public function get(string $name, $default = null)
     {
+        $name = $this->getName($name);
         $data = $this->redis->get($name);
         return is_string($data) ? unserialize($data) : $data;
     }
 
     public function del(string $name): bool
     {
+        $name = $this->getName($name);
         return $this->redis->delete($name);
     }
 
     public function has(string $name): bool
     {
+        $name = $this->getName($name);
         return (bool)$this->redis->get($name);
     }
 
-    public function flush(string $type = ''): bool
+    public function flush(string $prefix = '[app]'): bool
     {
-        return $this->redis->flushall();
+        if ($prefix == '[all]') {
+            return $this->redis->flushall();
+        }
+        if ($prefix == '[app]' || empty($prefix)) {
+            $prefix = APP_NAME . '@cache/';
+        } else {
+            $prefix = $this->getName($prefix);
+        }
+        $keys = $this->redis->keys($prefix . '*');
+        foreach ($keys as $key) {
+            $this->redis->delete($key);
+        }
+        return true;
+    }
+
+    private function getName(string $name): string
+    {
+        [$app, $name] = pre_split($name, APP_NAME, '@');
+        return rtrim($app . '@cache/' . $name, '*');
     }
 }

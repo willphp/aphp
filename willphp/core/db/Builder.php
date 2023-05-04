@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace willphp\core\db;
 
+use willphp\core\Arr;
 use willphp\core\Single;
 
 class Builder
@@ -139,7 +140,7 @@ class Builder
         $insertFields = $values = [];
         foreach ($dataSet as $data) {
             if (is_array($fields)) {
-                $data = array_filter_key($data, $fields, true);
+                $data = Arr::keyFilter($data, $fields, true);
             }
             if (empty($insertFields)) {
                 $insertFields = array_keys($data);
@@ -198,6 +199,7 @@ class Builder
                     $result[$item] = $item . $exp[$k] . floatval($val[1]);
                 }
             } elseif (is_scalar($val)) {
+                $val = strval($val);
                 if (str_starts_with($val, ':') && $this->query->isBind(substr($val, 1))) {
                     $result[$item] = $val;
                 } else {

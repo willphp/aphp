@@ -1,5 +1,13 @@
 <?php
-
+/*----------------------------------------------------------------
+ | Software: [WillPHP framework]
+ | Site: 113344.com
+ |----------------------------------------------------------------
+ | Author: 无念 <24203741@qq.com>
+ | WeChat: www113344
+ | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
+ |---------------------------------------------------------------*/
+declare(strict_types=1);
 namespace extend\captcha;
 /**
  * 验证码
@@ -40,9 +48,9 @@ class Captcha
         return true;
     }
 
-    public function get()
+    public function get(): string
     {
-        return session('captcha');
+        return session_flash('captcha');
     }
 
     private function createCode(): void
@@ -52,7 +60,7 @@ class Captcha
             $code .= $this->codeStr [mt_rand(0, strlen($this->codeStr) - 1)];
         }
         $this->code = strtoupper($code);
-        session('captcha', $this->code);
+        session_flash('captcha', $this->code);
     }
 
     private function create(): void
@@ -60,6 +68,7 @@ class Captcha
         if (!$this->checkGD()) {
             return;
         }
+        $this->createCode();
         $w = $this->width;
         $h = $this->height;
         $bgColor = $this->bgColor;
@@ -73,11 +82,11 @@ class Captcha
         imagefill($img, 0, 0, $bgColor);
         $this->img = $img;
         $this->createLine();
-        $this->createFont();
-        $this->createPix();
+        $fontColor = $this->createFont();
+        $this->createPix($fontColor);
     }
 
-    private function createLine()
+    private function createLine(): void
     {
         $w = $this->width;
         $h = $this->height;
@@ -100,9 +109,8 @@ class Captcha
         }
     }
 
-    private function createFont()
+    private function createFont(): int
     {
-        $this->createCode();
         $fontColor = '';
         $color = $this->fontColor;
         if (!empty($color)) {
@@ -127,19 +135,18 @@ class Captcha
                 $this->img,
                 $this->fontSize,
                 mt_rand(-30, 30),
-                $x * $i + mt_rand(6, 10),
-                mt_rand($this->height / 1.3, $this->height - 5),
+                intval($x * $i + mt_rand(6, 10)),
+                mt_rand(intval($this->height / 1.3), $this->height - 5),
                 $fontColor,
                 $this->font,
-                $this->code [$i]
+                $this->code[$i]
             );
         }
-        $this->fontColor = $fontColor;
+        return (int) $fontColor;
     }
 
-    private function createPix()
+    private function createPix(int $pix_color): void
     {
-        $pix_color = $this->fontColor;
         for ($i = 0; $i < 50; $i++) {
             imagesetpixel(
                 $this->img,

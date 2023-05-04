@@ -38,11 +38,11 @@
             <div class="error-page-head">
                 <a href="http://www.113344.com" title="willphp官网" target="_blank" rel="noopenner noreferrer">WillPHP框架</a>
             </div>
-            <h3><strong>:(</strong><?php echo $err['type']; ?></h3>
+            <h3><strong>:(</strong><?php echo $error['type']; ?></h3>
             <div class="error-page-body">
-                <p>[<?php echo $err['code']; ?>]Error in <a href="javascript:;" class="blue" title="<?php echo $err['file']; ?>"><?php echo basename($err['file']); ?></a>
-                    line <span class="blue"><?php echo $err['line']; ?></span>:</p>
-                <h4><?php echo $err['error']; ?></h4>
+                <p>[<?php echo $error['code']; ?>]Error in <a href="javascript:;" class="blue" title="<?php echo $error['file']; ?>"><?php echo basename($error['file']); ?></a>
+                    line <span class="blue"><?php echo $error['line']; ?></span>:</p>
+                <h4><?php echo $error['error']; ?></h4>
             </div>
             <div class="error-page-foot">
                 <a href="<?php echo __URL__; ?>" class="green">返回首页</a>

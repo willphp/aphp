@@ -10,28 +10,25 @@
 declare(strict_types=1);
 
 namespace willphp\core;
-
-use Exception;
-use ReflectionException;
 use ReflectionMethod;
 
 class Route
 {
     use Single;
 
-    private string $controller; //当前控制器
-    private string $action; //当前方法
-    private array $rule; //路由规则
-    private string $uri; //当前uri路径
-    private array $route; //路由信息
-    private string $path; //路由路径
-    private int $counter = 0; //fn计数器
+    protected string $controller;
+    protected string $action;
+    protected array $rule;
+    protected string $uri;
+    protected array $route;
+    protected string $path;
+    protected int $counter;
 
     private function __construct()
     {
-        $this->controller = get_config('route.default_controller', 'index');
-        $this->action = get_config('route.default_action', 'index');
-        $this->rule = get_cache('__Route__', fn() => $this->parseRule());
+        $this->controller = Config::init()->get('route.default_controller', 'index');
+        $this->action = Config::init()->get('route.default_action', 'index');
+        $this->rule = Cache::make('__Route__', fn() => $this->ruleParse());
         $this->uri = $this->getUri();
         $this->route = $this->parseRoute($this->uri, $_GET);
         $this->controller = $this->route['controller'];
@@ -39,100 +36,80 @@ class Route
         $this->path = $this->route['path'];
     }
 
-    private function getViewCache()
+    protected function error(int $code, array $errs = [])
     {
-        if (IS_GET && get_config('view.cache', false)) {
-            return Cache::driver()->get('view.' . md5($this->path));
-        }
-        return false;
+        Response::halt('', $code, $errs);
     }
 
     public function dispatch()
     {
-        $viewCache = $this->getViewCache();
-        if ($viewCache) {
-            return $viewCache;
+        if (IS_GET && Config::init()->get('view.cache', false) && $cache = Cache::get('view/' . md5($this->path))) {
+            return $cache;
         }
-        $module = APP_NAME;
-        $route = $this->getRoute();
-        $controller = name_camel($route['controller']);
-        $class = 'app\\' . $module . '\\controller\\' . $controller;
-        $action = $route['action'];
-        $params = $route['params'];
-        $path = $route['controller'] . '/' . $route['action'];
+        $class = 'app\\' . APP_NAME . '\\controller\\' . name_camel($this->controller);
+        $action = $this->action;
+        $params = $this->route['params'];
+        $errs = ['path' => $this->controller . '/' . $this->action];
         if (str_starts_with($action, '_')) {
-            Response::halt('', 405, ['path' => $path]);
+            $this->error(405, $errs);
         }
         if (!method_exists($class, $action)) {
-            if (IS_GET && View::init()->view_check() !== false) {
-                return view();
+            if (IS_GET && View::init()->getFile()) {
+                return View::init()->make();
             }
-            Response::halt('', 404, ['path' => $path]);
+            $this->error(404, $errs);
         }
+        Middleware::init()->execute('framework.controller_start', ['path' => $this->path]);
         $class = App::make($class);
-        try {
-            $class_method = new ReflectionMethod($class, $action);
-            if (!$class_method->isPublic()) {
-                Response::halt('', 405, ['path' => $path]);
-            }
-            $method_args = $class_method->getParameters();
-            $isReq = false;
-            $binds = $extend = [];
-            foreach ($method_args as $arg) {
-                $arg_name = $arg->getName();
-                if ($arg_name == 'req') {
-                    $binds['req'] = [];
-                    $isReq = true;
-                    continue;
-                }
-                $type = $arg->getType();
-                if (isset($params[$arg_name])) {
-                    if (!is_null($type)) {
-                        settype($params[$arg_name], $type->getName());
-                    }
-                    $binds[$arg_name] = $params[$arg_name];
-                } elseif (!is_null($type) && !$type->isBuiltin()) {
-                    $binds[$arg_name] = App::make($type->getName());
-                } elseif ($arg->isDefaultValueAvailable()) {
-                    $binds[$arg_name] = $extend[$arg_name] = $arg->getDefaultValue();
-                } elseif (isset($_POST[$arg_name])) {
-                    $binds[$arg_name] = $_POST[$arg_name];
-                } else {
-                    Response::halt('', 416, ['path' => $path, 'param' => $arg_name]);
-                }
-            }
-            Request::init()->setGet(array_merge($params, $extend));
-            Middleware::init()->web('controller_start');
-            if (IS_POST) {
-                Request::init()->csrf_check();
-            }
-            Middleware::init()->ctrlExec($class);
-            if ($isReq) {
-                $binds['req'] = $this->getReq();
-            }
-            return $class_method->invokeArgs($class, $binds);
-        } catch (ReflectionException $exception) {
-            throw new Exception($exception->getMessage());
+        $classMethod = new ReflectionMethod($class, $action);
+        if (!$classMethod->isPublic()) {
+            $this->error(405, $errs);
         }
+        $binds = $extend = [];
+        $isReq = false;
+        $methodArgs = $classMethod->getParameters();
+        foreach ($methodArgs as $arg) {
+            $argName = $arg->getName();
+            if ($argName == 'req') {
+                $isReq = true;
+                $binds['req'] = [];
+                continue;
+            }
+            $argType = $arg->getType();
+            if (isset($params[$argName])) {
+                if (!is_null($argType)) {
+                    settype($params[$argName], $argType->getName());
+                }
+                $binds[$argName] = $params[$argName];
+            } elseif (!is_null($argType) && !$argType->isBuiltin()) {
+                $binds[$argName] = App::make($argType->getName());
+            } elseif ($arg->isDefaultValueAvailable()) {
+                $binds[$argName] = $extend[$argName] = $arg->getDefaultValue();
+            } elseif (isset($_POST[$argName])) {
+                $binds[$argName] = $_POST[$argName];
+            } else {
+                $errs['param'] = $argName;
+                $this->error(416, $errs);
+            }
+        }
+        Request::init()->setGet(array_merge($params, $extend));
+        if (IS_POST && Config::init()->get('view.csrf_check', false)) {
+            Request::init()->csrfCheck();
+        }
+        Middleware::init()->controller($class);
+        if ($isReq) {
+            $binds['req'] = $this->getReq();
+        }
+        return $classMethod->invokeArgs($class, $binds);
     }
 
     private function getReq(): array
     {
         $req = Request::init()->getRequest();
-        if (get_config('filter.filter_req', false)) {
-            $req = Filter::init()->input($req);
+        if (Config::init()->get('filter.filter_req', false)) {
+            Filter::init()->input($req);
         }
         return $req;
-    }
-
-    public function getRoute(string $route = ''): array
-    {
-        return empty($route) ? $this->route : $this->parseRoute($route);
-    }
-
-    public function getPath(string $route = ''): string
-    {
-        return empty($route) ? $this->path : $this->parseRoute($route, [], true);
     }
 
     public function getController(): string
@@ -145,66 +122,14 @@ class Route
         return $this->action;
     }
 
-    protected function getUri(): string
+    public function getRoute(string $route = ''): array
     {
-        $uri = $this->controller . '/' . $this->action;
-        $get_var = get_config('route.get_var', 's');
-        $path_info = $_GET[$get_var] ?? $_SERVER['PATH_INFO'] ?? '';
-        if (isset($_GET[$get_var])) unset($_GET[$get_var]);
-        if (!empty($path_info)) {
-            $path_info = preg_replace('/\/+/', '/', trim($_SERVER['PATH_INFO'], '/'));
-            $check_regex = get_config('route.check_regex', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');
-            if (empty($check_regex) || preg_match($check_regex, $path_info)) {
-                $clear_suffix = get_config('route.clear_suffix', '.html');
-                $uri = !empty($clear_suffix) ? str_replace($clear_suffix, '', $path_info) : $path_info;
-            }
-        }
-        return $this->ruleReplace($uri, $this->rule['just']);
+        return empty($route) ? $this->route : $this->parseRoute($route);
     }
 
-    protected function ruleReplace(string $uri, array $rule): string
+    public function getPath(string $route = ''): string
     {
-        if (isset($rule[$uri])) return $rule[$uri];
-        foreach ($rule as $k => $v) {
-            if (preg_match('#^' . $k . '$#i', $uri)) {
-                if (str_contains($v, '$') && str_contains($k, '(')) {
-                    $v = preg_replace('#^' . $k . '$#i', $v, $uri);
-                }
-                return $v;
-            }
-        }
-        return $uri;
-    }
-
-    public function parseRule(): array
-    {
-        $file = ROOT_PATH . '/route/' . APP_NAME . '.php';
-        $rule = ['just' => [], 'flip' => []];
-        $route = file_exists($file) ? include $file : [];
-        if (empty($route)) {
-            return $rule;
-        }
-        $alias = get_config('route.alias', [':num' => '[0-9\-]+']);
-        $search = array_keys($alias);
-        $replace = array_values($alias);
-        foreach ($route as $k => $v) {
-            if (str_contains($k, ':')) {
-                $k = str_replace($search, $replace, $k);
-            }
-            $k = trim(strtolower($k), '/');
-            $rule['just'][$k] = trim(strtolower($v), '/');
-        }
-        $flip = array_flip($rule['just']);
-        foreach ($flip as $k => $v) {
-            if (preg_match_all('/\(.*?\)/i', $v, $res)) {
-                $pattern = array_map(fn(int $n): string => '/\$\{' . $n . '\}/i', range(1, count($res[0])));
-                $k = preg_replace($pattern, $res[0], $k);
-                $this->counter = 1;
-                $v = preg_replace_callback('/\(.*?\)/i', fn($match) => '${' . $this->counter++ . '}', $v);
-            }
-            $rule['flip'][$k] = $v;
-        }
-        return $rule;
+        return empty($route) ? $this->path : $this->parseRoute($route, [], true);
     }
 
     protected function parseRoute(string $uri, array $params = [], bool $getPath = false)
@@ -238,17 +163,90 @@ class Route
             ksort($route['params']);
             $route['path'] .= '?' . http_build_query($route['params']);
         }
-        array_value_case($route);
+        Arr::valueCase($route);
         return $getPath ? $route['path'] : $route;
+    }
+
+    protected function ruleParse(): array
+    {
+        $file = ROOT_PATH . '/route/' . APP_NAME . '.php';
+        $rule = ['just' => [], 'flip' => []];
+        $route = file_exists($file) ? include $file : [];
+        if (empty($route)) {
+            return $rule;
+        }
+        $alias = Config::init()->get('route.alias', [':num' => '[0-9\-]+']);
+        $aliasKey = array_keys($alias);
+        $aliasVal = array_values($alias);
+        foreach ($route as $k => $v) {
+            if (str_contains($k, ':')) {
+                $k = str_replace($aliasKey, $aliasVal, $k);
+            }
+            $k = trim(strtolower($k), '/');
+            $rule['just'][$k] = trim(strtolower($v), '/');
+        }
+        $flip = array_flip($rule['just']);
+        foreach ($flip as $k => $v) {
+            if (preg_match_all('/\(.*?\)/i', $v, $res)) {
+                $pattern = array_map(fn(int $n): string => '/\$\{' . $n . '\}/i', range(1, count($res[0])));
+                $k = preg_replace($pattern, $res[0], $k);
+                $this->counter = 1;
+                $v = preg_replace_callback('/\(.*?\)/i', fn($match) => '${' . $this->counter++ . '}', $v);
+            }
+            $rule['flip'][$k] = $v;
+        }
+        return $rule;
+    }
+
+    protected function ruleReplace(string $uri, array $rule): string
+    {
+        if (isset($rule[$uri])) {
+            return $rule[$uri];
+        }
+        foreach ($rule as $k => $v) {
+            if (preg_match('#^' . $k . '$#i', $uri)) {
+                if (str_contains($v, '$') && str_contains($k, '(')) {
+                    $v = preg_replace('#^' . $k . '$#i', $v, $uri);
+                }
+                return $v;
+            }
+        }
+        return $uri;
+    }
+
+    protected function getUri(): string
+    {
+        $uri = $this->controller . '/' . $this->action;
+        $pathinfo = trim($_SERVER['PATH_INFO'], '/');
+        if (!empty($pathinfo)) {
+            $pathinfo = preg_replace('/\/+/', '/', $pathinfo);
+            $regex = Config::init()->get('route.check_regex', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');
+            if (!empty($regex) && !preg_match($regex, $pathinfo)) {
+                exit('非法请求');
+            }
+            $suffix = Config::init()->get('route.clear_suffix', '.html');
+            $uri = !empty($suffix) ? str_replace($suffix, '', $pathinfo) : $pathinfo;
+        }
+        return $this->ruleReplace($uri, $this->rule['just']);
     }
 
     public function buildUrl(string $route = '', array $params = [], string $suffix = '*'): string
     {
-        if (in_array($route, ['', '@', '@/', '/@'])) return __URL__;
-        if (false !== filter_var($route, FILTER_VALIDATE_URL)) return $route;
-        if ($route == '[back]') return 'javascript:history.back(-1);';
-        if ($route == '[history]') return $_SERVER['HTTP_REFERER'] ?? 'javascript:history.back(-1);';
-        if ($suffix == '*') $suffix = get_config('route.url_suffix', '.html');
+        if (in_array($route, ['', '@', '@/', '/@'])) {
+            return __URL__;
+        }
+        if (false !== filter_var($route, FILTER_VALIDATE_URL)) {
+            return $route;
+        }
+        if ($route == '[back]') {
+            return 'javascript:history.back(-1);';
+        }
+        if ($route == '[history]') {
+            return $_SERVER['HTTP_REFERER'] ?? 'javascript:history.back(-1);';
+        }
+        if ($suffix == '*') {
+            $suffix = Config::init()->get('route.url_suffix', '.html');
+        }
         $args = [];
         if (str_contains($route, '?')) {
             [$route, $get] = explode('?', $route);
@@ -263,7 +261,7 @@ class Route
         }
         $params = array_merge($args, $params);
         if (!empty($params)) {
-            $get_empty = get_config('route.get_filter_empty', true);
+            $get_empty = Config::init()->get('route.get_filter_empty', true);
             if ($get_empty) {
                 $params = array_filter($params); //过滤空值和0
             }

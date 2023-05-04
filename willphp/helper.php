@@ -8,109 +8,36 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 /**
  * 支持php8新函数
  */
 if (!function_exists('str_contains')) {
-    function str_contains($haystack, $needle): bool
+    function str_contains(string $haystack, string $needle): bool
     {
         return $needle !== '' && mb_strpos($haystack, $needle) !== false;
     }
 }
 if (!function_exists('str_starts_with')) {
-    function str_starts_with($haystack, $needle): bool
+    function str_starts_with(string $haystack, string $needle): bool
     {
-        return (string)$needle !== '' && strncmp($haystack, $needle, strlen($needle)) === 0;
+        return $needle !== '' && strncmp($haystack, $needle, strlen($needle)) === 0;
     }
 }
 if (!function_exists('str_ends_with')) {
-    function str_ends_with($haystack, $needle): bool
+    function str_ends_with(string $haystack, string $needle): bool
     {
-        return $needle !== '' && substr($haystack, -strlen($needle)) === (string)$needle;
-    }
-}
-/**
- * 创建目录
- */
-function dir_create(string $dir, int $auth = 0755): bool
-{
-    return !empty($dir) && (is_dir($dir) or mkdir($dir, $auth, true));
-}
-
-/**
- * 删除目录
- */
-function dir_del(string $dir, bool $delRoot = false): bool
-{
-    if (!is_dir($dir)) return true;
-    $list = array_diff(scandir($dir), ['.', '..']);
-    foreach ($list as $file) {
-        is_dir("$dir/$file") ? dir_del("$dir/$file") : unlink("$dir/$file");
-    }
-    return !$delRoot || rmdir($dir);
-}
-
-/**
- * 获取最后修改时间
- */
-function get_mtime(string $res): int
-{
-    if (is_dir($res)) {
-        $files = array_diff(scandir($res), ['.', '..']);
-        if (!empty($files)) {
-            $mtime = array_map(fn($v)=>filemtime($res.'/'.$v), $files);
-            return max($mtime);
-        }
-    } elseif (is_file($res)) {
-        return filemtime($res);
-    }
-    return 0;
-}
-
-/**
- * 批量获取最后修改时间
- */
-function get_mtime_batch(array $res): int
-{
-    if (!empty($res)) {
-        $mtime = array_map(fn($v)=>get_mtime($v), $res);
-        return max($mtime);
-    }
-    return 0;
-}
-
-/**
- * 数组键名大小写转换
- */
-function array_key_case(array &$array, int $case = CASE_LOWER): void
-{
-    $array = array_change_key_case($array, $case);
-    foreach ($array as $key => $value) {
-        if (is_array($value)) array_key_case($array[$key], $case);
+        return $needle !== '' && substr($haystack, -strlen($needle)) === $needle;
     }
 }
 
 /**
- * 数组值大小写转换
+ * 拆分pre.name
  */
-function array_value_case(array &$array, int $case = CASE_LOWER): void
+function pre_split(string $name, string $preDefault, string $needle = '.'): array
 {
-    foreach ($array as $key => $value) {
-        if (is_array($value)) {
-            array_value_case($array[$key], $case);
-            continue;
-        }
-        $array[$key] = ($case == CASE_LOWER) ? strtolower($value) : strtoupper($value);
-    }
-}
-
-/**
- * 数组键名过滤
- */
-function array_filter_key(array $array, array $keys, bool $in = false): array
-{
-    $func = fn($k) => $in ? in_array($k, $keys) : !in_array($k, $keys);
-    return array_filter($array, $func, ARRAY_FILTER_USE_KEY);
+    $name = trim($name, $needle);
+    return str_contains($name, $needle) ? explode($needle, $name, 2) : [$preDefault, $name];
 }
 
 /**
@@ -127,47 +54,6 @@ function name_snake(string $name): string
 function name_camel(string $name): string
 {
     return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
-}
-
-/**
- * 点语法获取数组值
- */
-function array_dot_get(array $array, string $key, $default = '')
-{
-    $keyArr = explode('.', $key);
-    $value = $array;
-    foreach ($keyArr as $k) {
-        $value = $value[$k] ?? $default;
-    }
-    return $value;
-}
-
-/**
- * 点语法设置数组值
- */
-function array_dot_set(array &$array, string $key, $value = '')
-{
-    $temp = &$array;
-    $keyArr = explode('.', $key);
-    foreach ($keyArr as $k) {
-        $temp[$k] ??= [];
-        $temp = &$temp[$k];
-    }
-    return $temp = $value;
-}
-
-/**
- * 点语法检测键是否存在
- */
-function array_dot_has(array $array, string $key): bool
-{
-    $temp = $array;
-    $keyArr = explode('.', $key);
-    foreach ($keyArr as $k) {
-        if (!isset($temp[$k])) return false;
-        $temp = $temp[$k];
-    }
-    return true;
 }
 
 /**
@@ -202,54 +88,29 @@ function value_batch_func($value, $batchFunc)
 /**
  * 检测是否跳过
  */
-function is_continue(int $at, array $data, string $field): bool
+function is_continue(int $status, array $data, string $field): bool
 {
-    if ($at == AT_NOT_NULL && empty($data[$field])) {
+    if ($status == AT_NOT_NULL && empty($data[$field])) {
         return true;
     }
-    if ($at == AT_NULL && !empty($data[$field])) {
+    if ($status == AT_NULL && !empty($data[$field])) {
         return true;
     }
-    if ($at == AT_SET && !isset($data[$field])) {
+    if ($status == AT_SET && !isset($data[$field])) {
         return true;
     }
-    if ($at == AT_NOT_SET && isset($data[$field])) {
+    if ($status == AT_NOT_SET && isset($data[$field])) {
         return true;
     }
     return false;
 }
 
 /**
- * 拆分type.name
+ * 获取类单例
  */
-function split_name(string $name, string $type, string $needle = '.'): array
+function app(string $class): object
 {
-    $name = trim($name, $needle);
-    return str_contains($name, $needle) ? explode($needle, $name) : [$type, $name];
-}
-
-/**
- * 快速获取配置
- */
-function get_config(string $name = '', $default = '')
-{
-    return \willphp\core\Config::init()->get($name, $default);
-}
-
-/**
- * 快速设置配置
- */
-function set_config(string $name = '', $value = '')
-{
-    return \willphp\core\Config::init()->set($name, $value);
-}
-
-/**
- * 更新配置缓存
- */
-function update_config()
-{
-    return \willphp\core\Config::init()->update();
+    return \willphp\core\App::make($class);
 }
 
 /**
@@ -278,19 +139,11 @@ function site(string $name = '', $value = null)
 }
 
 /**
- * 获取缓存(不存在则写入)
- */
-function get_cache(string $name, ?Closure $closure = null, int $expire = 0)
-{
-    return \willphp\core\Cache::driver()->getCache($name, $closure, $expire);
-}
-
-/**
  * 缓存获取和设置
  */
 function cache(?string $name = '', $value = '', int $expire = 0)
 {
-    $cache = \willphp\core\Cache::driver();
+    $cache = \willphp\core\Cache::init();
     if ('' === $name) {
         return $cache;
     }
@@ -307,11 +160,11 @@ function cache(?string $name = '', $value = '', int $expire = 0)
 }
 
 /**
- * 获取类单例
+ * 清除指定缓存
  */
-function app(string $class): object
+function cache_flush(string $prefix = '[app]'): bool
 {
-    return \willphp\core\App::make($class);
+    return \willphp\core\Cache::flush($prefix);
 }
 
 /**
@@ -327,7 +180,7 @@ function db(string $table = '', $config = []): object
  */
 function model(string $name = ''): object
 {
-    [$module, $name] = split_name($name, APP_NAME);
+    [$module, $name] = pre_split($name, APP_NAME);
     $class = '\\app\\' . $module . '\\model\\' . name_camel($name);
     return call_user_func([$class, 'init']);
 }
@@ -337,7 +190,7 @@ function model(string $name = ''): object
  */
 function widget(string $name): object
 {
-    [$module, $name] = split_name($name, APP_NAME);
+    [$module, $name] = pre_split($name, APP_NAME);
     $class = '\\app\\' . $module . '\\widget\\' . name_camel($name);
     return app($class);
 }
@@ -367,14 +220,6 @@ function input(string $name, $default = null, $batchFunc = [])
 }
 
 /**
- * 记录trace到调试栏
- */
-function trace($info = '', string $level = 'debug'): void
-{
-    \willphp\core\Debug::init()->trace($info, $level);
-}
-
-/**
  * 获取视图对象
  */
 function view(string $file = '', array $vars = []): object
@@ -383,11 +228,11 @@ function view(string $file = '', array $vars = []): object
 }
 
 /**
- * 获取视图并传值
+ * 视图传值
  */
 function view_with($vars, $value = ''): object
 {
-    return \willphp\core\View::init()->setFile()->with($vars, $value);
+    return \willphp\core\View::init()->setTpl()->with($vars, $value);
 }
 
 /**
@@ -403,32 +248,36 @@ function csrf_field(string $name = 'csrf_token'): string
  */
 function csrf_token(string $name = 'csrf_token'): string
 {
-    return session($name);
+    return \willphp\core\Request::init()->csrfCreate();
 }
+
+/**
+ * 记录trace到调试栏
+ */
+function trace($info = '', string $level = 'debug'): void
+{
+    \willphp\core\Debug::init()->trace($info, $level);
+}
+
 
 /**
  * 字符串加密
  */
-function encrypt(string $str, string $key = ''): string
+function encrypt(string $string, string $salt = ''): string
 {
-    return \willphp\core\Crypt::init()->encrypt($str, $key);
+    return \willphp\core\Crypt::init()->encrypt($string, $salt);
 }
 
 /**
  * 字符串解密
  */
-function decrypt(string $str, string $key = ''): string
+function decrypt(string $string, string $salt = ''): string
 {
-    return \willphp\core\Crypt::init()->decrypt($str, $key);
-}
-
-function halt(string $msg, int $code = 400, array $params = []): void
-{
-    \willphp\core\Response::halt($msg, $code, $params);
+    return \willphp\core\Crypt::init()->decrypt($string, $salt);
 }
 
 /**
- * Cookie设置和获取
+ * Cookie快捷函数
  */
 function cookie(?string $name = '', $value = '', int $expire = 0, string $path = null, string $domain = null)
 {
@@ -449,7 +298,7 @@ function cookie(?string $name = '', $value = '', int $expire = 0, string $path =
 }
 
 /**
- * Session设置和获取
+ * Session快捷函数 (用于保存登录信息)
  */
 function session(?string $name = '', $value = '')
 {
@@ -470,6 +319,91 @@ function session(?string $name = '', $value = '')
 }
 
 /**
+ * Session 闪存快捷函数 (用于Ajax设置临时数据，如验证码)
+ */
+function session_flash($name = '', $value = '')
+{
+    return \willphp\core\Session::init()->flash($name, $value);
+}
+
+/**
+ * 调试输出
+ */
+function dump(...$vars): void
+{
+    ob_start();
+    var_dump(...$vars);
+    $output = ob_get_clean();
+    $output = preg_replace('/]=>\n(\s+)/m', '] => ', $output);
+    if (PHP_SAPI == 'cli') {
+        $output = PHP_EOL . $output . PHP_EOL;
+    } elseif (!extension_loaded('xdebug')) {
+        $output = '<pre>' . htmlspecialchars($output, ENT_SUBSTITUTE) . '</pre>';
+    }
+    echo $output;
+}
+
+/**
+ * 输出并结束
+ */
+function dd(...$vars): void
+{
+    dump(...$vars);
+    exit();
+}
+
+/**
+ * 输出用户常量
+ */
+function dump_const(): void
+{
+    dump(get_defined_constants(true)['user']);
+}
+
+/**
+ * 清除xss脚本
+ */
+function remove_xss(string $val): string
+{
+    $val = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $val);
+    $search = 'abcdefghijklmnopqrstuvwxyz';
+    $search .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $search .= '1234567890!@#$%^&*()';
+    $search .= '~`";:?+/={}[]-_|\'\\';
+    for ($i = 0; $i < strlen($search); $i++) {
+        $val = preg_replace('/(&#[xX]0{0,8}' . dechex(ord($search[$i])) . ';?)/i', $search[$i], $val);
+        $val = preg_replace('/(�{0,8}' . ord($search[$i]) . ';?)/', $search[$i], $val);
+    }
+    $ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
+    $ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+    $ra = array_merge($ra1, $ra2);
+    $found = true;
+    while ($found == true) {
+        $val_before = $val;
+        for ($i = 0; $i < sizeof($ra); $i++) {
+            $pattern = '/';
+            for ($j = 0; $j < strlen($ra[$i]); $j++) {
+                if ($j > 0) {
+                    $pattern .= '(';
+                    $pattern .= '(&#[xX]0{0,8}([9ab]);)';
+                    $pattern .= '|';
+                    $pattern .= '|(�{0,8}([9|10|13]);)';
+                    $pattern .= ')*';
+                }
+                $pattern .= $ra[$i][$j];
+            }
+            $pattern .= '/i';
+            $replacement = substr($ra[$i], 0, 2) . '<x>' . substr($ra[$i], 2);
+            $val = preg_replace($pattern, $replacement, $val);
+            if ($val_before == $val) {
+                $found = false;
+            }
+        }
+    }
+    return $val;
+}
+
+/**
  * 清理html代码
  */
 function clear_html(string $string): string
@@ -477,4 +411,85 @@ function clear_html(string $string): string
     $string = strip_tags($string);
     $string = preg_replace(['/\t/', '/\r\n/', '/\r/', '/\n/'], '', $string);
     return trim($string);
+}
+
+/**
+ * 字符串截取
+ */
+function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8'): string
+{
+    if (function_exists("mb_substr")) {
+        $slice = mb_substr($str, $start, $length, $charset);
+    } elseif (function_exists('iconv_substr')) {
+        $slice = iconv_substr($str, $start, $length, $charset);
+        if (false === $slice) {
+            $slice = '';
+        }
+    } else {
+        $re['utf-8'] = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+        $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
+        $re['gbk'] = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+        $re['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+        preg_match_all($re[$charset], $str, $match);
+        $slice = join('', array_slice($match[0], $start, $length));
+    }
+    return $suffix ? $slice . '...' : $slice;
+}
+
+/**
+ * 获取ip
+ */
+function get_ip(int $type = 0)
+{
+    $type = $type ? 1 : 0;
+    static $ip = null;
+    if (null !== $ip) return $ip[$type];
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $pos = array_search('unknown', $arr);
+        if (false !== $pos) unset($arr[$pos]);
+        $ip = trim($arr[0]);
+    } elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $long = ip2long((string)$ip);
+    $ip = $long ? [$ip, $long] : ['0.0.0.0', 0];
+    return $ip[$type];
+}
+
+/**
+ * 格式时间
+ */
+function get_time_ago(int $time): string
+{
+    $etime = time() - $time;
+    if ($etime < 1) {
+        return '刚刚';
+    }
+    $interval = [31536000 => '年前', 2592000 => '个月前', 604800=>'星期前', 86400=>'天前', 3600=>'小时前', 60=>'分钟前', 1=>'秒前'];
+    foreach ($interval as $k => $v) {
+        $ok = floor($etime / $k);
+        if ($ok != 0) {
+            return $ok.$v;
+        }
+    }
+    return '刚刚';
+}
+
+/**
+ * 字节大小转换
+ */
+function size_format(int $size): string
+{
+    return \willphp\core\Dir::sizeFormat($size);
+}
+
+/**
+ * 获取thumb
+ */
+function get_thumb(string $image, int $width, int $height, int $thumbType = 6): string
+{
+    return \willphp\core\Thumb::init()->getThumb($image, $width, $height, $thumbType);
 }

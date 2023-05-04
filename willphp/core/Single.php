@@ -12,7 +12,7 @@ declare(strict_types=1);
 namespace willphp\core;
 trait Single
 {
-    protected static ?object $single = null;
+    protected static object $single;
 
     private function __construct()
     {
@@ -24,11 +24,11 @@ trait Single
 
     public static function init(): object
     {
+        static $class = [];
         $args = func_get_args();
         if (empty($args)) {
             return static::$single ??= new static();
         }
-        static $class = [];
         $sign = md5(serialize($args));
         $class[$sign] ??= new static(...$args);
         return static::$single = $class[$sign];

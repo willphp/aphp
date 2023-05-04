@@ -12,31 +12,39 @@ declare(strict_types=1);
 namespace willphp\core;
 abstract class Widget
 {
-    protected string $table;
+    protected string $tagName;
+    protected string $prefix;
     protected int $expire = 0;
+
+    public function __construct()
+    {
+        $path = explode('\\', get_class($this));
+        $class = name_snake(end($path));
+        if (!$this->tagName) {
+            $this->tagName = $class;
+        }
+        $this->prefix = $path[1] . '@widget/' . $this->tagName . '/' . $class;
+    }
 
     abstract public function set($id = '', array $options = []);
 
     public function get($id = '', array $options = [])
     {
-        $signId = $this->getSignId($id, $options);
-        return get_cache($signId, fn() => $this->set($id, $options), $this->expire);
+        $name = $this->getName($id, $options);
+        return Cache::make($name, fn() => $this->set($id, $options), $this->expire);
     }
 
     public function update(): bool
     {
-        $type = !empty($this->table) ? 'widget/' . $this->table : 'widget';
-        return Cache::driver()->flush($type);
+        return Cache::flush($this->prefix);
     }
 
-    protected function getSignId($id = '', array $options = []): string
+    public function getName($id = '', array $options = []): string
     {
-        $sign = basename(strtr(get_class($this), '\\', '/')) . $id;
         if (!empty($options)) {
             ksort($options);
-            $sign .= http_build_query($options);
+            $id .= http_build_query($options);
         }
-        $type = !empty($this->table) ? 'widget/' . $this->table : 'widget';
-        return $type . '.' . md5($sign);
+        return $this->prefix . '/' . md5(strval($id));
     }
 }

@@ -8,23 +8,24 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
-    //全局中间件
-    'global' => [
-        //\middleware\Boot::class, //框架启动
-    ],
-    //控制器中间件(可自行定义)
+    //控制器中间件
     'controller' => [
         'auth' => [
             \middleware\controller\Auth::class, //权限检测
         ],
         'test' => [
-            \middleware\controller\Test::class, //测试中间件
+            \middleware\controller\Test::class, //测试
+            \middleware\controller\Run::class, //运行
         ],
     ],
-    //应用中间件(框架内置)
-    'web' => [
-        'database_query' => [],
-        'database_execute' => [],
-        'controller_start' => [],
+    //全局中间件
+    'common' => [
+        //\middleware\Boot::class, //框架启动
+    ],
+    //框架中间件
+    'framework' => [
+        'controller_start' => [], //控制器开始
+        'database_query' => [], //数据库查询sql
+        'database_execute' => [], //数据库执行sql
     ],
 ];

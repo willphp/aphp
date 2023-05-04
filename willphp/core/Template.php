@@ -15,7 +15,7 @@ class Template
 {
     public static function compile(string $content): string
     {
-        $config = get_config('template', []);
+        $config = Config::init()->get('template', []);
         $b_limit = $config['{'] ?? '{';
         $e_limit = $config['}'] ?? '}';
         $regex_literal = str_replace(['{', '}'], [$b_limit, $e_limit], $config['regex_literal']);

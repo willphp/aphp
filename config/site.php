@@ -8,7 +8,7 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
-    'theme' => 'default', //默认主题
+    'theme' => 'default',
     'site_title' => '一鱼PHP框架',
     'site_kw' => '一鱼PHP框架,willphp,PHP框架,MVC框架,php博客',
     'site_desc' => '一个简单易用的轻量级php框架',

@@ -14,7 +14,7 @@ class Cookie
 {
     use Single;
 
-    private array $items;
+    protected array $items;
     private string $prefix;
     private string $path;
     private string $domain;
@@ -22,13 +22,12 @@ class Cookie
     private function __construct()
     {
         $this->items = $_COOKIE;
-        $config = get_config('cookie', []);
-        $this->prefix = $config['prefix'] ?? 'willphp##';
-        $this->path = $config['path'] ?? '/';
-        $this->domain = $config['domain'] ?? '';
+        $this->prefix = APP_NAME . '##';
+        $this->path = Config::init()->get('cookie.path', '/');
+        $this->domain = Config::init()->get('cookie.domain', '');
     }
 
-    public function set(string $name, $value, int $expire = 0, string $path = null, string $domain = null): void
+    public function set(string $name, $value, int $expire = 0, ?string $path = null, ?string $domain = null): void
     {
         $name = $this->prefix . $name;
         $value = Crypt::init()->encrypt(strval($value));
@@ -56,20 +55,6 @@ class Cookie
         return isset($this->items[$this->prefix . $name]);
     }
 
-    public function all(): array
-    {
-        $data = [];
-        foreach ($this->items as $name => $value) {
-            if (str_starts_with($name, $this->prefix)) {
-                $name = substr($name, strlen($this->prefix));
-                $data[$name] = Crypt::init()->decrypt($value);
-            } else {
-                $data[$name] = $value;
-            }
-        }
-        return $data;
-    }
-
     public function del($name): bool
     {
         if (isset($this->items[$this->prefix . $name])) {
@@ -84,12 +69,25 @@ class Cookie
     public function flush(): bool
     {
         if (PHP_SAPI != 'cli') {
-            $keys = array_keys($this->items);
-            foreach ($keys as $key) {
-                setcookie($key, '', 1, '/');
+            $list = array_keys($this->items);
+            foreach ($list as $name) {
+                setcookie($name, '', 1, '/');
             }
         }
         $this->items = [];
         return true;
+    }
+
+    public function all(): array
+    {
+        $data = [];
+        foreach ($this->items as $name => $value) {
+            if (str_starts_with($name, $this->prefix)) {
+                $name = substr($name, strlen($this->prefix));
+                $value = Crypt::init()->decrypt($value);
+            }
+            $data[$name] = $value;
+        }
+        return $data;
     }
 }

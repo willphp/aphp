@@ -10,22 +10,18 @@
 declare(strict_types=1);
 
 namespace willphp\core\session;
-class File implements ISession
-{
-    use Base;
 
-    protected static ?object $single = null;
+use willphp\core\Dir;
+
+class File extends Base
+{
     protected string $dir;
     protected string $file;
 
-    public function connect(): void
+    public function connect()
     {
-        $dir = RUNTIME_PATH . '/' . get_config('session.file.path', 'session');
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-        $this->dir = $dir;
-        $this->file = $this->dir . '/' . $this->sessionId . '.php';
+        $this->dir = Dir::make(ROOT_PATH . '/runtime/session', 0777);
+        $this->file = $this->dir . '/' . $this->id . '.php';
     }
 
     public function read(): array
@@ -35,10 +31,10 @@ class File implements ISession
 
     public function write()
     {
-        return file_put_contents($this->file, json_encode($this->items), LOCK_EX);
+        file_put_contents($this->file, json_encode($this->items), LOCK_EX);
     }
 
-    public function gc(): void
+    public function gc()
     {
         $files = glob($this->dir . '/*.php');
         foreach ($files as $file) {

@@ -8,7 +8,6 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
-
 namespace willphp\core;
 class Session
 {
@@ -17,7 +16,7 @@ class Session
     public static function init(): object
     {
         if (is_null(static::$link)) {
-            $driver = get_config('session.driver', 'file');
+            $driver = Config::init()->get('session.driver', 'file');
             $class = '\\willphp\\core\\session\\' . ucfirst($driver);
             static::$link = call_user_func([$class, 'init']);
         }

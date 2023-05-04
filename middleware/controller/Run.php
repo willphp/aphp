@@ -9,14 +9,16 @@
  |---------------------------------------------------------------*/
 declare(strict_types=1);
 
-namespace willphp\core\session;
-interface ISession
+namespace middleware\controller;
+
+use Closure;
+
+class Run
 {
-    public function connect();
-
-    public function read();
-
-    public function gc();
-
-    public function flush();
+    public function run(Closure $next, array $params = []): void
+    {
+        trace('开始运行');
+        $next();
+        trace('结束运行');
+    }
 }

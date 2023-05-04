@@ -28,11 +28,11 @@ class Page
 
     private function __construct(int $totalRow, int $pageSize = 0, int $showNum = 0)
     {
-        $this->getVar = get_config('page.page_var', 'p'); //页码$_GET变量
-        $this->html = get_config('page.page_html', $this->html);
+        $this->getVar = Config::init()->get('page.page_var', 'p'); //页码$_GET变量
+        $this->html = Config::init()->get('page.page_html', $this->html);
         $this->totalRow = $totalRow; //总记录数
-        $this->pageSize = $pageSize ?: get_config('page.page_size', 10); //每页显示
-        $this->showNum = $showNum ?: get_config('page.show_num', 5); //显示页码数
+        $this->pageSize = $pageSize ?: Config::init()->get('page.page_size', 10); //每页显示
+        $this->showNum = $showNum ?: Config::init()->get('page.show_num', 5); //显示页码数
         $this->totalPage = (int)ceil($this->totalRow / $this->pageSize); //总页数
         $this->currentNum = $this->getCurrentNum(); //当前页码
         $this->offset = $this->pageSize * ($this->currentNum - 1); //limit开始数
@@ -43,7 +43,7 @@ class Page
         return $this->getHtml();
     }
 
-    protected function getAttr(string $type = '')
+    public function getAttr(string $type = '')
     {
         $attr = [];
         $attr['count'] = $this->totalRow; //总记录数
@@ -57,12 +57,12 @@ class Page
         return $attr[$type] ?? 0;
     }
 
-    protected function getLimit(): string
+    public function getLimit(): string
     {
         return $this->offset . ',' . $this->pageSize;
     }
 
-    protected function getHtml(string $class = 'pagination cl', string $active = 'active'): string
+    public function getHtml(string $class = 'pagination cl', string $active = 'active'): string
     {
         $html = '';
         if ($this->totalPage > 0) {

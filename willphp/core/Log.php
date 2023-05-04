@@ -10,9 +10,6 @@
 declare(strict_types=1);
 
 namespace willphp\core;
-
-use Exception;
-
 class Log
 {
     use Single;
@@ -22,33 +19,23 @@ class Log
 
     private function __construct()
     {
-        $this->dir(RUNTIME_PATH . '/log');
+        $this->dir = Dir::make(RUNTIME_PATH . '/log', 0777);
     }
 
-    public function dir(string $dir): object
-    {
-        if (!dir_create($dir)) throw new Exception('日志目录创建失败或不可写');
-        $this->dir = $dir;
-        return $this;
-    }
-
-    public function record($message, $level = 'ERROR'): bool
+    public function record(string $message, string $level = 'ERROR'): void
     {
         $this->log[] = date('[ c ]') . $level . ':' . $message . PHP_EOL;
-        return true;
     }
 
-    public function write($message, $level = 'ERROR'): bool
+    public function write(string $message, string $level = 'ERROR'): bool
     {
-        $file = $this->dir . '/' . date('Y_m_d') . '.log';
-        return error_log(date('[ c ]') . $level . ':' . $message . PHP_EOL, 3, $file, null);
+        return error_log(date('[ c ]') . $level . ':' . $message . PHP_EOL, 3, $this->dir . '/' . date('Y_m_d') . '.log');
     }
 
     public function __destruct()
     {
         if (!empty($this->log)) {
-            $file = $this->dir . '/' . date('Y_m_d') . '.log';
-            error_log(implode('', $this->log), 3, $file, null);
+            error_log(implode('', $this->log), 3, $this->dir . '/' . date('Y_m_d') . '.log');
         }
     }
 }

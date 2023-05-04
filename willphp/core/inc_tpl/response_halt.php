@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>出错了!</title>
+    <title>跳转提示!</title>
     <style>
         body,code,dd,div,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,input,legend,li,ol,p,pre,td,textarea,th,ul{margin:0;padding:0}
         body{background:#f0f1f3;font-size:16px;font-family:Tahoma,Arial,sans-serif;color:#111}
@@ -36,20 +36,32 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="http://www.113344.com" title="willphp官网" target="_blank" rel="noopenner noreferrer">WillPHP框架</a>
+                <a href="http://www.113344.com" title="willphp官网" target="_blank" rel="noopenner noreferrer">一鱼PHP框架</a>
             </div>
             <h3><strong>:(</strong><?php echo $msg; ?></h3>
             <div class="error-page-body">
-                <p><span class="blue">可能原因:</span></p>
-                <p>页面错误或验证失败，请稍候重试。</p>
+                <p>页面自动 <a id="href" href="javascript:history.back(-1);">跳转</a> 等待时间： <b id="wait">5</b> 秒</p>
             </div>
             <div class="error-page-foot">
                 <a href="<?php echo __URL__; ?>" class="green">返回首页</a>
-                <a href="javascript:history.back(-1);" class="blue">返回上一页</a>
+                <a href="javascript:history.back(-1);" class="blue">确认</a>
             </div>
         </div>
         <div class="error-page-actions"></div>
     </div>
 </div>
+<script type="text/javascript">
+    (function () {
+        var wait = document.getElementById('wait'),
+            href = document.getElementById('href').href;
+        var interval = setInterval(function () {
+            var time = --wait.innerHTML;
+            if (time <= 0) {
+                location.href = href;
+                clearInterval(interval);
+            }
+        }, 1000);
+    })();
+</script>
 </body>
 </html>

@@ -10,16 +10,16 @@
 declare(strict_types=1);
 
 namespace willphp\core\session;
-class Redis implements ISession
-{
-    use Base;
 
-    protected static ?object $single = null;
-    private object $redis;
+use willphp\core\Config;
+
+class Redis extends Base
+{
+    protected object $redis;
 
     public function connect()
     {
-        $config = get_config('session.redis');
+        $config = Config::init()->get('session.redis');
         $this->redis = new \Redis();
         $this->redis->connect($config['host'], $config['port']);
         if (!empty($config['password'])) {
@@ -28,15 +28,15 @@ class Redis implements ISession
         $this->redis->select((int)$config['database']);
     }
 
-    public function read()
+    public function read(): array
     {
-        $data = $this->redis->get($this->sessionId);
+        $data = $this->redis->get($this->id);
         return $data ? json_decode($data, true) : [];
     }
 
     public function write()
     {
-        return $this->redis->set($this->sessionId, json_encode($this->items, JSON_UNESCAPED_UNICODE));
+        $this->redis->set($this->id, json_encode($this->items, JSON_UNESCAPED_UNICODE));
     }
 
     public function gc()

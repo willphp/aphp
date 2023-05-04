@@ -11,29 +11,18 @@ declare(strict_types=1);
 
 namespace willphp\core\cache;
 
-use Exception;
+use willphp\core\Config;
+use willphp\core\Dir;
 
 class File extends Base
 {
-    protected static ?object $single = null;
-    private string $dir;
-
-    public function dir(string $dir): object
-    {
-        if (!dir_create($dir)) throw new Exception('缓存目录创建失败或不可写');
-        $this->dir = $dir;
-        return $this;
-    }
-
     public function connect()
     {
-        $dir = get_config('cache.file.path', 'cache');
-        $this->dir(RUNTIME_PATH . '/' . $dir);
     }
 
     public function set(string $name, $data, int $expire = 0): bool
     {
-        $file = $this->getFile($name);
+        $file = $this->getFile($name, true);
         $content = sprintf("%010d", $expire) . json_encode($data);
         return (bool)file_put_contents($file, $content);
     }
@@ -41,7 +30,9 @@ class File extends Base
     public function get(string $name, $default = null)
     {
         $file = $this->getFile($name);
-        if (!is_file($file) || !is_writable($file)) return $default;
+        if (!is_file($file) || !is_writable($file)) {
+            return $default;
+        }
         $content = file_get_contents($file);
         $expire = intval(substr($content, 0, 10));
         if ($expire > 0 && filemtime($file) + $expire < time()) {
@@ -62,20 +53,31 @@ class File extends Base
         return (bool)$this->get($name);
     }
 
-    public function flush(string $type = ''): bool
+    public function flush(string $prefix = '[app]'): bool
     {
-        $type = !empty($type) ? '/' . $type : '';
-        return dir_del($this->dir . $type);
+        if ($prefix == '[all]') {
+            $appList = Config::init()->get('app.app_list', []);
+            $appList[] = 'common';
+            foreach ($appList as $app) {
+                Dir::del(ROOT_PATH . '/runtime/' . $app . '/cache');
+            }
+            return true;
+        }
+        if ($prefix == '[app]' || empty($prefix)) {
+            return Dir::del(ROOT_PATH . '/runtime/' . APP_NAME . '/cache');
+        }
+        [$app, $prefix] = pre_split($prefix, APP_NAME, '@');
+        $dir = rtrim(ROOT_PATH . '/runtime/' . $app . '/cache/' . $prefix, '*');
+        return Dir::del($dir, true);
     }
 
-    private function getFile(string $name): string
+    private function getFile(string $name, bool $dirMake = false): string
     {
-        $dir = $this->dir;
-        if (str_contains($name, '.')) {
-            [$type, $name] = explode('.', $name);
-            $dir .= '/' . $type;
-            if (!is_dir($dir)) mkdir($dir, 0755, true);
+        [$app, $path] = pre_split($name, APP_NAME, '@');
+        $file = ROOT_PATH . '/runtime/' . $app . '/cache/' . $path . '.php';
+        if ($dirMake) {
+            Dir::make(dirname($file), 0777);
         }
-        return $dir . '/' . md5($name) . '.php';
+        return $file;
     }
 }

@@ -16,10 +16,13 @@ use Exception;
 use Iterator;
 use PDO;
 use PDOStatement;
+use willphp\core\Cache;
+use willphp\core\Config;
+use willphp\core\Debug;
 use willphp\core\Log;
 use willphp\core\Middleware;
 use willphp\core\Page;
-use willphp\core\Request;
+use willphp\core\Session;
 use willphp\core\Single;
 
 class Query implements ArrayAccess, Iterator
@@ -77,15 +80,15 @@ class Query implements ArrayAccess, Iterator
     {
         $sql = $this->getRealSql($sql, $bind);
         if (APP_TRACE) {
-            trace($this->getRealSql($sql, $bind), 'sql');
+            Debug::init()->trace($sql, 'sql');
         }
-        if ($isUpdate && get_config('log.database_execute_log', false)) {
+        if ($isUpdate && Config::init()->get('log.database_execute', false)) {
             Log::init()->record($sql, 'sql');
         }
-        if (!$isUpdate) {
-            Middleware::init()->web('database_query', ['sql' => $sql]);
-        } else {
-            Middleware::init()->web('database_execute', ['sql' => $sql]);
+        $middleware = $isUpdate ? 'database_execute' : 'database_query';
+        Middleware::init()->execute('framework.'.$middleware, ['sql' => $sql]);
+        if ($isUpdate && Config::init()->get('view.csrf_check')) {
+            Session::init()->del('csrf_token');
         }
     }
 
@@ -98,9 +101,6 @@ class Query implements ArrayAccess, Iterator
     public function execute(string $sql, array $bind = []): int
     {
         $this->recordSql($sql, $bind, true);
-        if (IS_POST) {
-            Request::init()->csrf_reset();
-        }
         return $this->connection->execute($sql, $bind);
     }
 
@@ -112,7 +112,7 @@ class Query implements ArrayAccess, Iterator
         if ($table == $this->table) {
             return $this->fieldList;
         }
-        return get_cache('field.' . $table . '_field', fn() => $this->parseFieldList($table));
+        return Cache::make('field/' . $table . '_field', fn() => $this->parseFieldList($table));
     }
 
     private function parseFieldList(string $table): array
@@ -198,7 +198,7 @@ class Query implements ArrayAccess, Iterator
         return isset($this->bind[$key]);
     }
 
-    public function bind($key, $value = false, int $type = PDO::PARAM_STR): Query
+    public function bind($key, $value = false, int $type = PDO::PARAM_STR): object
     {
         if (is_array($key)) {
             $this->bind = array_merge($this->bind, $key);
@@ -219,7 +219,7 @@ class Query implements ArrayAccess, Iterator
         return $this->query($sql, $bind, $options['obj']);
     }
 
-    public function find(int $id = 0)
+    public function find($id = 0)
     {
         if ($id > 0) {
             $this->where($this->getPk(), $id);
@@ -452,7 +452,7 @@ class Query implements ArrayAccess, Iterator
         return $this->total($field, 'avg');
     }
 
-    public function data($field, $value = null): Query
+    public function data($field, $value = null): object
     {
         if (is_array($field)) {
             $this->options['data'] = isset($this->options['data']) ? array_merge($this->options['data'], $field) : $field;
@@ -462,7 +462,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function inc($field, int $step = 1): Query
+    public function inc($field, int $step = 1): object
     {
         $fields = is_string($field) ? explode(',', $field) : $field;
         foreach ($fields as $field) {
@@ -480,19 +480,19 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function getObj(): Query
+    public function getObj(): object
     {
         $this->options['obj'] = true;
         return $this;
     }
 
-    public function getSql(): Query
+    public function getSql(): object
     {
         $this->options['sql'] = true;
         return $this;
     }
 
-    public function table($table): Query
+    public function table($table): object
     {
         if (is_string($table) && !str_contains($table, ')')) {
             if (strpos($table, ',')) {
@@ -517,7 +517,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function alias($alias): Query
+    public function alias($alias): object
     {
         if (is_array($alias)) {
             $this->options['alias'] = $alias;
@@ -531,7 +531,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function field($field = ''): Query
+    public function field($field = ''): object
     {
         if (empty($field)) {
             return $this;
@@ -546,7 +546,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function limit($offset, ?int $length = null): Query
+    public function limit($offset, ?int $length = null): object
     {
         if (is_string($offset) && strpos($offset, ',')) {
             [$offset, $length] = explode(',', $offset);
@@ -555,13 +555,13 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function page(int $page, int $length): Query
+    public function page(int $page, int $length): object
     {
         $page = $page > 0 ? ($page - 1) : 0;
         return $this->limit($page * $length, $length);
     }
 
-    public function order($field, string $order = ''): Query
+    public function order($field, string $order = ''): object
     {
         if (!empty($field)) {
             if (is_string($field)) {
@@ -581,7 +581,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function where($field, $op = null, $condition = null, ?string $logic = null): Query
+    public function where($field, $op = null, $condition = null, ?string $logic = null): object
     {
         if (is_array($field)) {
             foreach ($field as $k => $v) {
@@ -602,7 +602,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function join($join, $condition = null, string $type = 'INNER'): Query
+    public function join($join, $condition = null, string $type = 'INNER'): object
     {
         if (empty($condition)) {
             foreach ($join as $value) {
@@ -643,7 +643,7 @@ class Query implements ArrayAccess, Iterator
         return $table;
     }
 
-    public function union($union, bool $all = false): Query
+    public function union($union, bool $all = false): object
     {
         $this->options['union']['type'] = $all ? 'UNION ALL' : 'UNION';
         if (is_array($union)) {
@@ -660,49 +660,49 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function having(string $having): Query
+    public function having(string $having): object
     {
         $this->options['having'] = $having;
         return $this;
     }
 
-    public function using($using): Query
+    public function using($using): object
     {
         $this->options['using'] = $using;
         return $this;
     }
 
-    public function extra(string $extra): Query
+    public function extra(string $extra): object
     {
         $this->options['extra'] = $extra;
         return $this;
     }
 
-    public function duplicate($duplicate): Query
+    public function duplicate($duplicate): object
     {
         $this->options['duplicate'] = $duplicate;
         return $this;
     }
 
-    public function lock($lock = false): Query
+    public function lock($lock = false): object
     {
         $this->options['lock'] = $lock;
         return $this;
     }
 
-    public function distinct($distinct = false): Query
+    public function distinct($distinct = false): object
     {
         $this->options['distinct'] = $distinct;
         return $this;
     }
 
-    public function force(string $force): Query
+    public function force(string $force): object
     {
         $this->options['force'] = $force;
         return $this;
     }
 
-    public function comment(string $comment): Query
+    public function comment(string $comment): object
     {
         $this->options['comment'] = $comment;
         return $this;

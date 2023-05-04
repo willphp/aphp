@@ -14,6 +14,7 @@ namespace willphp\core\db;
 use Closure;
 use Exception;
 use PDO;
+use willphp\core\Config;
 use willphp\core\Single;
 
 class Connection
@@ -30,9 +31,9 @@ class Connection
     private function __construct($config = [])
     {
         if (is_string($config) && $config != 'default') {
-            $config = get_config('database.' . $config, []);
+            $config = Config::init()->get('database.' . $config, []);
         }
-        $this->config = array_merge(get_config('database.default', []), $config);
+        $this->config = array_merge(Config::init()->get('database.default', []), $config);
         $this->connect();
     }
 
@@ -56,7 +57,7 @@ class Connection
     {
         $this->config['dsn'] ??= $this->getDsn();
         $this->config['pdo_params'] ??= [];
-        $this->pdo = new PDO($this->config['dsn'], $this->config['db_user'], $this->config['db_pwd'], $this->config['pdo_params']);
+        $this->pdo = new PDO($this->config['dsn'], $this->config['db_user'], strval($this->config['db_pwd']), $this->config['pdo_params']);
         if ($this->isMysql()) $this->pdo->exec("SET sql_mode = ''");
     }
 
@@ -65,7 +66,7 @@ class Connection
         if (!$this->isMysql()) {
             return '';
         }
-        $dsn = 'mysql:dbname=' . $this->config['db_name'] . ';host=' . $this->config['db_host'];
+        $dsn = 'mysql:host=' . $this->config['db_host'] . ';dbname=' . $this->config['db_name'];
         if (isset($this->config['db_port'])) {
             $dsn .= ';port=' . $this->config['db_port'];
         }

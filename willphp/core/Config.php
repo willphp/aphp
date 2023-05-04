@@ -15,37 +15,45 @@ class Config
     use Single;
 
     protected static array $items = [];
-    protected string $cacheDir;
 
-    private function __construct()
+    private function __construct(array $dirs = [])
     {
-        $this->cacheDir = RUNTIME_PATH.'/config';
-        if (!is_dir($this->cacheDir)) {
-            mkdir($this->cacheDir, 0777, true);
-        }
-        $this->loadConfig();
-    }
-
-    protected function loadConfig()
-    {
-        $configPath = [ROOT_PATH . '/config', APP_PATH . '/config', ROOT_PATH . '/.env'];
-        $configMtime = get_mtime_batch($configPath);
-        $cacheFile = $this->cacheDir. '/'.$configMtime.'.php';
-        if (!file_exists($cacheFile)) {
-            $this->update();
-            foreach ($configPath as $res) {
-                $this->load($res);
+        if (!empty($dirs)) {
+            $files = Dir::getFiles($dirs);
+            $mtime = Dir::getMtime($files);
+            $cacheDir = Dir::make(RUNTIME_PATH . '/config', 0777);
+            $cacheFile = $cacheDir . '/' . $mtime . '.php';
+            if (!file_exists($cacheFile)) {
+                Dir::del($cacheDir);
+                foreach ($files as $file) {
+                    $this->loadFile($file);
+                }
+                file_put_contents($cacheFile, json_encode(self::$items));
+            } else {
+                $data = file_get_contents($cacheFile);
+                self::$items = json_decode($data, true);
             }
-            file_put_contents($cacheFile, json_encode(self::$items));
-        } else {
-            $data = file_get_contents($cacheFile);
-            self::$items = json_decode($data, true);
         }
     }
 
-    public function update(): bool
+    public function loadFile(string $file): void
     {
-        return dir_del($this->cacheDir);
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        if ($ext == 'php') {
+            $data = include $file;
+            if ($data) {
+                Arr::keyCase($data);
+                $name = basename($file, '.php');
+                self::$items[$name] = isset(self::$items[$name]) ? array_replace_recursive(self::$items[$name], $data) : $data;
+            }
+        }
+        if ($ext == 'env') {
+            $data = parse_ini_file($file, true, INI_SCANNER_TYPED);
+            if ($data) {
+                Arr::keyCase($data);
+                self::$items = array_replace_recursive(self::$items, $data);
+            }
+        }
     }
 
     public function all(): array
@@ -58,51 +66,21 @@ class Config
         return self::$items = $config;
     }
 
-    public function get(string $key = '', $default = '')
+    public function get(string $name = '', $default = '')
     {
-        return empty($key) ? self::$items : array_dot_get(self::$items, $key, $default);
-    }
-
-    public function set(string $key, $value = '')
-    {
-        return array_dot_set(self::$items, $key, $value);
-    }
-
-    public function has(string $key): bool
-    {
-        return array_dot_has(self::$items, $key);
-    }
-
-    public function load(string $res): void
-    {
-        if (is_dir($res)) {
-            $list = glob($res . '/*.php');
-            foreach ($list as $file) {
-                $this->loadFile($file);
-            }
-        } elseif (is_file($res)) {
-            $this->loadFile($res);
+        if (empty($name)) {
+            return self::$items;
         }
+        return Arr::get(self::$items, $name, $default);
     }
 
-    public function loadFile(string $file): void
+    public function set(string $name, $value = '')
     {
-        $ext = pathinfo($file, PATHINFO_EXTENSION);
-        $data = [];
-        $name = '';
-        if ($ext == 'php') {
-            $name = strtolower(basename($file, '.php'));
-            $data = include $file;
-        } elseif ($ext == 'env') {
-            $data = parse_ini_file($file, true, INI_SCANNER_TYPED) ?: [];
-        }
-        if ($data) {
-            array_key_case($data);
-            if ($name) {
-                self::$items[$name] = isset(self::$items[$name]) ? array_replace_recursive(self::$items[$name], $data) : $data;
-            } else {
-                self::$items = array_replace_recursive(self::$items, $data);
-            }
-        }
+        return Arr::set(self::$items, $name, $value);
+    }
+
+    public function has(string $name): bool
+    {
+        return Arr::has(self::$items, $name);
     }
 }
