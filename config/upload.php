@@ -23,10 +23,10 @@ return [
         ],
     ],
     //头像上传
-    'head' => [
+    'avatar' => [
         'allow_ext' => ['jpg', 'jpeg', 'gif', 'png'], //允许的文件扩展名
         'allow_size' => 1048576, //最大上传大小1MB
-        'path' => 'public/uploads/head',
+        'path' => 'public/uploads/avatar',
         'auto_thumb' => true, //自动生成thumb
         'thumb' => [
             'thumb_type' => 6, //生成方式：1固宽,2固高,3固宽裁高,4固高裁宽,5缩放,6自动裁切

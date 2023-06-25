@@ -20,6 +20,7 @@ trait Jump
 
     private function _jumpTo($msg = '', int $code = 400, string $url = null): void
     {
+
         if (is_array($msg)) {
             $msg = current($msg);
         }

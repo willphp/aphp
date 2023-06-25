@@ -48,6 +48,16 @@ class Captcha
         return true;
     }
 
+    public function getBase64(): string
+    {
+        $this->create();
+        ob_start();
+        imagepng($this->img);
+        $buffer = ob_get_clean();
+        ob_end_clean();
+        return base64_encode($buffer);
+    }
+
     public function get(): string
     {
         return session_flash('captcha');

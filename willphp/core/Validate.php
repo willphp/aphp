@@ -17,7 +17,8 @@ class Validate
 {
     use Single;
 
-    protected ?object $model = null; //验证模型
+    protected ?object $model = null;
+    protected array $uniqueMap = [];
     protected int $handle = 0;
     protected array $errors = []; //错误信息
 
@@ -45,7 +46,7 @@ class Validate
                 continue;
             }
             $this->errors[$field] ??= '';
-            $value = strval($data[$field]) ?? '';
+            $value = isset($data[$field]) ? strval($data[$field]) : '';
             if ($rules instanceof Closure) {
                 if ($rules($value) !== true) {
                     $this->errors[$field] = $msgs;
@@ -106,6 +107,12 @@ class Validate
         return $this;
     }
 
+    public function uniqueWhere(array $map = []): object
+    {
+        $this->uniqueMap = $map;
+        return $this;
+    }
+
     public function unique(string $value, string $field, string $params, array $data): bool
     {
         if (!empty($params) && str_contains($params, ',')) {
@@ -116,7 +123,7 @@ class Validate
         } else {
             return false;
         }
-        $map = [];
+        $map = $this->uniqueMap;
         $map[$field] = $value;
         if (($this->handle == 0 && isset($data[$pk])) || $this->handle == IN_UPDATE) {
             $map[] = [$pk, '<>', $data[$pk]];

@@ -51,7 +51,9 @@ class Route
         $params = $this->route['params'];
         $errs = ['path' => $this->controller . '/' . $this->action];
         if (str_starts_with($action, '_')) {
-            $this->error(405, $errs);
+            $code = substr($action, 1);
+            $code = is_numeric($code) ? (int) $code : 405;
+            $this->error($code, $errs);
         }
         if (!method_exists($class, $action)) {
             if (IS_GET && View::init()->getFile()) {
@@ -59,6 +61,7 @@ class Route
             }
             $this->error(404, $errs);
         }
+
         Middleware::init()->execute('framework.controller_start', ['path' => $this->path]);
         $class = App::make($class);
         $classMethod = new ReflectionMethod($class, $action);
@@ -158,6 +161,9 @@ class Route
         }
         $route['controller'] = name_snake($route['controller']);
         $route['params'] = array_merge($args1, $args2, $params);
+        if (is_numeric($route['action'])) {
+            $route['action'] = '_'.$route['action'];
+        }
         $route['path'] = $route['module'] . '/' . $route['controller'] . '/' . $route['action'];
         if (!empty($route['params'])) {
             ksort($route['params']);
@@ -222,7 +228,7 @@ class Route
             $pathinfo = preg_replace('/\/+/', '/', $pathinfo);
             $regex = Config::init()->get('route.check_regex', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');
             if (!empty($regex) && !preg_match($regex, $pathinfo)) {
-                exit('非法请求');
+                exit('非法请求：'. htmlentities($pathinfo));
             }
             $suffix = Config::init()->get('route.clear_suffix', '.html');
             $uri = !empty($suffix) ? str_replace($suffix, '', $pathinfo) : $pathinfo;

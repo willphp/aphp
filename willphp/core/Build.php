@@ -48,7 +48,7 @@ class Build
             $c_error .= "\n\t{\n\t\t\$msg = \$arguments[0] ?? '出错了啦...';\n\t\t\$code = str_starts_with(\$name, '_') ? substr(\$name, 1) : 400;\n\t\t\$this->error(\$msg, (int)\$code);\n\t}\n}";
             file_put_contents(APP_PATH . '/controller/Error.php', $c_error);
             //API控制器
-            $c_api = "<?php\ndeclare(strict_types=1);\nnamespace app\\index\\controller;\nuse willphp\\core\\Jump;\nclass Api\n{\n\tuse Jump;\n\tpublic function clear()\n\t{\n\t\tcache_flush('[all]');";
+            $c_api = "<?php\ndeclare(strict_types=1);\nnamespace app\\".APP_NAME."\\controller;\nuse willphp\\core\\Jump;\nclass Api\n{\n\tuse Jump;\n\tpublic function clear()\n\t{\n\t\tcache_flush('[all]');";
             $c_api .= "\n\t\t\$this->success('清除缓存成功', 'index/index');\n\t}\n\tpublic function captcha()\n\t{\n\t\treturn (new \\extend\\captcha\\Captcha())->make();\n\t}\n}";
             file_put_contents(APP_PATH . '/controller/Api.php', $c_api);
             //首页模板

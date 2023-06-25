@@ -23,7 +23,8 @@
     "ext-pdo": "*",
     "ext-mbstring": "*",
     "ext-gd": "*",
-    "ext-openssl": "*"
+    "ext-openssl": "*",
+    "ext-zip": "*"
   },
   "autoload": {
     "psr-4": {

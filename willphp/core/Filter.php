@@ -14,6 +14,7 @@ class Filter
 {
     use Single;
 
+    protected array $exceptField = []; //例外字段
     protected array $htmlField = []; //html字段列表
     protected string $htmlFieldLike = ''; //html字段包含
     protected string $funcHtml = ''; //html处理函数
@@ -25,6 +26,7 @@ class Filter
     private function __construct()
     {
         $filter = Config::init()->get('filter', []);
+        $this->exceptField = $filter['except_field'] ?? [];
         $this->funcHtml = $filter['func_html'] ?? '';
         $this->funcExceptHtml = $filter['func_except_html'] ?? '';
         $this->htmlField = $filter['html_field'] ?? [];
@@ -64,7 +66,7 @@ class Filter
 
     public function filterIn(&$value, $key): void
     {
-        if (!empty($value)) {
+        if (!empty($value) && !in_array($key, $this->exceptField)) {
             if (!empty($this->funcHtml) && $this->isHtmlField($key)) {
                 $value = value_batch_func($value, $this->funcHtml);
             } elseif (!empty($this->funcExceptHtml) && !$this->isHtmlField($key)) {

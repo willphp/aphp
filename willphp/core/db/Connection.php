@@ -102,10 +102,10 @@ class Connection
         if (!empty($this->sth) && $this->sth->queryString != $sql) {
             $this->sth = null;
         }
-        if (empty($this->sth)) {
-            $this->sth = $this->pdo->prepare($sql);
-        }
         try {
+            if (empty($this->sth)) {
+                $this->sth = $this->pdo->prepare($sql);
+            }
             $this->bindValue($bind);
             $this->sth->execute();
             if (!$isQuery) {

@@ -11,6 +11,8 @@ return [
     'filter_req' => true, //是否开启req过滤
     'func_html' => 'remove_xss', //html字段处理函数
     'func_except_html' => 'clear_html', //html除外字段处理函数
+    //例外字段
+    'except_field' => ['list_tpl'],
     //html字段
     'html_field' => ['content', 'html'], //html字段列表
     'html_field_like' => 'content', //html字段包含

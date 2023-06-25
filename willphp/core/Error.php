@@ -35,6 +35,8 @@ class Error
             }
         } elseif (!in_array($code, [E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED])) {
             $this->show($error);
+        } else {
+            Log::init()->write($error['msg'], $error['type']);
         }
     }
 

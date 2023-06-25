@@ -168,6 +168,22 @@ function cache_flush(string $prefix = '[app]'): bool
 }
 
 /**
+ * 清除指定Runtime
+ */
+function clear_runtime(string $app = ''): bool
+{
+    return \willphp\core\Dir::del(ROOT_PATH.'/runtime/'.$app);
+}
+
+/**
+ * 清除当前视图编译目录
+ */
+function clear_view_compile(): bool
+{
+    return \willphp\core\Dir::del(ROOT_PATH.'/runtime/'.APP_NAME.'/view');
+}
+
+/**
  * 获取数据表对象
  */
 function db(string $table = '', $config = []): object
@@ -182,7 +198,7 @@ function model(string $name = ''): object
 {
     [$module, $name] = pre_split($name, APP_NAME);
     $class = '\\app\\' . $module . '\\model\\' . name_camel($name);
-    return call_user_func([$class, 'init']);
+    return app($class);
 }
 
 /**
@@ -220,6 +236,15 @@ function input(string $name, $default = null, $batchFunc = [])
 }
 
 /**
+ * 获取当前第几页
+ */
+function input_page(string $name = 'page'): int
+{
+    $page = input('get.'.$name, 1, 'intval');
+    return max(1,  $page);
+}
+
+/**
  * 获取视图对象
  */
 function view(string $file = '', array $vars = []): object
@@ -232,7 +257,7 @@ function view(string $file = '', array $vars = []): object
  */
 function view_with($vars, $value = ''): object
 {
-    return \willphp\core\View::init()->setTpl()->with($vars, $value);
+    return \willphp\core\View::init()->with($vars, $value); //->setTpl()
 }
 
 /**
@@ -259,6 +284,13 @@ function trace($info = '', string $level = 'debug'): void
     \willphp\core\Debug::init()->trace($info, $level);
 }
 
+/**
+ * 记录变量到日志
+ */
+function log_var($vars, string $name = 'var'): void
+{
+    \willphp\core\Log::init()->logVar($vars, $name);
+}
 
 /**
  * 字符串加密
@@ -274,6 +306,30 @@ function encrypt(string $string, string $salt = ''): string
 function decrypt(string $string, string $salt = ''): string
 {
     return \willphp\core\Crypt::init()->decrypt($string, $salt);
+}
+
+/**
+ * 获取当前控制器
+ */
+function get_controller(): string
+{
+    return  \willphp\core\Route::init()->getController();
+}
+
+/**
+ * 获取当前方法
+ */
+function get_action(): string
+{
+    return  \willphp\core\Route::init()->getAction();
+}
+
+/**
+ * 错误响应
+ */
+function halt($msg = '', int $code = 400, array $params = [])
+{
+    \willphp\core\Response::halt($msg, $code, $params);
 }
 
 /**
@@ -492,4 +548,16 @@ function size_format(int $size): string
 function get_thumb(string $image, int $width, int $height, int $thumbType = 6): string
 {
     return \willphp\core\Thumb::init()->getThumb($image, $width, $height, $thumbType);
+}
+
+/**
+ * 数组分页
+ */
+function get_page(array $list, int $pageSize = 10): array
+{
+    $count = count($list);
+    $page = \willphp\core\Page::init($count, $pageSize);
+    $offset = $page->getAttr('offset');
+    $list = array_slice($list, $offset, $pageSize);
+    return ['list' => $list, 'page_html' => $page->getHtml()];
 }

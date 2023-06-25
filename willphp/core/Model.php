@@ -18,10 +18,9 @@ use willphp\core\db\Query;
 
 abstract class Model implements ArrayAccess, Iterator
 {
-    use Single;
-
     protected string $table = ''; //表名
     protected string $pk = ''; //主键
+    protected string $tablePrefix = ''; //表前缀
     protected string $dbConfig = ''; //数据库连接配置
     protected array $allowFill = ['*']; //允许填充字段
     protected array $denyFill = []; //禁止填充字段
@@ -39,7 +38,7 @@ abstract class Model implements ArrayAccess, Iterator
     protected array $fields = []; //处理后的展示用数据
     protected array $errors = []; //错误信息
 
-    private function __construct()
+    public function __construct()
     {
         if (empty($this->table)) {
             $this->table = name_snake(basename(strtr(get_class($this), '\\', '/')));
@@ -48,6 +47,7 @@ abstract class Model implements ArrayAccess, Iterator
         if (empty($this->pk)) {
             $this->pk = $this->db->getPk();
         }
+        $this->tablePrefix = $this->db->getPrefix();
     }
 
     public function getTable(): string
@@ -62,7 +62,7 @@ abstract class Model implements ArrayAccess, Iterator
 
     public function getPrefix(): string
     {
-        return $this->db->getPrefix();
+        return $this->tablePrefix;
     }
 
     public function getData(): array
@@ -264,11 +264,16 @@ abstract class Model implements ArrayAccess, Iterator
         return empty($this->data[$this->pk]) ? IN_INSERT : IN_UPDATE;
     }
 
+    protected function _unique_where(array $data): array
+    {
+        return [];
+    }
+
     //自动验证
     final public function autoValidate(): bool
     {
         if (!empty($this->validate)) {
-            $this->errors = Validate::init($this)->make($this->validate, $this->original, $this->isBatch)->getError();
+            $this->errors = Validate::init($this)->uniqueWhere($this->_unique_where($this->original))->make($this->validate, $this->original, $this->isBatch)->getError();
             return empty($this->errors);
         }
         return true;
@@ -352,13 +357,12 @@ abstract class Model implements ArrayAccess, Iterator
 
     public function __call(string $name, array $arguments)
     {
-
         if (method_exists($this, '_before_' . $name)) {
             $this->{'_before_' . $name}($name);
         }
         $res = call_user_func_array([$this->db, $name], $arguments);
         if (!empty($res)) {
-            $data = !is_array($res) ? $res->toArray() : $res;
+            $data = is_object($res) ? $res->toArray() : $res;
             if (method_exists($this, '_after_' . $name)) {
                 $this->{'_after_' . $name}($data);
             }
@@ -377,9 +381,10 @@ abstract class Model implements ArrayAccess, Iterator
 
     public static function __callStatic(string $name, array $arguments)
     {
-        return call_user_func_array([static::init(), $name], $arguments);
+        return call_user_func_array([new static(), $name], $arguments);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->original[$offset] = $value;
@@ -387,16 +392,19 @@ abstract class Model implements ArrayAccess, Iterator
         $this->fields[$offset] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->fields[$offset] ?? null;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset): bool
     {
         return isset($this->data[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if (isset($this->original[$offset])) unset($this->original[$offset]);
@@ -404,26 +412,31 @@ abstract class Model implements ArrayAccess, Iterator
         if (isset($this->fields[$offset])) unset($this->fields[$offset]);
     }
 
-    function rewind()
+    #[\ReturnTypeWillChange]
+    public function rewind()
     {
         reset($this->data);
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return current($this->fields);
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         return next($this->fields);
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return key($this->fields);
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return current($this->fields);

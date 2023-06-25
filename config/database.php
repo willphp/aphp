@@ -18,7 +18,7 @@ return [
 			'db_pwd' => '', //数据库密码
 			'db_name' => 'myapp01db', //数据库名
 			'db_prefix' => 'wp_', //数据库表前缀
-			'db_charset' => 'utf8', //默认字符编码
+			'db_charset' => 'utf8mb4', //默认字符编码
 			'pdo_params' => [
 				\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
 				\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,

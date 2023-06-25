@@ -11,5 +11,5 @@ return [
     'prefix' => '.html', //模板文件后缀
     'cache' => false, //是否开启模板缓存
     'expire' => 30, //缓存时间(0,永久)秒
-    'csrf_check' => true, //是否开启csrf表单令牌验证
+    'csrf_check' => false, //是否开启csrf表单令牌验证
 ];

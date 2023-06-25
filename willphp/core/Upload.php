@@ -30,6 +30,39 @@ class Upload
         $this->path = Dir::make(ROOT_PATH . '/' . $this->config['path']);
     }
 
+    protected function getExt(string $type): string
+    {
+        $types = ['.jpg' => 'image/jpeg', '.png' => 'image/png', '.gif' => 'image/gif'];
+        foreach ($types as $ext => $mime) {
+            if (str_contains($type, $mime)) {
+                return $ext;
+            }
+        }
+        return '';
+    }
+
+    public function saveBase64(string $base64, string $fileName = ''): array
+    {
+        [$mime, $data] = explode(',', $base64);
+        $ext = $this->getExt($mime);
+        if (!$ext) {
+            $this->error = '文件类型不允许';
+            return [];
+        }
+        $fileName ?: mt_rand(1, 9999) . time();
+        $filePath = $this->path . '/' . $fileName . $ext;
+        $ok = file_put_contents($filePath, base64_decode($data), LOCK_EX);
+        if (!$ok) {
+            $this->error = '文件保存失败';
+            return [];
+        }
+        $file = [];
+        $file['path'] = substr($filePath, strlen(ROOT_PATH . '/public')); //新文件名
+        $file['url'] = __HOST__ . $file['path'];
+        $file['uptime'] = time();
+        return $file;
+    }
+
     public function save(): array
     {
         $files = $this->getInputFile();

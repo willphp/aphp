@@ -27,6 +27,11 @@ class Log
         $this->log[] = date('[ c ]') . $level . ':' . $message . PHP_EOL;
     }
 
+    public function logVar($vars, string $name = 'var'): void
+    {
+        $this->record(json_encode($vars), $name);
+    }
+
     public function write(string $message, string $level = 'ERROR'): bool
     {
         return error_log(date('[ c ]') . $level . ':' . $message . PHP_EOL, 3, $this->dir . '/' . date('Y_m_d') . '.log');

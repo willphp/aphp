@@ -10,7 +10,7 @@
 declare(strict_types=1);
 define('START_MEMORY', memory_get_usage());
 define('START_TIME', microtime(true));
-const __VERSION__ = 'v4.2.0';
+const __VERSION__ = 'v4.3.0';
 const __POWERED__ = 'WillPHP' . __VERSION__;
 version_compare(PHP_VERSION, '7.4.3', '<') and die(__POWERED__ . ' requires PHP 7.4.3 or newer.');
 if (PHP_SAPI != 'cli' && !isset($_SERVER['PATH_INFO'])) {

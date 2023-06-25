@@ -94,6 +94,8 @@ class Response
         exit;
     }
 
+
+
     public static function validate(array $errors = []): void
     {
         if (!empty($errors)) {

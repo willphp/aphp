@@ -44,12 +44,12 @@ class Query implements ArrayAccess, Iterator
     {
         $this->connection = Connection::init($config);
         $this->prefix = $this->connection->getConfig('db_prefix');
-        $this->builder = Builder::init($this->connection, $this);
         if (!empty($table)) {
             $this->fieldList = $this->getFieldList($table);
             $this->pk = $this->fieldList['pri'] ?? 'id';
             $this->table = $table;
         }
+        $this->builder = Builder::init($this->connection, $this);
     }
 
     public function getPrefix(): string
@@ -144,10 +144,12 @@ class Query implements ArrayAccess, Iterator
         return $result[0]['Field'] ?? 'id';
     }
 
-    public function getFilterData(array $data, string $table = ''): array
+    public function getFilterData(array $data, string $table = '', bool $getSql = false): array
     {
         $fields = $this->getFieldList($table);
-        unset($fields['pri']);
+        if (!$getSql) {
+            unset($fields['pri']);
+        }
         return array_filter($data, fn($k)=>in_array($k, $fields), ARRAY_FILTER_USE_KEY);
     }
 
@@ -339,7 +341,7 @@ class Query implements ArrayAccess, Iterator
             throw new Exception('The update operation query condition cannot be empty!');
         }
         $data = array_merge($options['data'], $data);
-        $data = $this->getFilterData($data);
+        $data = $this->getFilterData($data, $options['table'], $options['sql']);
         $sql = $this->builder->update($data, $options);
         if (!$sql) {
             throw new Exception('The generated query statement is empty!');
@@ -370,7 +372,7 @@ class Query implements ArrayAccess, Iterator
     {
         $options = $this->parseExpress();
         $data = array_merge($options['data'], $data);
-        $data = $this->getFilterData($data, $options['table']);
+        $data = $this->getFilterData($data, $options['table'], $options['sql']);
         $sql = $this->builder->insert($data, $options, $replace);
         $bind = $this->getBind();
         if ($options['sql']) {
@@ -531,7 +533,7 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    public function field($field = ''): object
+    public function field($field = '', bool $isExcept = false): object
     {
         if (empty($field)) {
             return $this;
@@ -539,8 +541,13 @@ class Query implements ArrayAccess, Iterator
         if (is_string($field)) {
             $field = array_map('trim', explode(',', $field));
         }
-        if (isset($this->options['field'])) {
-            $field = array_merge($this->options['field'], $field);
+        if ($isExcept) {
+            $oldFields = $this->options['field'] ?? $this->getFieldList();
+            $field = array_diff(array_values($oldFields), $field);
+        } else {
+            if (isset($this->options['field'])) {
+                $field = array_merge($this->options['field'], $field);
+            }
         }
         $this->options['field'] = array_unique($field);
         return $this;
@@ -708,46 +715,55 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->objData[$offset] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->objData[$offset] ?? null;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset): bool
     {
         return isset($this->objData[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if (isset($this->objData[$offset])) unset($this->objData[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         reset($this->objData);
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return current($this->objData);
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         return next($this->objData);
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return key($this->objData);
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return current($this->objData);

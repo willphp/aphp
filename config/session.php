@@ -10,7 +10,7 @@
 return [
     'driver' => 'file', //默认驱动支持file,redis
     'name' => 'willphp_session', //名称
-    'expire' => 86400 * 2, //过期时间 2天
+    'expire' => 86400, //过期时间 1天
     'redis' => [
         'host' => '127.0.0.1',
         'port' => 6379,

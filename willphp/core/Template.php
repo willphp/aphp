@@ -16,6 +16,9 @@ class Template
     public static function compile(string $content): string
     {
         $config = Config::init()->get('template', []);
+        if (empty($config)) {
+            die('模板配置读取失败!');
+        }
         $b_limit = $config['{'] ?? '{';
         $e_limit = $config['}'] ?? '}';
         $regex_literal = str_replace(['{', '}'], [$b_limit, $e_limit], $config['regex_literal']);
