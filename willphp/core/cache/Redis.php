@@ -13,11 +13,15 @@ namespace willphp\core\cache;
 
 use willphp\core\Config;
 
+/**
+ * Redis缓存类
+ */
 class Redis extends Base
 {
     private object $redis;
 
-    public function connect()
+    //连接服务器
+    public function connect(): void
     {
         $config = Config::init()->get('cache.redis');
         $this->redis = new \Redis();
@@ -28,54 +32,66 @@ class Redis extends Base
         $this->redis->select((int)$config['database']);
     }
 
+    //设置
     public function set(string $name, $data, int $expire = 0): bool
     {
-        $name = $this->getName($name);
+        $name = $this->parseName($name);
         if ($this->redis->set($name, serialize($data))) {
             return ($expire > 0) ? $this->redis->expire($name, $expire) : true;
         }
         return false;
     }
 
+    //获取
     public function get(string $name, $default = null)
     {
-        $name = $this->getName($name);
+        $name = $this->parseName($name);
         $data = $this->redis->get($name);
         return is_string($data) ? unserialize($data) : $data;
     }
 
+    //删除
     public function del(string $name): bool
     {
-        $name = $this->getName($name);
+        $name = $this->parseName($name);
         return $this->redis->delete($name);
     }
 
+    //检测存在
     public function has(string $name): bool
     {
-        $name = $this->getName($name);
+        $name = $this->parseName($name);
         return (bool)$this->redis->get($name);
     }
 
-    public function flush(string $prefix = '[app]'): bool
+    //清空
+    public function flush(string $type = '[app]'): bool
     {
-        if ($prefix == '[all]') {
+        //清空所有
+        if ($type == '[all]') {
             return $this->redis->flushall();
         }
-        if ($prefix == '[app]' || empty($prefix)) {
-            $prefix = APP_NAME . '@cache/';
+        //清空应用
+        if ($type == '[app]' || empty($type)) {
+            $type = APP_NAME . '@cache/';
         } else {
-            $prefix = $this->getName($prefix);
+            $type = $this->parseName($type);
         }
-        $keys = $this->redis->keys($prefix . '*');
+        $keys = $this->redis->keys($type . '*');
         foreach ($keys as $key) {
             $this->redis->delete($key);
         }
         return true;
     }
 
-    private function getName(string $name): string
+    //解析缓存名
+    private function parseName(string $name): string
     {
-        [$app, $name] = pre_split($name, APP_NAME, '@');
+        $name = trim($name, '@');
+        $app = APP_NAME;
+        if (str_contains($name, '@')) {
+            [$app, $name] = explode('@', $name, 2);
+        }
         return rtrim($app . '@cache/' . $name, '*');
     }
 }

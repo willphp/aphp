@@ -13,10 +13,14 @@ namespace willphp\core;
 
 use willphp\core\db\Query;
 
+/**
+ * 数据库操作类
+ */
 class Db
 {
     private static ?object $link = null;
 
+    //连接配置
     public static function connect($config = [], string $table = ''): object
     {
         static $conn = [];
@@ -25,6 +29,7 @@ class Db
         return static::$link = $conn[$sign];
     }
 
+    //静态调用
     public static function __callStatic(string $name, array $arguments)
     {
         if (static::$link === null) {

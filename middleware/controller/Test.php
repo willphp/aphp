@@ -13,9 +13,12 @@ namespace middleware\controller;
 
 use Closure;
 
+/**
+ * 测试示例
+ */
 class Test
 {
-    public function run(Closure $next): void
+    public function run(Closure $next, array $params = []): void
     {
         trace('开始测试');
         $next();

@@ -9,6 +9,9 @@
  |---------------------------------------------------------------*/
 declare(strict_types=1);
 
+/**
+ * 自动加载
+ */
 class Autoloader
 {
     public static function boot(): void

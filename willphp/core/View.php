@@ -10,6 +10,8 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+use Exception;
+
 class View
 {
     use Single;
@@ -93,7 +95,7 @@ class View
             if (THEME_ON) {
                 $theme = '[' . __THEME__ . ']';
             }
-            throw new \Exception($theme . $tpl . ' 模板文件不存在');
+            throw new Exception($theme . $tpl . ' 模板文件不存在');
         }
         $this->viewFile = $viewFile;
         if (THEME_ON) {
@@ -136,12 +138,12 @@ class View
 
     public function toString(): string
     {
-        if ($this->expire >= 0 && ($cache = Cache::get($this->hash))) {
+        if ($this->expire >= 0 && ($cache = Cache::init()->get($this->hash))) {
             return $cache;
         }
         $html = $this->parse();
         if ($this->expire >= 0) {
-            Cache::set($this->hash, $html, $this->expire);
+            Cache::init()->set($this->hash, $html, $this->expire);
         }
         return $html;
     }

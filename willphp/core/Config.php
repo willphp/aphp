@@ -10,12 +10,16 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+/**
+ * 配置处理类
+ */
 class Config
 {
     use Single;
 
     protected static array $items = [];
 
+    //初始化配置
     private function __construct(array $dirs = [])
     {
         if (!empty($dirs)) {
@@ -26,7 +30,7 @@ class Config
             if (!file_exists($cacheFile)) {
                 Dir::del($cacheDir);
                 foreach ($files as $file) {
-                    $this->loadFile($file);
+                    $this->parseFile($file);
                 }
                 file_put_contents($cacheFile, json_encode(self::$items));
             } else {
@@ -36,7 +40,8 @@ class Config
         }
     }
 
-    public function loadFile(string $file): void
+    //配置文件处理
+    public function parseFile(string $file): void
     {
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         if ($ext == 'php') {
@@ -56,16 +61,19 @@ class Config
         }
     }
 
+    //获取全部
     public function all(): array
     {
         return self::$items;
     }
 
+    //重置全部
     public function reset(array $config = []): array
     {
         return self::$items = $config;
     }
 
+    //获取
     public function get(string $name = '', $default = '')
     {
         if (empty($name)) {
@@ -74,11 +82,13 @@ class Config
         return Arr::get(self::$items, $name, $default);
     }
 
+    //设置
     public function set(string $name, $value = '')
     {
         return Arr::set(self::$items, $name, $value);
     }
 
+    //检测存在
     public function has(string $name): bool
     {
         return Arr::has(self::$items, $name);

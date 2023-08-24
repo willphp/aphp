@@ -8,20 +8,27 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace willphp\core\session;
+
 use willphp\core\Arr;
 use willphp\core\Config;
 use willphp\core\Cookie;
 use willphp\core\Single;
 
+/**
+ * session驱动基类
+ */
 abstract class Base
 {
     use Single;
+
     protected string $name; //session 名称
     protected string $id; //session ID
     protected int $expire; //过期时间
     protected array $items; //session 数据
     protected static float $startTime; //开始时间
+
     private function __construct()
     {
         $this->name = Config::init()->get('session.name', 'willphp_session');
@@ -32,14 +39,19 @@ abstract class Base
         self::$startTime = microtime(true);
     }
 
-    abstract public function connect();
+    //连接
+    abstract public function connect(): void;
 
+    //读取
     abstract public function read(): array;
 
-    abstract public function write();
+    //写入
+    abstract public function write(): void;
 
-    abstract public function gc();
+    //回收
+    abstract public function gc(): void;
 
+    //获取session id
     private function getId(): string
     {
         $id = Cookie::init()->get($this->name);
@@ -50,11 +62,13 @@ abstract class Base
         return $id;
     }
 
+    //设置
     public function set(string $name, $value = '')
     {
         return Arr::set($this->items, $name, $value);
     }
 
+    //批量设置
     public function setBatch(array $data): void
     {
         foreach ($data as $k => $v) {
@@ -62,21 +76,25 @@ abstract class Base
         }
     }
 
+    //获取
     public function get(string $name = '', $default = '')
     {
         return empty($name) ? $this->items : Arr::get($this->items, $name, $default);
     }
 
+    //获取所有
     public function all(): array
     {
         return $this->items;
     }
 
+    //检测存在
     public function has(string $name): bool
     {
         return isset($this->items[$name]);
     }
 
+    //删除
     public function del(string $name): bool
     {
         if (isset($this->items[$name])) {
@@ -85,12 +103,14 @@ abstract class Base
         return true;
     }
 
+    //清空
     public function flush(): bool
     {
         $this->items = [];
         return true;
     }
 
+    //闪存快捷操作方法
     public function flash($name = '', $value = '')
     {
         if ($name === '') {
@@ -118,6 +138,7 @@ abstract class Base
         return $this->set('_FLASH_.' . $name, [$value, self::$startTime]);
     }
 
+    //清除闪存
     public function clearFlash(): void
     {
         $flash = $this->items['_FLASH_'] ?? [];
@@ -128,6 +149,7 @@ abstract class Base
         }
     }
 
+    //关闭
     public function close(): void
     {
         $this->write();

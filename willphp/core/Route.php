@@ -28,7 +28,7 @@ class Route
     {
         $this->controller = Config::init()->get('route.default_controller', 'index');
         $this->action = Config::init()->get('route.default_action', 'index');
-        $this->rule = Cache::make('__Route__', fn() => $this->ruleParse());
+        $this->rule = Cache::init()->make('__Route__', fn() => $this->ruleParse());
         $this->uri = $this->getUri();
         $this->route = $this->parseRoute($this->uri, $_GET);
         $this->controller = $this->route['controller'];
@@ -36,14 +36,14 @@ class Route
         $this->path = $this->route['path'];
     }
 
-    protected function error(int $code, array $errs = [])
+    protected function error(int $code, array $errs = []): void
     {
         Response::halt('', $code, $errs);
     }
 
     public function dispatch()
     {
-        if (IS_GET && Config::init()->get('view.cache', false) && $cache = Cache::get('view/' . md5($this->path))) {
+        if (IS_GET && Config::init()->get('view.cache', false) && $cache = Cache::init()->get('view/' . md5($this->path))) {
             return $cache;
         }
         $class = 'app\\' . APP_NAME . '\\controller\\' . name_camel($this->controller);
@@ -223,7 +223,8 @@ class Route
     protected function getUri(): string
     {
         $uri = $this->controller . '/' . $this->action;
-        $pathinfo = trim($_SERVER['PATH_INFO'], '/');
+        $path = $_SERVER['PATH_INFO'] ?? '';
+        $pathinfo = trim($path, '/');
         if (!empty($pathinfo)) {
             $pathinfo = preg_replace('/\/+/', '/', $pathinfo);
             $regex = Config::init()->get('route.check_regex', '#^[a-zA-Z0-9\x7f-\xff\%\/\.\-_]+$#');

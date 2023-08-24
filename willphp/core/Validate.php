@@ -134,7 +134,7 @@ class Validate
 
     public function required(string $value, string $field, string $params, array $data): bool
     {
-        return isset($data[$field]) && !empty($data[$field]);
+        return !empty($data[$field]);
     }
 
     public function exists(string $value, string $field, string $params, array $data): bool
@@ -149,7 +149,7 @@ class Validate
 
     public function confirm(string $value, string $field, string $params, array $data): bool
     {
-        return ($value == $data[$params]);
+        return !isset($data[$params]) || $value == $data[$params];
     }
 
     public function regex(string $value, string $field, string $params, array $data): bool

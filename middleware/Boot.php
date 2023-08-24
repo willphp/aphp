@@ -13,6 +13,9 @@ namespace middleware;
 
 use Closure;
 
+/**
+ * 全局中件间
+ */
 class Boot
 {
     public function run(Closure $next): void

@@ -10,8 +10,12 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+/**
+ * 数组操作增强类
+ */
 class Arr
 {
+    //以键名.键名方式获取数组值
     public static function get(array $data, string $name, $default = '')
     {
         $keys = explode('.', $name);
@@ -22,6 +26,7 @@ class Arr
         return $val;
     }
 
+    //以键名.键名方式设置数组值
     public static function set(array &$data, string $name, $value = '')
     {
         $keys = explode('.', $name);
@@ -33,6 +38,7 @@ class Arr
         return $temp = $value;
     }
 
+    //以键名.键名方式判断键名是否存在
     public static function has(array $data, string $name): bool
     {
         $keys = explode('.', $name);
@@ -46,6 +52,7 @@ class Arr
         return true;
     }
 
+    //数组键名大小写转换
     public static function keyCase(array &$data, int $case = CASE_LOWER): void
     {
         $data = array_change_key_case($data, $case);
@@ -56,6 +63,7 @@ class Arr
         }
     }
 
+    //数组值大小写转换
     public static function valueCase(array &$data, int $case = CASE_LOWER): void
     {
         foreach ($data as $key => $val) {
@@ -67,6 +75,7 @@ class Arr
         }
     }
 
+    //根键名数组对数组进行过滤
     public static function keyFilter(array $data, array $filter, bool $in = false): array
     {
         $callback = fn($key) => $in ? in_array($key, $filter) : !in_array($key, $filter);

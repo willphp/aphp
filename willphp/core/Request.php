@@ -8,11 +8,16 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace willphp\core;
+/**
+ * 请求处理类
+ */
 class Request
 {
     use Single;
-    protected array $items = [];
+
+    protected array $items = []; //get和post数据集合
 
     private function __construct()
     {
@@ -20,6 +25,7 @@ class Request
         $this->items['post'] = $_POST;
     }
 
+    //获取请求数据
     public function getRequest(string $name = '', $default = null, $batchFunc = [])
     {
         if (empty($name)) {
@@ -39,11 +45,13 @@ class Request
         return empty($batchFunc) ? $value : value_batch_func($value, $batchFunc);
     }
 
+    //设置请求数据
     public function setRequest(string $name, $value = ''): bool
     {
         return Arr::set($this->items, $name, $value);
     }
 
+    //设置get请求的数据
     public function setGet($name, $value = ''): void
     {
         if (is_array($name)) {
@@ -62,6 +70,7 @@ class Request
         }
     }
 
+    //检测请求来源
     public function isDomain(): bool
     {
         if (isset($_SERVER['HTTP_REFERER'])) {
@@ -71,6 +80,7 @@ class Request
         return false;
     }
 
+    //获取主机
     public function getHost(string $url = ''): string
     {
         if (empty($url)) {
@@ -80,6 +90,7 @@ class Request
         return $arr['host'] ?? '';
     }
 
+    //获取请求头信息
     public function getHeader(string $name = '', ?string $default = '')
     {
         $server = $_SERVER;
@@ -100,12 +111,13 @@ class Request
         return $headers[strtolower($name)] ?? $default;
     }
 
-    public function csrfCreate(): string
+
+    public function csrfCreate(string $name = 'csrf_token'): string
     {
-        $serverToken = Session::init()->get('csrf_token');
+        $serverToken = Session::init()->get($name);
         if (!$serverToken) {
             $serverToken = md5(get_ip() . microtime(true));
-            Session::init()->set('csrf_token', $serverToken);
+            Session::init()->set($name, $serverToken);
         }
         return $serverToken;
     }

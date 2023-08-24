@@ -18,7 +18,7 @@ use PDO;
 use PDOStatement;
 use willphp\core\Cache;
 use willphp\core\Config;
-use willphp\core\Debug;
+use willphp\core\DebugBar;
 use willphp\core\Log;
 use willphp\core\Middleware;
 use willphp\core\Page;
@@ -76,13 +76,13 @@ class Query implements ArrayAccess, Iterator
         return $this->options[$name] ?? null;
     }
 
-    private function recordSql(string $sql, array $bind = [], bool $isUpdate = false)
+    private function recordSql(string $sql, array $bind = [], bool $isUpdate = false): void
     {
         $sql = $this->getRealSql($sql, $bind);
         if (APP_TRACE) {
-            Debug::init()->trace($sql, 'sql');
+            DebugBar::init()->trace($sql, 'sql');
         }
-        if ($isUpdate && Config::init()->get('log.database_execute', false)) {
+        if ($isUpdate && Config::init()->get('app.log_execute_sql', false)) {
             Log::init()->record($sql, 'sql');
         }
         $middleware = $isUpdate ? 'database_execute' : 'database_query';
@@ -112,7 +112,7 @@ class Query implements ArrayAccess, Iterator
         if ($table == $this->table) {
             return $this->fieldList;
         }
-        return Cache::make('field/' . $table . '_field', fn() => $this->parseFieldList($table));
+        return Cache::init()->make('field/' . $table . '_field', fn() => $this->parseFieldList($table));
     }
 
     private function parseFieldList(string $table): array

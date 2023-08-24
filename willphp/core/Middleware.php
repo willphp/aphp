@@ -14,12 +14,16 @@ namespace willphp\core;
 use Closure;
 use ReflectionClass;
 
+/**
+ * 中间件处理类
+ */
 class Middleware
 {
     use Single;
 
-    protected array $params = [];
+    protected array $params = []; //中间件传参
 
+    //执行中间件
     public function execute($name = [], array $params = []): bool
     {
         $middleware = [];
@@ -35,12 +39,15 @@ class Middleware
         return true;
     }
 
+    //添加应用层中间件
     public function add(string $name, array $middleware)
     {
-        $web = Config::init()->get('middleware.' . $name . $name, []);
-        return Config::init()->set('middleware.' . $name, array_merge($web, $middleware));
+        $config = Config::init();
+        $web = $config->get('middleware.' . $name . $name, []);
+        return $config->set('middleware.' . $name, array_merge($web, $middleware));
     }
 
+    //中间件执行过程
     public function exec(array $middleware = []): bool
     {
         $middleware = array_reverse(array_unique($middleware));
@@ -49,6 +56,7 @@ class Middleware
         return true;
     }
 
+    //运行中件间run方法
     protected function run(Closure $callback, string $class): void
     {
         if (method_exists($class, 'run')) {
@@ -57,6 +65,7 @@ class Middleware
         }
     }
 
+    //设置控制器中间件
     public function set(string $name, array $types = []): bool
     {
         $middleware = [];
@@ -75,6 +84,7 @@ class Middleware
         return $this->exec($middleware);
     }
 
+    //解析控制器中的中间件设置
     public function controller(object $controller): void
     {
         $class = new ReflectionClass($controller);

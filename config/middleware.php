@@ -20,7 +20,7 @@ return [
     ],
     //全局中间件
     'common' => [
-        //\middleware\Boot::class, //框架启动
+        \middleware\Boot::class, //框架启动
     ],
     //框架中间件
     'framework' => [

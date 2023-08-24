@@ -10,6 +10,9 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+/**
+ * 单例调用模块类
+ */
 trait Single
 {
     protected static object $single;

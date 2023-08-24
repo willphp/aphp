@@ -13,11 +13,14 @@ namespace willphp\core;
 
 use Throwable;
 
+/**
+ * 错误处理类
+ */
 class Error
 {
     use Single;
 
-    protected array $msg = [];
+    protected array $msg = []; //错误信息
 
     private function __construct()
     {
@@ -26,6 +29,13 @@ class Error
         set_exception_handler([$this, 'exception']);
     }
 
+    //获取错误信息
+    public function getError(): array
+    {
+        return $this->msg;
+    }
+
+    //错误处理
     public function error(int $code, string $info, string $file, int $line): void
     {
         $error = $this->parseError($code, $info, $file, $line, 0);
@@ -34,12 +44,13 @@ class Error
                 echo '<p style="color:#900">[ERROR] ' . $info . ' [' . basename($file) . ':' . $line . ']<p>';
             }
         } elseif (!in_array($code, [E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED])) {
-            $this->show($error);
+            $this->output($error);
         } else {
             Log::init()->write($error['msg'], $error['type']);
         }
     }
 
+    //异常处理
     public function exception(Throwable $exception): void
     {
         $code = $exception->getCode();
@@ -47,12 +58,13 @@ class Error
         $file = $exception->getFile();
         $line = $exception->getLine();
         $error = $this->parseError($code, $info, $file, $line);
-        $this->show($error);
+        $this->output($error);
     }
 
+    //格式化错误信息
     private function parseError(int $code, string $info, string $file, int $line, int $type = 1): array
     {
-        $file = Dir::removeRoot($file);
+        $file = Dir::hideRoot($file);
         $error = [];
         $error['code'] = $code;
         $error['error'] = $info;
@@ -65,12 +77,8 @@ class Error
         return $error;
     }
 
-    public function getError(): array
-    {
-        return $this->msg;
-    }
-
-    public function show(array $error): void
+    //错误输出
+    public function output(array $error): void
     {
         if (PHP_SAPI == 'cli') {
             die(PHP_EOL . "\033[;36m " . $error['msg'] . " \x1B[0m\n" . PHP_EOL);
@@ -83,8 +91,8 @@ class Error
         if (IS_AJAX) {
             Response::json(500, $msg);
         } else {
-            $tpl = APP_DEBUG ? 'error_debug.php' : 'error_online.php';
-            include ROOT_PATH . '/willphp/core/inc_tpl/'.$tpl;
+            $tpl = APP_DEBUG ? 'error_show.php' : 'error_hide.php';
+            include ROOT_PATH . '/willphp/tpl/' . $tpl;
         }
         exit();
     }

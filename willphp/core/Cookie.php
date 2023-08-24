@@ -10,24 +10,29 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+/**
+ * Cookie处理类
+ */
 class Cookie
 {
     use Single;
 
-    protected array $items;
-    private string $prefix;
-    private string $path;
-    private string $domain;
+    protected array $items; //cookie集合
+    private string $prefix; //类型前缀
+    private string $path; //路径
+    private string $domain; //域名
 
     private function __construct()
     {
         $this->items = $_COOKIE;
-        $this->prefix = APP_NAME . '##';
-        $this->path = Config::init()->get('cookie.path', '/');
-        $this->domain = Config::init()->get('cookie.domain', '');
+        $config = Config::init()->get('cookie', []);
+        $this->prefix = !empty($config['prefix']) ? $config['prefix'] . '##' : APP_NAME . '##';
+        $this->path = $config['path'] ?? '/';
+        $this->domain = $config['domain'] ?? '';
     }
 
-    public function set(string $name, $value, int $expire = 0, ?string $path = null, ?string $domain = null): void
+    //设置
+    public function set(string $name, $value, int $expire = 0, ?string $path = null, ?string $domain = null): bool
     {
         $name = $this->prefix . $name;
         $value = Crypt::init()->encrypt(strval($value));
@@ -40,8 +45,10 @@ class Cookie
             $domain ??= $this->domain;
             setcookie($name, $value, $expire, $path, $domain);
         }
+        return true;
     }
 
+    //获取
     public function get(string $name, $default = '')
     {
         if ($this->has($name)) {
@@ -50,12 +57,14 @@ class Cookie
         return $this->items[$name] ?? $default;
     }
 
-    public function has($name): bool
+    //检测存在
+    public function has(string $name): bool
     {
         return isset($this->items[$this->prefix . $name]);
     }
 
-    public function del($name): bool
+    //删除
+    public function del(string $name): bool
     {
         if (isset($this->items[$this->prefix . $name])) {
             unset($this->items[$this->prefix . $name]);
@@ -66,6 +75,7 @@ class Cookie
         return true;
     }
 
+    //清空
     public function flush(): bool
     {
         if (PHP_SAPI != 'cli') {
@@ -78,6 +88,7 @@ class Cookie
         return true;
     }
 
+    //获取所有
     public function all(): array
     {
         $data = [];

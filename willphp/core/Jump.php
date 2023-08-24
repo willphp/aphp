@@ -10,7 +10,9 @@
 declare(strict_types=1);
 
 namespace willphp\core;
-
+/**
+ * 跳转模块
+ */
 trait Jump
 {
     protected function _json(int $code = 200, string $msg = '', array $data = null, array $extend = []): void
@@ -20,14 +22,12 @@ trait Jump
 
     private function _jumpTo($msg = '', int $code = 400, string $url = null): void
     {
-
         if (is_array($msg)) {
             $msg = current($msg);
         }
         if (empty($msg)) {
-            $msg = Config::init()->get('response.msgs.' . $code);
+            $msg = Config::init()->get('response.code_msg.' . $code);
         }
-
         if (!is_null($url)) {
             $url = Route::init()->buildUrl($url);
         } else {

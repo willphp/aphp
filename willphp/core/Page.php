@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace willphp\core;
 
+/**
+ * 快速分页类
+ */
 class Page
 {
     use Single;

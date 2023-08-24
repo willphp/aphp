@@ -8,11 +8,16 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace willphp\core;
+/**
+ * 缓存调用类
+ */
 class Cache
 {
-    protected static ?object $link = null;
+    protected static ?object $link = null; //驱动链接
 
+    //初始化缓存驱动
     public static function init(?string $driver = null): object
     {
         static $cache = [];
@@ -24,6 +29,7 @@ class Cache
         return static::$link = $cache[$driver];
     }
 
+    //静态调用方法
     public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$link)) {

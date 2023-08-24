@@ -8,7 +8,6 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
-
 /**
  * 支持php8新函数
  */
@@ -106,6 +105,56 @@ function is_continue(int $status, array $data, string $field): bool
 }
 
 /**
+ * 记录trace到调试栏
+ */
+function trace($info = '', string $type = 'debug'): void
+{
+    \willphp\core\DebugBar::init()->trace($info, $type);
+}
+
+/**
+ * 记录变量到日志
+ */
+function log_value($vars, string $name = 'var'): void
+{
+    \willphp\core\Log::init()->value($vars, $name);
+}
+
+/**
+ * 调试输出
+ */
+function dump(...$vars): void
+{
+    ob_start();
+    var_dump(...$vars);
+    $output = ob_get_clean();
+    $output = preg_replace('/]=>\n(\s+)/m', '] => ', $output);
+    if (PHP_SAPI == 'cli') {
+        $output = PHP_EOL . $output . PHP_EOL;
+    } elseif (!extension_loaded('xdebug')) {
+        $output = '<pre>' . htmlspecialchars($output, ENT_SUBSTITUTE) . '</pre>';
+    }
+    echo $output;
+}
+
+/**
+ * 输出并结束
+ */
+function dd(...$vars): void
+{
+    dump(...$vars);
+    exit();
+}
+
+/**
+ * 输出用户常量
+ */
+function dump_const(): void
+{
+    dump(get_defined_constants(true)['user']);
+}
+
+/**
  * 获取类单例
  */
 function app(string $class): object
@@ -164,7 +213,7 @@ function cache(?string $name = '', $value = '', int $expire = 0)
  */
 function cache_flush(string $prefix = '[app]'): bool
 {
-    return \willphp\core\Cache::flush($prefix);
+    return \willphp\core\Cache::init()->flush($prefix);
 }
 
 /**
@@ -273,23 +322,7 @@ function csrf_field(string $name = 'csrf_token'): string
  */
 function csrf_token(string $name = 'csrf_token'): string
 {
-    return \willphp\core\Request::init()->csrfCreate();
-}
-
-/**
- * 记录trace到调试栏
- */
-function trace($info = '', string $level = 'debug'): void
-{
-    \willphp\core\Debug::init()->trace($info, $level);
-}
-
-/**
- * 记录变量到日志
- */
-function log_var($vars, string $name = 'var'): void
-{
-    \willphp\core\Log::init()->logVar($vars, $name);
+    return \willphp\core\Request::init()->csrfCreate($name);
 }
 
 /**
@@ -327,7 +360,7 @@ function get_action(): string
 /**
  * 错误响应
  */
-function halt($msg = '', int $code = 400, array $params = [])
+function halt($msg = '', int $code = 400, array $params = []): void
 {
     \willphp\core\Response::halt($msg, $code, $params);
 }
@@ -380,40 +413,6 @@ function session(?string $name = '', $value = '')
 function session_flash($name = '', $value = '')
 {
     return \willphp\core\Session::init()->flash($name, $value);
-}
-
-/**
- * 调试输出
- */
-function dump(...$vars): void
-{
-    ob_start();
-    var_dump(...$vars);
-    $output = ob_get_clean();
-    $output = preg_replace('/]=>\n(\s+)/m', '] => ', $output);
-    if (PHP_SAPI == 'cli') {
-        $output = PHP_EOL . $output . PHP_EOL;
-    } elseif (!extension_loaded('xdebug')) {
-        $output = '<pre>' . htmlspecialchars($output, ENT_SUBSTITUTE) . '</pre>';
-    }
-    echo $output;
-}
-
-/**
- * 输出并结束
- */
-function dd(...$vars): void
-{
-    dump(...$vars);
-    exit();
-}
-
-/**
- * 输出用户常量
- */
-function dump_const(): void
-{
-    dump(get_defined_constants(true)['user']);
 }
 
 /**

@@ -16,8 +16,11 @@ class Thumb
 
     public function getThumb(string $image, int $width, int $height, int $thumbType = 6): string
     {
+        if (empty($image)) {
+            return '';
+        }
         $path = $image;
-        $host = '';
+        $host = '/';
         if (false !== filter_var($image, FILTER_VALIDATE_URL)) {
             $path = parse_url($image, PHP_URL_PATH);
             $host = substr($image, 0, -strlen($path)) . '/';
@@ -39,6 +42,7 @@ class Thumb
     {
         if (is_file($imgFile) && $imgInfo = getimagesize($imgFile)) {
             $thumbSize = $this->getThumbSize($imgInfo[0], $imgInfo[1], $thumbWidth, $thumbHeight, $thumbType);
+            $thumbSize = array_map(fn($v):int=>intval($v), $thumbSize);
             $imgType = image_type_to_extension($imgInfo[2], false);
             $funcCreate = 'imagecreatefrom' . $imgType;
             $funcOut = 'image' . $imgType;

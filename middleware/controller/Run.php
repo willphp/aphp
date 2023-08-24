@@ -13,6 +13,9 @@ namespace middleware\controller;
 
 use Closure;
 
+/**
+ * 运行示例
+ */
 class Run
 {
     public function run(Closure $next, array $params = []): void

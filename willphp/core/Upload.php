@@ -49,12 +49,17 @@ class Upload
             $this->error = '文件类型不允许';
             return [];
         }
-        $fileName ?: mt_rand(1, 9999) . time();
+        if (empty($fileName)) {
+            $fileName = mt_rand(1, 9999) . time();
+        }
         $filePath = $this->path . '/' . $fileName . $ext;
         $ok = file_put_contents($filePath, base64_decode($data), LOCK_EX);
         if (!$ok) {
             $this->error = '文件保存失败';
             return [];
+        }
+        if ($this->config['auto_thumb']) {
+            $filePath = $this->thumb($filePath);
         }
         $file = [];
         $file['path'] = substr($filePath, strlen(ROOT_PATH . '/public')); //新文件名

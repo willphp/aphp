@@ -10,11 +10,14 @@
 declare(strict_types=1);
 
 namespace willphp\core;
+/**
+ * 部件基类(数据缓存)
+ */
 abstract class Widget
 {
-    protected string $tagName;
-    protected string $prefix;
-    protected int $expire = 0;
+    protected string $tagName; //缓存标签名
+    protected int $expire = 0; //缓存时间(秒)
+    protected string $prefix; //缓存前缀
 
     public function __construct()
     {
@@ -26,25 +29,24 @@ abstract class Widget
         $this->prefix = $path[1] . '@widget/' . $this->tagName . '/' . $class;
     }
 
+    //缓存数据设置
     abstract public function set($id = '', array $options = []);
 
+    //获取
     public function get($id = '', array $options = [])
     {
-        $name = $this->getName($id, $options);
-        return Cache::make($name, fn() => $this->set($id, $options), $this->expire);
-    }
-
-    public function update(): bool
-    {
-        return Cache::flush($this->prefix);
-    }
-
-    public function getName($id = '', array $options = []): string
-    {
+        $name = $id;
         if (!empty($options)) {
             ksort($options);
-            $id .= http_build_query($options);
+            $name .= http_build_query($options);
         }
-        return $this->prefix . '/' . md5(strval($id));
+        $name = $this->prefix . '/' . md5(strval($name));
+        return Cache::init()->make($name, fn() => $this->set($id, $options), $this->expire);
+    }
+
+    //更新
+    public function update(): bool
+    {
+        return Cache::init()->flush($this->prefix);
     }
 }

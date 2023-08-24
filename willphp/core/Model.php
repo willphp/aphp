@@ -90,8 +90,9 @@ abstract class Model implements ArrayAccess, Iterator
 
     public function updateWidget(): void
     {
-        Cache::flush(APP_NAME.'@widget/'.$this->table.'/*');
-        Cache::flush('common@widget/'.$this->table.'/*');
+        $cache = Cache::init();
+        $cache->flush(APP_NAME.'@widget/'.$this->table.'/*');
+        $cache->flush('common@widget/'.$this->table.'/*');
     }
 
     final public function toArray(): array

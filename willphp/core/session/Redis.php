@@ -13,11 +13,15 @@ namespace willphp\core\session;
 
 use willphp\core\Config;
 
+/**
+ * session Redis驱动处理类
+ */
 class Redis extends Base
 {
-    protected object $redis;
+    protected object $redis; //redis对象
 
-    public function connect()
+    //连接
+    public function connect(): void
     {
         $config = Config::init()->get('session.redis');
         $this->redis = new \Redis();
@@ -28,18 +32,21 @@ class Redis extends Base
         $this->redis->select((int)$config['database']);
     }
 
+    //读取
     public function read(): array
     {
         $data = $this->redis->get($this->id);
         return $data ? json_decode($data, true) : [];
     }
 
-    public function write()
+    //写入
+    public function write(): void
     {
         $this->redis->set($this->id, json_encode($this->items, JSON_UNESCAPED_UNICODE));
     }
 
-    public function gc()
+    //回收
+    public function gc(): void
     {
     }
 }

@@ -9,7 +9,7 @@
  |---------------------------------------------------------------*/
 return [
     //调试栏显示
-    'level' => [
+    'tabs' => [
         'base' => '基本',
         'file' => '文件', //去掉则不显示文件加载
         'sql' => 'SQL',
@@ -20,6 +20,6 @@ return [
         'session' => 'SESSION',
         'error' => '错误',
     ],
-    'is_hide' => false, //是否隐藏调试栏
-    'process_log' => true, //是否把进程日志加入html注释
+    'is_hide' => false, //是否隐藏
+    'is_footnote' => true, //是否显示html页脚注释
 ];

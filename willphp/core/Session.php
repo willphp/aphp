@@ -8,11 +8,16 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace willphp\core;
+/**
+ * session调用处理类
+ */
 class Session
 {
-    protected static ?object $link = null;
+    protected static ?object $link = null; //驱动链接
 
+    //初始化处理驱动
     public static function init(): object
     {
         if (is_null(static::$link)) {
@@ -23,6 +28,7 @@ class Session
         return static::$link;
     }
 
+    //静态调用方法
     public static function __callStatic(string $name, array $arguments)
     {
         if (is_null(static::$link)) {
