@@ -50,7 +50,7 @@ return [
         '/{\s*empty\s*(.+?)\s*:}/i' => '<?php if (empty(\\1)):?>',//empty(*):
         '/{\s*else:\s*}/i' => '<?php else:?>', //else:
         '/{\s*\/(if|empty)\s*}/i' => '<?php endif?>', //endif
-        '/{\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+?)\s*}/i' => '<?php echo \\1 ? \\2 : \\3?>', //{条件 ? '1' : '0'}
+        '/{\s*if\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+?)\s*}/i' => '<?php echo \\1 ? \\2 : \\3?>', //{if 条件 ? '1' : '0'}
         '/{\s*foreach\s+\$var\s+as\s+\$var\s*}/i' => '<?php foreach($\\1 as $\\2):?>', //foreach $数组 as $变量
         '/{\s*foreach\s+\$var\s+as\s+\$key\s*=>\s*\$var\s*}/i' => '<?php foreach($\\1 as $\\2 => $\\3):?>', //foreach $数组 as $键名=>$变量
         '/{\s*\/foreach\s*}/i' => '<?php endforeach?>', //endforeach
