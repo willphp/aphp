@@ -16,7 +16,7 @@ return [
         'auto_thumb' => true, //自动生成thumb
         'thumb' => [
             'thumb_type' => 1, //生成方式：1固宽,2固高,3固宽裁高,4固高裁宽,5缩放,6自动裁切
-            'max_width' => 750, //当图片宽度超过750时生成thumb
+            'max_width' => 980, //当图片宽度超过750时生成thumb
             'width' => 0, //thumb宽度
             'height' => 0, //thumb高度
             'del_src' => true, //生成thumb后删除源图片

@@ -25,11 +25,34 @@ GitHub地址： [https://github.com/willphp/yiyu](https://github.com/willphp/yiy
 
 >如无需composer加载，可删除vendor目录，使用框架自动加载！
 
+### URL重写
+
+[Apache] .htaccess
+
+```
+<IfModule mod_rewrite.c>
+  Options +FollowSymlinks -Multiviews
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(.*)$ index.php? [L,E=PATH_INFO:$1]
+</IfModule>
+```
+
+[Nginx] nginx.htaccess
+
+```
+location / {
+	if (!-e $request_filename) {
+		rewrite  ^(.*)$  /index.php/$1  last;
+	}
+}
+```
 
 ### 交流Q群
 
 >QQ群1：325825297 QQ群2：16008861
 
-### 框架版权
+### 关于框架
 
 官网：[113344.com](http://www.113344.com) 无念(24203741@qq.com) 

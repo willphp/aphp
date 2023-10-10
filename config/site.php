@@ -8,6 +8,7 @@
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
+    'version' => '20231010',
     'theme' => 'default',
     'site_title' => '一鱼PHP框架',
     'site_kw' => '一鱼PHP框架,willphp,PHP框架,MVC框架,php博客',

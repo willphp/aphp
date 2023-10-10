@@ -82,7 +82,7 @@ abstract class Model implements ArrayAccess, Iterator
         foreach ($data as $key => $val) {
             $method = 'get' . name_camel($key) . 'Attr';
             if (method_exists($this, $method)) {
-                $data[$key] = $this->$method($val);
+                $data['_'.$key] = $this->$method($val, $data);
             }
         }
         return $data;
@@ -91,8 +91,8 @@ abstract class Model implements ArrayAccess, Iterator
     public function updateWidget(): void
     {
         $cache = Cache::init();
-        $cache->flush(APP_NAME.'@widget/'.$this->table.'/*');
-        $cache->flush('common@widget/'.$this->table.'/*');
+        $cache->flush(APP_NAME . '@widget/' . $this->table . '/*');
+        $cache->flush('common@widget/' . $this->table . '/*');
     }
 
     final public function toArray(): array
@@ -370,7 +370,11 @@ abstract class Model implements ArrayAccess, Iterator
             if ($name == 'find') {
                 return $this->setData($data);
             }
+            if ($name == 'select') {
+                $res = array_map(fn(array $v): array => $this->getFieldAuto($v), $res);
+            }
             if ($name == 'paginate') {
+                $res->objData = array_map(fn(array $v): array => $this->getFieldAuto($v), $res->objData);
                 return $res;
             }
             if ($res instanceof Query) {

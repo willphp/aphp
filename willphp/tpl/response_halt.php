@@ -40,7 +40,7 @@
             </div>
             <h3><strong>:(</strong><?php echo $msg; ?></h3>
             <div class="error-page-body">
-                <p>页面自动 <a id="href" href="javascript:history.back(-1);">跳转</a> 等待时间： <b id="wait">5</b> 秒</p>
+                <p>页面自动 <a id="href" href="javascript:history.back(-1);">跳转</a> 等待时间： <strong id="wait">5</strong> 秒</p>
             </div>
             <div class="error-page-foot">
                 <a href="<?php echo __URL__; ?>" class="green">返回首页</a>

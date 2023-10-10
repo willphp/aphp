@@ -30,10 +30,20 @@ class Route
         $this->action = Config::init()->get('route.default_action', 'index');
         $this->rule = Cache::init()->make('__Route__', fn() => $this->ruleParse());
         $this->uri = $this->getUri();
-        $this->route = $this->parseRoute($this->uri, $_GET);
+        $this->route = $this->parseRoute($this->uri, $this->getParams());
         $this->controller = $this->route['controller'];
         $this->action = $this->route['action'];
         $this->path = $this->route['path'];
+    }
+
+    protected function getParams(): array
+    {
+        $params = [];
+        $request = parse_url($_SERVER['REQUEST_URI']);
+        if (isset($request['query'])) {
+            parse_str($request['query'], $params);
+        }
+        return $params;
     }
 
     protected function error(int $code, array $errs = []): void
@@ -61,7 +71,6 @@ class Route
             }
             $this->error(404, $errs);
         }
-
         Middleware::init()->execute('framework.controller_start', ['path' => $this->path]);
         $class = App::make($class);
         $classMethod = new ReflectionMethod($class, $action);
@@ -86,10 +95,10 @@ class Route
                 $binds[$argName] = $params[$argName];
             } elseif (!is_null($argType) && !$argType->isBuiltin()) {
                 $binds[$argName] = App::make($argType->getName());
-            } elseif ($arg->isDefaultValueAvailable()) {
-                $binds[$argName] = $extend[$argName] = $arg->getDefaultValue();
             } elseif (isset($_POST[$argName])) {
                 $binds[$argName] = $_POST[$argName];
+            } elseif ($arg->isDefaultValueAvailable()) {
+                $binds[$argName] = $extend[$argName] = $arg->getDefaultValue();
             } else {
                 $errs['param'] = $argName;
                 $this->error(416, $errs);
@@ -223,7 +232,7 @@ class Route
     protected function getUri(): string
     {
         $uri = $this->controller . '/' . $this->action;
-        $path = $_SERVER['PATH_INFO'] ?? '';
+        $path = $_SERVER['PATH_INFO'] ?? $_SERVER['ORIG_PATH_INFO'] ?? $_SERVER['REDIRECT_PATH_INFO']  ?? $_SERVER['REDIRECT_URL'] ?? '';
         $pathinfo = trim($path, '/');
         if (!empty($pathinfo)) {
             $pathinfo = preg_replace('/\/+/', '/', $pathinfo);

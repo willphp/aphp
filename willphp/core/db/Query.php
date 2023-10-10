@@ -37,7 +37,7 @@ class Query implements ArrayAccess, Iterator
     protected string $pk = 'id'; //表主键
     protected array $options = [];
     protected array $bind = [];
-    protected array $objData = []; //对象数据
+    public array $objData = []; //对象数据
     protected ?object $page = null;
 
     private function __construct(string $table = '', $config = [])

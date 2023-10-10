@@ -20,7 +20,8 @@ return [
     'regex_literal' => '/{literal}(.*?){\/literal}/s', //原样输出标识正则
     'var' => '([a-zA-Z_][a-zA-Z0-9_]*)', //变量名正则
     'key' => '([a-zA-Z0-9_]*)', //键名正则
-    'regex_include' => '/{\s*include\s+[\"\']?(.+?)[\"\']?\s*}/i', //模板包含正则
+    'regex_layout' => '/{\s*layout\s+name\s*=\s*[\"\']?(.+?)[\"\']?\s*}/i', //布局模板正则
+    'regex_include' => '/{\s*include\s+file\s*=\s*[\"\']?(.+?)[\"\']?\s*}/i', //模板包含正则
     //正则替换
     'regex_replace' => [
         '/__(\w+)__/i' => '<?php echo __\\1__?>', //__常量__
@@ -35,9 +36,12 @@ return [
         '/{\s*\$var\[\$var\[[\'"]?key[\'"]?\]\]\s*}/i' => '<?php echo $\\1[$\\2[\'\\3\']]?>', //$变量名[$变量名[键名]]
         '/{\s*php\s+\$var\s*=\s*(.+?)\s*}/i' => '<?php $\\1 = \\2?>', //php $变量名=*
         '/{\s*:var\((.*?)\)\s*}/i' => '<?php echo \\1(\\2)?>', //:函数名称(*)
+        '/{\s*(.+?)\s*\?:\s*(.+?)\s*}/i' => '<?php echo \\1 ?: \\2?>', //{变量表达式 ?: '默认值'}
         '/{\s*\$var\|var\s*}/i' => '<?php echo \\2($\\1)?>', //$变量名|函数名
+        '/{\s*\$var\|default=(.+?)\s*}/i' => '<?php echo $\\1 ?: \\2?>', //$变量名|default=默认值
         '/{\s*\$var\|var=(.+?)\s*}/i' => '<?php echo \\2($\\1,\\3)?>', //$变量名|函数名=参数
         '/{\s*\$var\.key\|var\s*}/i' => '<?php echo \\3($\\1[\'\\2\'])?>', //$变量名.键名|函数
+        '/{\s*\$var\.key\|default=(.+?)\s*}/i' => '<?php echo $\\1[\'\\2\'] ?: \\3?>', //$变量名.键名|default=默认值
         '/{\s*\$var\.key\|var=(.+?)\s*}/i' => '<?php echo \\3($\\1[\'\\2\'],\\4)?>', //$变量名.键名|函数=参数
         '/{\s*:var\((.*?)\)\->var\((.*?)\)\s*}/i' => '<?php echo \\1(\\2)->\\3(\\4)?>', //:函数(参数)->方法(参数)
         '/{\s*\$var\->var\((.*?)\)\s*}/i' => '<?php echo $\\1->\\2(\\3)?>', //$对象名->方法(参数)
@@ -46,6 +50,7 @@ return [
         '/{\s*empty\s*(.+?)\s*:}/i' => '<?php if (empty(\\1)):?>',//empty(*):
         '/{\s*else:\s*}/i' => '<?php else:?>', //else:
         '/{\s*\/(if|empty)\s*}/i' => '<?php endif?>', //endif
+        '/{\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+?)\s*}/i' => '<?php echo \\1 ? \\2 : \\3?>', //{条件 ? '1' : '0'}
         '/{\s*foreach\s+\$var\s+as\s+\$var\s*}/i' => '<?php foreach($\\1 as $\\2):?>', //foreach $数组 as $变量
         '/{\s*foreach\s+\$var\s+as\s+\$key\s*=>\s*\$var\s*}/i' => '<?php foreach($\\1 as $\\2 => $\\3):?>', //foreach $数组 as $键名=>$变量
         '/{\s*\/foreach\s*}/i' => '<?php endforeach?>', //endforeach

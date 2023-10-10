@@ -180,6 +180,22 @@ function config(string $name = '', $value = null, string $type = '')
 }
 
 /**
+ * 快速获取配置
+ */
+function get_config(string $name = '', $default = '')
+{
+    return \willphp\core\Config::init()->get($name, $default);
+}
+
+/**
+ * 快速设置配置
+ */
+function set_config(string $name = '', $value = '')
+{
+    return \willphp\core\Config::init()->set($name, $value);
+}
+
+/**
  * site配置获取和设置
  */
 function site(string $name = '', $value = null)
