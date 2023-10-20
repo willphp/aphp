@@ -43,6 +43,9 @@ class Route
         if (isset($request['query'])) {
             parse_str($request['query'], $params);
         }
+        if (!empty($params)) {
+            Request::init()->setGet($params);
+        }
         return $params;
     }
 
@@ -104,7 +107,9 @@ class Route
                 $this->error(416, $errs);
             }
         }
-        Request::init()->setGet(array_merge($params, $extend));
+        if (!empty($extend)) {
+            Request::init()->setGet($extend);
+        }
         if (IS_POST && Config::init()->get('view.csrf_check', false)) {
             Request::init()->csrfCheck();
         }
