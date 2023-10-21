@@ -43,9 +43,6 @@ class Route
         if (isset($request['query'])) {
             parse_str($request['query'], $params);
         }
-        if (!empty($params)) {
-            Request::init()->setGet($params);
-        }
         return $params;
     }
 
@@ -62,6 +59,9 @@ class Route
         $class = 'app\\' . APP_NAME . '\\controller\\' . name_camel($this->controller);
         $action = $this->action;
         $params = $this->route['params'];
+        if (!empty($params)) {
+            Request::init()->setGet($params);
+        }
         $errs = ['path' => $this->controller . '/' . $this->action];
         if (str_starts_with($action, '_')) {
             $code = substr($action, 1);
