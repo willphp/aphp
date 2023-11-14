@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -140,7 +140,7 @@ class DebugBar
             '主机信息：' . $_SERVER['SERVER_SOFTWARE'] . ' PHP版本：' . PHP_VERSION,
             '请求信息：' . $_SERVER['SERVER_PROTOCOL'] . ' ' . $_SERVER['REQUEST_METHOD'] . ': <a href="' . __URL__ . '" style="color:#333;">' . __URL__ . '</a>',
             '路由参数：' . $this->trace['path'],
-            '内存开销：' . $this->trace['memory'] . ' <a href="' . __URL__ . '/api/clear" style="color:green;">清除缓存</a>',
+            '内存开销：' . $this->trace['memory'] . ' <a href="' . __URL__ . '/api/clear" style="color:green;">清空缓存</a>',
             '调试统计：文件：' . $this->trace['total'] . '(' . $this->trace['filesize'] . ')' . $totalExtend,
             '运行时间：' . $this->trace['time'] . ' at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="http://www.113344.com" style="color:green;" target="_blank" rel="noopenner noreferrer">WillPHP' . __VERSION__ . '</a>',
         ];

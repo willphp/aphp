@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -238,6 +238,14 @@ function cache_flush(string $prefix = '[app]'): bool
 function clear_runtime(string $app = ''): bool
 {
     return \willphp\core\Dir::del(ROOT_PATH.'/runtime/'.$app);
+}
+
+/**
+ * 目录检测生成
+ */
+function dir_make(string $dir, int $auth = 0755): string
+{
+    return \willphp\core\Dir::make($dir, $auth);
 }
 
 /**
@@ -575,4 +583,22 @@ function get_page(array $list, int $pageSize = 10): array
     $offset = $page->getAttr('offset');
     $list = array_slice($list, $offset, $pageSize);
     return ['list' => $list, 'page_html' => $page->getHtml()];
+}
+
+//ids过滤转换
+function ids_filter(string $ids, bool $to_array = false, bool $gt_0 = true)
+{
+    $ids = array_filter(explode(',', $ids), 'is_numeric');
+    $ids = array_unique($ids);
+    if ($gt_0) {
+        $ids = array_filter($ids, fn(int $n)=>$n>0);
+    }
+    ksort($ids);
+    return $to_array ? $ids : implode(',', $ids);
+}
+
+// 获取网站版本
+function site_ver(): string
+{
+    return APP_DEBUG ? date('YmdHis') : get_config('site.version', date('Y-m-d'));
 }

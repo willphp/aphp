@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -44,7 +44,7 @@ class Build
             file_put_contents(APP_PATH . '/controller/Error.php', $c_error);
             //API控制器
             $c_api = "<?php\ndeclare(strict_types=1);\nnamespace app\\" . APP_NAME . "\\controller;\nuse willphp\\core\\Jump;\nclass Api\n{\n\tuse Jump;\n\tpublic function clear()\n\t{\n\t\tcache_flush('[all]');";
-            $c_api .= "\n\t\t\$this->success('清除缓存成功', 'index/index');\n\t}\n}";
+            $c_api .= "\n\t\t\$this->success('清空缓存成功', 'index/index');\n\t}\n}";
             file_put_contents(APP_PATH . '/controller/Api.php', $c_api);
             //首页模板
             $t_index = file_get_contents(ROOT_PATH . '/willphp/tpl/build_index.tpl');

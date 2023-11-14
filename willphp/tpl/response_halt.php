@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>跳转提示!</title>
+    <title>错误提示!</title>
     <style>
         body,code,dd,div,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,input,legend,li,ol,p,pre,td,textarea,th,ul{margin:0;padding:0}
         body{background:#f0f1f3;font-size:16px;font-family:Tahoma,Arial,sans-serif;color:#111}

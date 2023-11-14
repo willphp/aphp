@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -310,6 +310,8 @@ abstract class Model implements ArrayAccess, Iterator
                         }
                         $data[$field] = !empty((new ReflectionFunction($func))->getParameters()) ? $func($data[$field]) : $func();
                     }
+                } elseif ($type == 'field') {
+                    $data[$field] = $data[$rule] ?? ''; //增加等同于字段
                 } else {
                     $data[$field] = $rule;
                 }

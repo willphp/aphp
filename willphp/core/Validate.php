@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -115,8 +115,20 @@ class Validate
 
     public function unique(string $value, string $field, string $params, array $data): bool
     {
-        if (!empty($params) && str_contains($params, ',')) {
-            [$table, $pk] = explode(',', $params, 2);
+        if (!empty($params)) {
+            $params = explode(',', $params);
+            $count = count($params); //参数数量
+            if ($count == 3) {
+                [$table, $pk, $field] = $params;
+            } elseif ($count == 2) {
+                [$table, $pk] = $params;
+            } elseif ($count == 1 && !is_null($this->model)) {
+                $table = $this->model->getTable();
+                $pk = $this->model->getPk();
+                $field = current($params);
+            } else {
+                return false;
+            }
         } elseif (!is_null($this->model)) {
             $table = $this->model->getTable();
             $pk = $this->model->getPk();
@@ -125,11 +137,16 @@ class Validate
         }
         $map = $this->uniqueMap;
         $map[$field] = $value;
-        if (($this->handle == 0 && isset($data[$pk])) || $this->handle == IN_UPDATE) {
+        if (($this->handle == 0 && isset($data[$pk])) || ($this->handle == IN_UPDATE && $table == $this->model->getTable())) {
             $map[] = [$pk, '<>', $data[$pk]];
         }
         $isFind = db($table)->field($pk)->where($map)->find();
         return !$isFind || empty($value);
+    }
+
+    public function value_find(string $value, string $field, string $params, array $data): bool
+    {
+        return !$this->unique($value, $field, $params, $data);
     }
 
     public function required(string $value, string $field, string $params, array $data): bool

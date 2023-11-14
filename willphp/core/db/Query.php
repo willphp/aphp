@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -76,13 +76,37 @@ class Query implements ArrayAccess, Iterator
         return $this->options[$name] ?? null;
     }
 
+    public function hasTable(string $table): bool
+    {
+        $isHas = $this->query("SHOW TABLES LIKE '{$this->prefix}{$table}';");
+        return !empty($isHas);
+    }
+
+    public function cloneIds(array $ids): bool
+    {
+        $ids = array_filter($ids, 'is_numeric');
+        if (empty($ids)) return false;
+        if (count($ids) > 1) {
+            $where = $this->pk.' IN ('.implode(',', $ids).')';
+        } else {
+            $where = $this->pk.' = '.current($ids);
+        }
+        $fields = $this->getFieldList();
+        array_shift($fields);
+        $fields = implode(',', $fields);
+        $table = $this->prefix.$this->getTable();
+        $result = $this->execute("INSERT INTO `$table` ($fields) SELECT $fields FROM `$table` WHERE $where;");
+        return (bool)$result;
+    }
+
     private function recordSql(string $sql, array $bind = [], bool $isUpdate = false): void
     {
         $sql = $this->getRealSql($sql, $bind);
         if (APP_TRACE) {
             DebugBar::init()->trace($sql, 'sql');
         }
-        if ($isUpdate && Config::init()->get('app.log_execute_sql', false)) {
+        $log_sql = Config::init()->get('app.log_sql_level', 0);
+        if ($log_sql == 2 || ($log_sql == 1 && $isUpdate)) {
             Log::init()->record($sql, 'sql');
         }
         $middleware = $isUpdate ? 'database_execute' : 'database_query';

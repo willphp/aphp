@@ -3,12 +3,12 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 return [
-    'version' => '20231010',
+    'version' => '20231111',
     'theme' => 'default',
     'site_title' => '一鱼PHP框架',
     'site_kw' => '一鱼PHP框架,willphp,PHP框架,MVC框架,php博客',

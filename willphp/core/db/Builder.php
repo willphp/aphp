@@ -3,7 +3,7 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
@@ -249,40 +249,27 @@ class Builder
     public function getExpress(string $field, $condition, string $op = '=')
     {
         $op = strtoupper($op);
-        $express = false;
-        if (in_array($op, ['=', '<>', '>', '>=', '<', '<='])) {
+        if (in_array($op, ['=', '<>', '!=', '>', '>=', '<', '<=', 'LIKE', 'NOT LIKE'])) {
             $express = $this->parseValue($condition);
             if (is_scalar($express)) {
-                return $this->parseKey($field) . $op . $express;
+                return $this->parseKey($field) . ' ' . $op . ' ' . $express;
             }
+            return false;
         }
-        if ($op == 'EXP') {
-            return $this->parseKey($field) . ' ' . $condition;
-        }
-        if ($op == 'IN' || $op == 'NOT IN') {
-            if (is_array($condition)) {
-                $express = implode(',', $condition);
-            } elseif (strpos($condition, ',')) {
-                $express = $condition;
+        if (in_array($op, ['IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN'])) {
+            if (!is_array($condition)) {
+                $condition = explode(',', $condition);
             }
-            if ($express) {
-                return $this->parseKey($field) . ' ' . $op . ' (' . $express . ')';
+            $express = $this->parseValue($condition);
+            if ($op == 'BETWEEN' || $op == 'NOT BETWEEN') {
+                return '(' . $this->parseKey($field) . ' ' . $op . ' ' . implode(' AND ', $express) . ')';
             }
+            return $this->parseKey($field) . ' ' . $op . ' (' . implode(',', $express) . ')';
         }
-        if ($op == 'BETWEEN' || $op == 'NOT BETWEEN') {
-            if (is_array($condition)) {
-                $express = implode(' AND ', $condition);
-            } elseif (strpos($condition, ',')) {
-                $express = implode(' AND ', explode(',', $condition));
-            }
-            if ($express) {
-                return '(' . $this->parseKey($field) . ' ' . $op . ' ' . $express . ')';
-            }
-        }
-        if ($op == 'LIKE' || $op == 'NOT LIKE') {
-            return $this->parseKey($field) . ' ' . $op . ' \'' . $condition . '\'';
-        }
-        return $express;
+        //if ($op == 'EXP') {
+        //    return $this->parseKey($field) . ' ' . $condition; //存在注入风险
+        //}
+        return false;
     }
 
     protected function linkExpress(array $express, array $logic): string

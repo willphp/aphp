@@ -71,7 +71,7 @@
             </div>
             <div class="willphp-copyright cl">
                 CopyRight &copy; 2020-{:date('Y')} <a href="http://www.113344.com" title="willphp官网" target="_blank">113344.com</a>
-                by 无念 | 主题：__THEME__
+                by 大松栩 | 主题：__THEME__
             </div>
         </div>
         <div class="willphp-page-actions"></div>

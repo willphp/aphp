@@ -12,7 +12,7 @@
   "license": "Apache-2.0",
   "authors": [
     {
-      "name": "无念",
+      "name": "大松栩",
       "email": "24203741@qq.com"
     }
   ],
@@ -23,8 +23,7 @@
     "ext-pdo": "*",
     "ext-mbstring": "*",
     "ext-gd": "*",
-    "ext-openssl": "*",
-    "ext-zip": "*"
+    "ext-openssl": "*"
   },
   "autoload": {
     "psr-4": {

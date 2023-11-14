@@ -3,14 +3,14 @@
  | Software: [WillPHP framework]
  | Site: 113344.com
  |----------------------------------------------------------------
- | Author: 无念 <24203741@qq.com>
+ | Author: 大松栩 <24203741@qq.com>
  | WeChat: www113344
  | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
  |---------------------------------------------------------------*/
 declare(strict_types=1); //采用严格模式
 define('START_MEMORY', memory_get_usage()); //开始时间
 define('START_TIME', microtime(true)); //开始内存
-const __VERSION__ = 'v4.6.6'; //框架版本
+const __VERSION__ = 'v4.7.0'; //框架版本
 const __POWERED__ = 'WillPHP ' . __VERSION__; //框架全称
 version_compare(PHP_VERSION, '7.4.3', '<') and die(__POWERED__ . ' 仅支持 PHP 7.4.3+ 以上版本！'); //PHP版本验证
 //条件常量，用于字段验证，处理，过滤
