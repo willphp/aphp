@@ -56,6 +56,10 @@ final class App
         define('APP_DEBUG', $config['debug'] ?? false); //调试开关
         define('APP_TRACE', $config['trace'] ?? false); //调试栏开关
         define('URL_REWRITE', $config['url_rewrite'] ?? false); //URL重写
+        $_SERVER['PATH_INFO'] ??= '';
+        if (!empty($_SERVER['PATH_INFO'])) {
+            $_SERVER['SCRIPT_NAME'] = str_replace($_SERVER['PATH_INFO'], '', $_SERVER['SCRIPT_NAME']);
+        }
         define('__HOST__', IS_HTTPS ? 'https://' . $_SERVER['HTTP_HOST'] : 'http://' . $_SERVER['HTTP_HOST']); //域名
         define('__WEB__', URL_REWRITE ? strtr($_SERVER['SCRIPT_NAME'], ['/index.php' => '']) : $_SERVER['SCRIPT_NAME']); //相对地址
         define('__URL__', __HOST__ . __WEB__); //当前URL

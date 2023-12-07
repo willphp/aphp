@@ -323,9 +323,9 @@ class Query implements ArrayAccess, Iterator
         return $data;
     }
 
-    public function getResult(string $sql): array
+    public function getResult(string $sql, array $bind = []): array
     {
-        $result = $this->query($sql);
+        $result = $this->query($sql, $bind);
         if (isset($result[0]['Variable_name'])) {
             $data = [];
             foreach ($result as $re) {
