@@ -1,41 +1,58 @@
-## WillPHP框架
+<p align="center">
+    <a href="https://github.com/willphp/yiyu">
+        <img src="https://avatars.githubusercontent.com/u/94844305?v=4" width="192" alt="aidigu" />
+    </a>
+</p>
+<p align="center">
+    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/PHP-7.4.3~8.2.x-blue?style=for-the-badge&color=%238d4bbb" alt="PHP7.4.3~8.2.x"></a>
+    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/STABLE-4.7.1-blue?style=for-the-badge&color=%230aa344" alt="Latest Stable Version"></a>
+    <a href="hhttps://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/UNSTABLE-4.7.x--DEV-blue?style=for-the-badge&color=%23ff0097" alt="Latest Unstable Version"></a>
+    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/SIZE-124KB-blue?style=for-the-badge&color=%23f0c239" alt="Download Size"></a>
+    <a href="https://raw.githubusercontent.com/lty628/aidigu/master/LICENSE"><img src="https://img.shields.io/badge/LICENSE-Apache--2.0-blue?style=for-the-badge&color=%23FF0000" alt="Apache-2.0 License"></a>
+</p>
 
->WillPHP(一鱼框架)是一个轻量级php8开发框架
+## WillPHP Framework
 
-### 框架特色
+>WillPHP Framework is a lightweight PHP 8 development framework.
+---
+### The Features
 
-- 易学，会ThinkPHP就会WillPHP，可当新手入门学习框架
-- 轻量，200KB+，目录和文件结构简单
-- 简单，开发只需少量代码，模板语法可定制
-- ORM，与ThinkPHP相似，数据库操作简单
-- 安全，可自动过滤，自动验证请求参数
-
-### 环境要求
+- **It is easy to LEARN**：*If you know  <a href="https://github.com/top-think/think">ThinkPHP</a>, you'll find WillPHP easy to grasp.Of course, if you're not familiar with ThinkPHP, that's perfectly fine. This is a framework designed for beginners, and it's very easy to get started with, even if you are learning from scratch.*
+  
+- **More Light***：Only 200KB+, WillPHP boasts a simple directory and file structure.*
+  
+- **Simple**：*Development requires minimal code, and template syntax is customizable.*
+  
+- **ORM (Object-Relational Mapping)**：*It is Similar to ThinkPHP, WillPHP offers straightforward database operations.*
+  
+- **Security**：*Automatically filters and validates incoming request parameters for enhanced security.*
+---
+### System Requirements
 
 - PHP7.4.3~PHP8.2.x
-- PDO等扩展
+- Required extensions such as PDO,etc.
+---
+### Development Manual
 
-### 开发手册
+Development Manual： [https://willphp.gitee.io](https://willphp.gitee.io)
 
-开发手册： [https://willphp.gitee.io](https://willphp.gitee.io)
+### Installation
 
-### 下载安装
+Gitee Repository： [https://gitee.com/willphp/yiyu](https://gitee.com/willphp/yiyu)
 
-Gitee地址： [https://gitee.com/willphp/yiyu](https://gitee.com/willphp/yiyu)
+GitHub Repository： [https://github.com/willphp/yiyu](https://github.com/willphp/yiyu)
 
-GitHub地址： [https://github.com/willphp/yiyu](https://github.com/willphp/yiyu)
+### Composer
 
-### composer
-
-可以使用 composer 命令安装和扩展：
+You can use the '*composer*' command to install and extend:
 
     composer create-project willphp/yiyu blog --prefer-dist
 
-> 如无需composer扩展，建议删除vendor目录，加速框架运行！ 
+> If no composer extension is needed, it is recommended to delete the vendor directory to speed up the framework's operation!
+---
+### URL Rewriting Rules
 
-### URL重写
-
-Apache环境规则`public/.htaccess`文件：
+Apache Rewriting Rule `public/.htaccess` File：
 
 ```
 <IfModule mod_rewrite.c>
@@ -47,7 +64,7 @@ Apache环境规则`public/.htaccess`文件：
 </IfModule>
 ```
 
-Nginx环境规则`public/nginx.htaccess`文件：
+Nginx Rewriting Rule `public/nginx.htaccess` File：
 
 ```
 location / {
@@ -56,11 +73,16 @@ location / {
 	}
 }
 ```
+---
+### Talk to us!
 
-### 交流Q群
+>QQ Group 1：325825297 Q Group 2：16008861
 
->QQ群1：325825297 QQ群2：16008861
+### Contact & Support
 
-### 技术支持
+Official Website:：[113344.com](http://www.113344.com) Our Email：大松栩(24203741@qq.com) 
 
-官网：[113344.com](http://www.113344.com) 大松栩(24203741@qq.com) 
+>Also you can communicate with us through issues, raise your questions, or provide suggestions. We will do our best to answer and make improvements.  Thank you for your support and encouragement for this project. We will continue to work hard and strive for further progress！
+---
+### Copyright ©
+**This project adheres to the** ***Apache-2.0 License***
