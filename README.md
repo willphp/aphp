@@ -19,7 +19,7 @@
 
 - **It is easy to LEARN**：*If you know  <a href="https://github.com/top-think/think">ThinkPHP</a>, you'll find WillPHP easy to grasp.Of course, if you're not familiar with ThinkPHP, that's perfectly fine. This is a framework designed for beginners, and it's very easy to get started with, even if you are learning from scratch.*
   
-- **More Light***：Only 200KB+, WillPHP boasts a simple directory and file structure.*
+- **More Light**：*Only 200KB+, WillPHP boasts a simple directory and file structure.*
   
 - **Simple**：*Development requires minimal code, and template syntax is customizable.*
   
