@@ -1,25 +1,17 @@
 <?php
-/*----------------------------------------------------------------
- | Software: [WillPHP framework]
- | Site: 113344.com
- |----------------------------------------------------------------
- | Author: 大松栩 <24203741@qq.com>
- | WeChat: www113344
- | Copyright (c) 2020-2023, 113344.com. All Rights Reserved.
- |---------------------------------------------------------------*/
+/*------------------------------------------------------------------
+ | Software: APHP - A PHP TOP Framework
+ | Site: https://aphp.top
+ |------------------------------------------------------------------
+ | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ |-----------------------------------------------------------------*/
 return [
-    'filter_req' => true, //是否开启req过滤
-    'func_html' => 'remove_xss', //html字段处理函数
-    'func_except_html' => 'clear_html', //html除外字段处理函数
-    //例外字段
-    'except_field' => ['list_tpl'],
-    //html字段
-    'html_field' => ['content', 'html'], //html字段列表
-    'html_field_like' => 'content', //html字段包含
-    //字段自动处理
-    'field_auto' => [
-        'id,p' => 'intval',
+    'auto_filter_req' => true, //自动过滤req参数
+    'except_key' => [], //排除主键(可写入script脚本)
+    'auto' => [
+        '/^(id|p)$/' => 'intval', //id分页自动转换数字
+        '/^content(_\w+|\d+)?$/' => 'remove_xss', //html内容xss过滤
+        'pwd' => 'intval|md5', //演示字段md5
+        '*' => 'clear_html', //其他处理(必须放在最后)：去除html代码
     ],
-    //'func_out' => 'stripslashes', //模板输出过滤(全部)
-    //'func_out_except_html' => 'htmlspecialchars', //模板输出过滤(html除外)
 ];

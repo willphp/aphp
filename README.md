@@ -1,58 +1,45 @@
-<p align="center">
-    <a href="https://github.com/willphp/yiyu">
-        <img src="https://avatars.githubusercontent.com/u/94844305?v=4" width="192" alt="aidigu" />
-    </a>
-</p>
-<p align="center">
-    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/PHP-7.4.3~8.2.x-blue?style=for-the-badge&color=%238d4bbb" alt="PHP7.4.3~8.2.x"></a>
-    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/STABLE-4.7.1-blue?style=for-the-badge&color=%230aa344" alt="Latest Stable Version"></a>
-    <a href="hhttps://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/UNSTABLE-4.7.x--DEV-blue?style=for-the-badge&color=%23ff0097" alt="Latest Unstable Version"></a>
-    <a href="https://github.com/willphp/yiyu"><img src="https://img.shields.io/badge/SIZE-124KB-blue?style=for-the-badge&color=%23f0c239" alt="Download Size"></a>
-    <a href="https://raw.githubusercontent.com/lty628/aidigu/master/LICENSE"><img src="https://img.shields.io/badge/LICENSE-Apache--2.0-blue?style=for-the-badge&color=%23FF0000" alt="Apache-2.0 License"></a>
-</p>
+## 一鱼框架APHP
 
-## WillPHP Framework
+APHP框架(原WillPHP框架)是一个MVC超轻量级PHP8开发框架
 
->WillPHP Framework is a lightweight PHP 8 development framework.
----
-### The Features
+### 框架特点
 
-- **It is easy to LEARN**：*If you know  <a href="https://github.com/top-think/think">ThinkPHP</a>, you'll find WillPHP easy to grasp.Of course, if you're not familiar with ThinkPHP, that's perfectly fine. This is a framework designed for beginners, and it's very easy to get started with, even if you are learning from scratch.*
-  
-- **More Light**：*Only 200KB+, WillPHP boasts a simple directory and file structure.*
-  
-- **Simple**：*Development requires minimal code, and template syntax is customizable.*
-  
-- **ORM (Object-Relational Mapping)**：*It is Similar to ThinkPHP, WillPHP offers straightforward database operations.*
-  
-- **Security**：*Automatically filters and validates incoming request parameters for enhanced security.*
----
-### System Requirements
+- 大小200KB+，新手快速入门
+- ORM，数据交互简单
+- 模型可自动验证，处理，过滤数据
 
-- PHP7.4.3~PHP8.2.x
-- Required extensions such as PDO,etc.
----
-### Development Manual
+### 环境要求
 
-Development Manual： [https://willphp.gitee.io](https://willphp.gitee.io)
+- PHP 7.4~PHP 8.3
+- MySQL5.6~8.0
 
-### Installation
+### 开发手册
 
-Gitee Repository： [https://gitee.com/willphp/yiyu](https://gitee.com/willphp/yiyu)
+开发手册： [https://doc.aphp.top](https://doc.aphp.top)
 
-GitHub Repository： [https://github.com/willphp/yiyu](https://github.com/willphp/yiyu)
+### 下载安装
 
-### Composer
+GitHub地址： https://github.com/willphp/aphp
 
-You can use the '*composer*' command to install and extend:
+Gitee地址： https://gitee.com/willphp/aphp
 
-    composer create-project willphp/yiyu blog --prefer-dist
+Composer安装：`composer create-project willphp/aphp blog --prefer-dist`
 
-> If no composer extension is needed, it is recommended to delete the vendor directory to speed up the framework's operation!
----
-### URL Rewriting Rules
+> 如无需composer扩展，建议删除vendor目录，加速框架运行！ 
 
-Apache Rewriting Rule `public/.htaccess` File：
+### URL重写
+
+Nginx规则：
+
+```
+location / {
+	if (!-e $request_filename) {
+		rewrite  ^(.*)$  /index.php/$1  last;
+	}
+}
+```
+
+Apache规则：
 
 ```
 <IfModule mod_rewrite.c>
@@ -64,25 +51,8 @@ Apache Rewriting Rule `public/.htaccess` File：
 </IfModule>
 ```
 
-Nginx Rewriting Rule `public/nginx.htaccess` File：
+### 技术支持
 
-```
-location / {
-	if (!-e $request_filename) {
-		rewrite  ^(.*)$  /index.php/$1  last;
-	}
-}
-```
----
-### Talk to us!
+QQ群1：325825297  QQ群2：16008861
 
->QQ Group 1：325825297 Q Group 2：16008861
-
-### Contact & Support
-
-Official Website:：[113344.com](http://www.113344.com) Our Email：大松栩(24203741@qq.com) 
-
->Also you can communicate with us through issues, raise your questions, or provide suggestions. We will do our best to answer and make improvements.  Thank you for your support and encouragement for this project. We will continue to work hard and strive for further progress！
----
-### Copyright ©
-**This project adheres to the** ***Apache-2.0 License***
+官网：[aphp.top](https://www.aphp.top) 作者：大松栩(24203741@qq.com) 

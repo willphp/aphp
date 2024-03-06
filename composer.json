@@ -1,14 +1,14 @@
 {
-  "name": "willphp/yiyu",
-  "description": "一鱼PHP框架willphp framework",
+  "name": "willphp/aphp",
+  "description": "一鱼PHP框架 APHP Framework",
   "type": "project",
   "keywords": [
-    "willphp",
+    "aphp",
     "一鱼框架",
     "framework",
     "ORM"
   ],
-  "homepage": "http://www.113344.com/",
+  "homepage": "https://www.aphp.top/",
   "license": "Apache-2.0",
   "authors": [
     {
@@ -28,7 +28,7 @@
   "autoload": {
     "psr-4": {
       "app\\": "app",
-      "willphp\\core\\": "willphp/core",
+      "aphp\\core\\": "aphp/core",
       "middleware\\": "middleware",
       "extend\\": "extend"
     }
