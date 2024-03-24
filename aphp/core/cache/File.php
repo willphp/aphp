@@ -66,7 +66,7 @@ class File extends Base
         if (empty($path)) {
             return Tool::dir_delete(APHP_TOP . '/runtime/' . APP_NAME . '/cache');
         }
-        [$app, $path] = parse_app_name($path, APP_NAME);
+        [$app, $path] = parse_app_name($path);
         if ($path == '*') {
             //clear app
             return Tool::dir_delete(APHP_TOP . '/runtime/' . $app . '/cache');
@@ -78,7 +78,7 @@ class File extends Base
 
     private function parseName(string $name, bool $dirMake = false): string
     {
-        [$app, $name] = parse_app_name($name, APP_NAME);
+        [$app, $name] = parse_app_name($name);
         $file = APHP_TOP . '/runtime/' . $app . '/cache/' . $name . '.php';
         if ($dirMake) {
             Tool::dir_init(dirname($file), 0777);

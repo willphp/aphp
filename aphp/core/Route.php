@@ -39,7 +39,7 @@ class Route
             return $cache;
         }
         $route = empty($uri) ? $this->route : $this->parseRoute($uri, $params, $app);
-        $class = 'app\\'.$route['app'].'\\controller\\' . name_camel($route['controller']);
+        $class = 'app\\' . $route['app'] . '\\controller\\' . name_camel($route['controller']);
         $action = $route['action'];
         $params = $route['params'];
         $path = $route['controller'] . '/' . $route['action'];
@@ -227,11 +227,8 @@ class Route
         [$app, $uri] = parse_app_name($uri, $this->app);
         $route = $this->parseRoute($uri, $params, $app);
         $url = Rewrite::init($route['app'])->replace($route['rewrite'], true);
-        $prefix = '';
-        if ($route['app'] != 'index') {
-            $prefix = $route['app'] . '@';
-        }
-        return __URL__ . '/' . $prefix . $url . $suffix;
+
+        return __URL__ . '/' . $url . $suffix;
     }
 
     public function buildPageUrl(array $params = []): string

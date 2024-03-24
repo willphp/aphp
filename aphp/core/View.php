@@ -39,7 +39,7 @@ class View
     protected function getTheme(): string
     {
         $default = Config::init()->get('site.theme', 'default');
-        $theme_get = Config::init()->get('app.theme_get', '');
+        $theme_get = Config::init()->get('app.theme_get');
         if (empty($theme_get)) {
             return $default;
         }

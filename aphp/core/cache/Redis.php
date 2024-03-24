@@ -69,7 +69,7 @@ class Redis extends Base
 
     private function parseName(string $name): string
     {
-        [$app, $name] = parse_app_name($name, APP_NAME);
+        [$app, $name] = parse_app_name($name);
         return rtrim($app . '@cache/' . $name, '*');
     }
 }

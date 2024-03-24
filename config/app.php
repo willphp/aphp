@@ -7,8 +7,8 @@
  |-----------------------------------------------------------------*/
 return [
     'app_key' => 'b64f03169423386de0b080a248ca3526', //应用密钥(加密解密验证)
-    'debug' => true, //调试模式(上线设置false)
-    'trace' => true, //显示调试栏(上线设置false)
+    'debug' => false, //调试模式
+    'trace' => false, //显示调试栏
     'url_rewrite' => true, //url重写
 	'log_sql_level' => 0, //记录sql到日志, 0不记录1只记录execute2记录全部sql
     'default_timezone' => 'PRC', //默认时区

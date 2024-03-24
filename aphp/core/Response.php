@@ -49,7 +49,7 @@ class Response
     {
         header('Content-type: application/json; charset=utf-8');
         if (empty($msg)) {
-            $msg = Config::init()->get('response.code_msgs.' . $code, 'Error...');
+            $msg = Config::init()->get('response.code_msg.' . $code, 'Error...');
         }
         $json = Config::init()->get('response.json', ['ret' => 'ret', 'msg' => 'msg', 'data' => 'data', 'status' => 'status']);
         $res = [];
@@ -66,7 +66,7 @@ class Response
     public static function halt(string $msg = '', int $code = 400, array $params = []): void
     {
         if (empty($msg)) {
-            $msg = Config::init()->get('response.code_msgs.' . $code, 'Error...');
+            $msg = Config::init()->get('response.code_msg.' . $code, 'Error...');
         }
         if (!empty($params) && str_contains($msg, '$')) {
             $msg = preg_replace_callback('/{\s*\$([a-zA-Z_][a-zA-Z0-9_]*)\s*}/i', fn($v) => $params[$v[1]] ?? '', $msg);

@@ -47,7 +47,7 @@ abstract class Base
         $id = Cookie::init()->get($this->session_name);
         if (!$id) {
             $id = 'aphp' . md5(microtime(true) . mt_rand(1, 6));
-            Cookie::init()->set($this->session_name, $id, ['expire' => $this->expire, 'domain' => Config::init()->get('session.domain', '')]);
+            Cookie::init()->set($this->session_name, $id, ['expire' => $this->expire, 'domain' => Config::init()->get('session.domain')]);
         }
         return $id;
     }

@@ -56,7 +56,7 @@
                 <a href="{:url('index/index')}">首页</a> | <a href="{:url('index/ok')}">成功</a> | <a href="{:url('abc/abc')}">404</a>
             </div>
             <div class="aphp-page-body cl">
-                <p style="color:red;">公告：APHP框架(原WillPHP)2024年起启用域名：aphp.top</p>
+                <p style="color:red;">公告：{:site('site_notice')}</p>
                 <h4>开始使用</h4>
                 <ol>
                     <li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>

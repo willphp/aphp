@@ -22,10 +22,25 @@ trait Jump
         $this->_msg($msg, $code, $url);
     }
 
-    protected function _msg(string $msg = '', int $code = 400, ?string $url = null): void
+    protected function _jump($info, $status = 1, string $url = null): void
     {
+        if (is_array($info)) {
+            [$msg200, $msg400] = $info;
+        } else {
+            $msg200 = $msg400 = $info;
+        }
+        $code = !$status ? 400 : 200;
+        $msg = !$status ? $msg400 : $msg200;
+        $this->_msg($msg, $code, $url);
+    }
+
+    protected function _msg($msg = '', int $code = 400, ?string $url = null): void
+    {
+        if (is_array($msg)) {
+            $msg = current($msg);
+        }
         if (empty($msg)) {
-            $msg = Config::init()->get('response.code_msgs.' . $code, 'Error...');
+            $msg = Config::init()->get('response.code_msg.' . $code, 'Error...');
         }
         if (IS_CLI) {
             $this->_json($code, $msg);

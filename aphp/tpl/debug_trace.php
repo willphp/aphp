@@ -46,18 +46,17 @@
 </div>
 <div id="aphp_trace_open">
     <div class="runtime"><?php echo $runtime?> <span style="color:red"><?php echo $errors?></span></div>
-    <img width="30" title="WillPHP DebugBar" alt="logo"
-         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAMrSURBVHjaxJdLaFNBFIZv9Da2CVK1ojVUsb5daH0gBkFRES2CCx9VpAURsboQdSkoQRQ3BUUERS0o9YkKbhSahd2Ij2B9VRGtLsS6sFaoQXykTZr4H/mvjNcZkpsUMvB15s6d3n/OzDlnJr49rQstTdkLDoJfYAjoATvAGVAJUlb+xQbd8sfPj/eDNF8OB+XEGTwMVIDR1iAUEWwBrWCp0p92jUuxb8AanJIS4fUUrVBeZFwDZQV8mv5s5Sc4DLaAp+71PsAPzwPzlf59bIvgVxAHJR6FW47XxiJ/nCYafoYqBgKOQBMH3QAb2JZZPgabuMzjuTLiWG/Ba9BFi6RvKpgLylzC35X2D3WrbMPySnsl2K70yUTWgQfgs9MJi8SaUjSnc/xWxyqUbXgnk+wEEa7sX2GxcoS4OMNF9r0N1CqOtR8cM4URxBOoOsAuCF1FfRLUgFHgnMmrT4Nm8AhcB7IXU8AShlgjtyOn2MUk7qNaA9qzBfMLUAU+gCNgsfJeHO88CNLr+8AXbsVYyQGw8BvE4qgDHJPE80c816N9lz6gtfgQM1WJa9ATcJTttXSoKBOJjL3MvkaOkRV6I2IQnQDxd4rjai1uptf6XOFyCiTYHkqHUWM9yL5S5VsB+ovjtFfAbjBRZ3EZrfBT3GJubtN4/IAmu2U0YzLcb/H+O6al1qXBTnq5pSSRbMWU1dpNwrrSTUfyUkyT69JNyiSczkPQ52WWJuExrqxmFbDUVbpJmYSnMU7dVqW5BerZ3c86qXxTFarxYnGIcWm5Pj4SzOLEQuybibiV/gV87nP8A/0SWitMcWzaN0n412jZQ9DL3Hub1lVzbAOYwxPK4tgeJfHM8GKxlGVgJ9vvmd3i3LNqHnkxfmM284Hk+QjiNwlrK5lyLS8WO6WJ4SBWXgTPOSH5v3vgFVjFpf8EbkG0l0t/AUzKV1jS4iU57li/JOppdPOf62k0PBnVWbA82+mUrZTzQrganKDVif/uw9GwLP9G5uZQLnfcXON9M6jjud3B7JaGYJC3jzAY5+Vy7fUyvogUfK8uSimqsF0EXdvmVdVf4A8xzz/afgswADn3zfhlrXIaAAAAAElFTkSuQmCC"/>
+    <img width="30" title="APHP DebugBar" alt="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAK+SURBVHja7JfLb01RFMZ36962CUobKWmkDCgREk2E1KMoEY+SEG1TxEBiQGOACQYMSP8AiTQxKqIxoEYiEuJREgYeNRE6aBh4dYSiWnp8S76TrLuyj/Yc162BL/nl3rPP7t1f115r7XPy6jrqnEc14BIY4nUKHAdjwBHw3f258kBvKuJmIZhkxoppoNRlTykx0AImgIvgJm8MeSb/cNnXoBg4zItXysCgZ3I6wthI9Bw8AMvBtIwQgE6GW6KwFARgLugCfWreMzAjweIvwDLZby5+B1RoA7VMiFaaEd0Fm0A1/2u5/xUsTGDgPhcXvQQPrYEwo3Vmf+ZiF7KwzyvATNAN5oMldgv0Hv+NpKtgRJ+CBWCiNXCNOXAZrAJjwWtQmcVsLwOrvXUI1vD7abAYbOGel7kcKCxDqYDb7HZVLocSA9+YdNvU4ifBY898KdGDYCo4EGMdKd89vi4adsIiMy5Noz2if7cwTyRiPTFMdICrdmvzwUfPZNmWcZ5xyY9yUAD2x4z2I7Ce0c4w4FMlDx+rrep7I3PHRmgfaFaUq/vShM5E9YGMQ8LT90vAWvCEod/Mur5hcqTRNJvtbEYDvG4De4eLgE+1bCJHQT3o55jVF3NdTaPapEtiYAcb1HV2yU6O2Q5qc6fLVFQwki2wKmX4W3koic6Cc2AeEyzUKWZ7qHb1N6KmJAZqWKr31NgVftYbA+d/8zuzwe4kBhbxs5nJKOU0mWMbwTGVZFGq4nlTHNdAITN+gE80K9U9qZQ5fIAJo1DEZ0fReJrfAHbyt1xcA+J8Fthl9tZx/BZoUAbaaDQ0XzLcWeAiev4Htcf9/OHAzHvL5rIOHFIJOyXOYeRTAZ//+1hqLuJ9IGD3k855AnwC02O9HODF5F2uzn6P3ue7UdZ/A/+EgfQorp+WMnzD8gpyvPiv1/OfAgwAYfOIea3qbv8AAAAASUVORK5CYII=">
 </div>
 <script type="text/javascript">
     (function () {
-        var tab_tit = document.getElementById('aphp_trace_title').getElementsByTagName('span');
-        var tab_cont = document.getElementById('aphp_trace_content').getElementsByTagName('div');
-        var open = document.getElementById('aphp_trace_open');
-        var close = document.getElementById('aphp_trace_close').children[0];
-        var trace = document.getElementById('aphp_trace_tab');
-        var cookie = document.cookie.match(/aphp_show_page_trace=(\d\|\d)/);
-        var history = (cookie && typeof cookie[1] != 'undefined' && cookie[1].split('|')) || [0, 0];
+        let tab_tit = document.getElementById('aphp_trace_title').getElementsByTagName('span');
+        let tab_cont = document.getElementById('aphp_trace_content').getElementsByTagName('div');
+        let open = document.getElementById('aphp_trace_open');
+        let close = document.getElementById('aphp_trace_close').children[0];
+        let trace = document.getElementById('aphp_trace_tab');
+        let cookie = document.cookie.match(/aphp_show_page_trace=(\d\|\d)/);
+        let history = (cookie && typeof cookie[1] != 'undefined' && cookie[1].split('|')) || [0, 0];
         open.onclick = function () {
             trace.style.display = 'block';
             this.style.display = 'none';
@@ -72,10 +71,10 @@
             history[0] = 0;
             document.cookie = 'aphp_show_page_trace=' + history.join('|')
         }
-        for (var i = 0; i < tab_tit.length; i++) {
+        for (let i = 0; i < tab_tit.length; i++) {
             tab_tit[i].onclick = (function (i) {
                 return function () {
-                    for (var j = 0; j < tab_cont.length; j++) {
+                    for (let j = 0; j < tab_cont.length; j++) {
                         tab_cont[j].style.display = 'none';
                         tab_tit[j].style.color = '#999';
                     }

@@ -68,6 +68,7 @@ class Upload
             $this->error = '文件保存失败';
             return [];
         }
+        $filePath = $this->image_rewrite($filePath, $ext, $filePath);
         if ($this->config['auto_thumb']) {
             $filePath = $this->thumb($filePath);
         }
@@ -227,18 +228,7 @@ class Upload
         $filePath = $this->path . '/' . $fileName; //新文件 旧文件$file['tmp_name']
         //图片处理
         if ($file['filetype'] == 1) {
-            if ($file['ext'] == 'png') {
-                $img = imagecreatefrompng($file['tmp_name']);
-                imagesavealpha($img, true);
-                imagepng($img, $filePath, 9);
-            } elseif ($file['ext'] == 'gif') {
-                $img = imagecreatefromgif($file['tmp_name']);
-                imagegif($img, $filePath);
-            } else {
-                $img = imagecreatefromjpeg($file['tmp_name']);
-                imagejpeg($img, $filePath, 100);
-            }
-            imagedestroy($img);
+            $filePath = $this->image_rewrite($file['tmp_name'], $file['ext'], $filePath);
             if ($this->config['auto_thumb']) {
                 $filePath = $this->thumb($filePath);
             }
@@ -252,6 +242,23 @@ class Upload
         $file['uptime'] = time();
         unset($file['tmp_name']);
         return $file;
+    }
+
+    protected function image_rewrite(string $src, string $ext, string $rewrite): string
+    {
+        if ($ext == 'png') {
+            $img = imagecreatefrompng($src);
+            imagesavealpha($img, true);
+            imagepng($img, $rewrite, 9);
+        } elseif ($ext == 'gif') {
+            $img = imagecreatefromgif($src);
+            imagegif($img, $rewrite);
+        } else {
+            $img = imagecreatefromjpeg($src);
+            imagejpeg($img, $rewrite, 100);
+        }
+        imagedestroy($img);
+        return $rewrite;
     }
 
     public function getError(): string

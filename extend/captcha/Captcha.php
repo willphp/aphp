@@ -17,7 +17,7 @@ class Captcha
     private string $bgColor = '#ffffff';
     private string $codeStr = '23456789abcdefghjkmnpqrstuvwsyz';
     private int $num = 4;
-    private string $font = '';
+    private string $font;
     private int $fontSize = 16;
     private string $fontColor = '';
 

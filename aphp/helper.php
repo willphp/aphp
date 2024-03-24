@@ -97,11 +97,16 @@ function dump_const(): void
 /**
  * 解析 应用@名称
  */
-function parse_app_name(string $name, string $app): array
+function parse_app_name(string $name, string $app = ''): array
 {
-    $name = trim(strtolower($name), '@');
+    if (empty($app)) {
+        $app = APP_NAME;
+    }
+    $name = trim(strtolower($name), '@.');
     if (str_contains($name, '@')) {
         [$app, $name] = explode('@', $name, 2);
+    } elseif (str_contains($name, '.')) {
+        [$app, $name] = explode('.', $name, 2);
     }
     return [$app, $name];
 }
@@ -207,8 +212,11 @@ function app(string $class): object
 /**
  * 命令调用
  */
-function cli(string $uri, string $app = APP_NAME, bool $isCall = true)
+function cli(string $uri, string $app = '', bool $isCall = true)
 {
+    if (empty($app)) {
+        $app = APP_NAME;
+    }
     return Cli::run($uri, $app, $isCall);
 }
 
@@ -299,7 +307,7 @@ function cache_clear(string $path = ''): bool
  */
 function widget(string $name): object
 {
-    [$app, $name] = parse_app_name($name, APP_NAME);
+    [$app, $name] = parse_app_name($name);
     $class = 'app\\' . $app . '\\widget\\' . name_camel($name);
     return App::make($class);
 }
@@ -328,7 +336,7 @@ function cookie(string $name = '', $value = '', array $options = [])
 /**
  * session管理：设置，检测，获取，删除，获取全部，清空
  */
-function session(string $name = '', $value = '')
+function session(?string $name = '', $value = '')
 {
     $session = Session::init();
     if ('' === $name) {
@@ -432,7 +440,7 @@ function db(string $table = '', $config = []): object
  */
 function model(string $name = ''): object
 {
-    [$app, $name] = parse_app_name($name, APP_NAME);
+    [$app, $name] = parse_app_name($name);
     $class = 'app\\' . $app . '\\model\\' . name_camel($name);
     return App::make($class);
 }

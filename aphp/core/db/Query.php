@@ -16,7 +16,7 @@ use Exception;
 use Iterator;
 use PDO;
 use PDOStatement;
-use aphp\core\cache;
+use aphp\core\Cache;
 use aphp\core\Log;
 use aphp\core\Middleware;
 use aphp\core\Pagination;
@@ -34,7 +34,7 @@ class Query implements ArrayAccess, Iterator
     protected string $pk = 'id'; //表主键
     protected array $options = []; //构建选项
     protected array $bind = []; //绑定参数
-    protected array $data = []; //对象数据
+    public array $data = []; //对象数据
     protected ?object $page = null; //分页对象
     protected bool $insertLog = false; //是否为插入日志
 
@@ -57,6 +57,12 @@ class Query implements ArrayAccess, Iterator
             return $this->options;
         }
         return $this->options[$name] ?? null;
+    }
+
+    //获取数据库配置
+    public function getConfig(string $name = '')
+    {
+        return $this->db->getConfig($name);
     }
 
     //获取表前缀
@@ -133,7 +139,7 @@ class Query implements ArrayAccess, Iterator
     protected function parseFieldList(string $table): array
     {
         $data = [];
-        $res = $this->db->query("SHOW COLUMNS FROM `{$this->prefix}{$table}`");
+        $res = $this->db->query("SHOW COLUMNS FROM `$this->prefix$table`");
         foreach ((array)$res as $vo) {
             if ($vo['Key'] == 'PRI' && $vo['Extra'] == 'auto_increment') {
                 $data['pk'] = $vo['Field'];
@@ -161,7 +167,7 @@ class Query implements ArrayAccess, Iterator
     //表是否存在
     public function hasTable(string $table): bool
     {
-        $res = $this->db->query("SHOW TABLES LIKE '{$this->prefix}{$table}'");
+        $res = $this->db->query("SHOW TABLES LIKE '$this->prefix$table'");
         return !empty($res);
     }
 
@@ -287,8 +293,9 @@ class Query implements ArrayAccess, Iterator
     }
 
     //查询单条
-    public function find(int $id = 0)
+    public function find($id = 0)
     {
+        $id = intval($id);
         if ($id > 0) {
             $this->where($this->getPk(), $id);
         }
@@ -476,7 +483,7 @@ class Query implements ArrayAccess, Iterator
     //统计
     public function total(string $field, string $type = 'count')
     {
-        $alias = 'willphp_' . strtolower($type);
+        $alias = 'aphp_' . strtolower($type);
         $type = strtoupper($type);
         if (!in_array($type, ['COUNT', 'SUM', 'MIN', 'MAX', 'AVG'])) {
             $type = 'COUNT';

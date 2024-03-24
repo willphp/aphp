@@ -8,7 +8,7 @@
 defined('APHP_TOP') or die('Access Denied');
 define('START_MEMORY', memory_get_usage());
 define('START_TIME', microtime(true));
-const __VERSION__ = 'v5.0.1';
+const __VERSION__ = 'v5.0.2';
 const __POWERED__ = 'APHP ' . __VERSION__;
 version_compare(PHP_VERSION, '7.4.3', '<') and die(__POWERED__ . ' requires PHP 7.4.3 or newer.');
 const AT_MUST = 1;

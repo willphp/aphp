@@ -8,6 +8,6 @@ class {{CLASS}}
     public function clear()
     {
         cache_clear();
-        $this->success('Clear Cache Successful', 'index/index');
+        $this->success('清除缓存成功', 'index/index');
     }
 }
