@@ -371,12 +371,12 @@ abstract class Model implements ArrayAccess, Iterator
     public function __call($name, $arguments)
     {
         if (method_exists($this, '_before_' . $name)) {
-            $this->{'_before_' . $name}($name);
+            $this->{'_before_' . $name}($this->data);
         }
         $res = call_user_func_array([$this->db, $name], $arguments);
         if (!empty($res)) {
             $data = is_object($res) ? $res->toArray() : $res;
-            if (method_exists($this, '_after_' . $name)) {
+            if (is_array($data) && method_exists($this, '_after_' . $name)) {
                 $this->{'_after_' . $name}($data);
             }
             if ($name == 'find') {

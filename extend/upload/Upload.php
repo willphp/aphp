@@ -246,6 +246,7 @@ class Upload
 
     protected function image_rewrite(string $src, string $ext, string $rewrite): string
     {
+        $ext = trim($ext, '.');
         if ($ext == 'png') {
             $img = imagecreatefrompng($src);
             imagesavealpha($img, true);

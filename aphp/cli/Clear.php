@@ -25,8 +25,13 @@ class Clear extends Command
 
     public function runtime(array $req = []): ?bool
     {
-        $app = $req[0] ?? '';
-        $result = Tool::dir_delete(APHP_TOP . '/runtime/' . $app, !empty($app));
-        return $result ? $this->success() : $this->error();
+        if (empty($req)) {
+            Tool::dir_delete(APHP_TOP . '/runtime/');
+        } else {
+            foreach ($req as $app) {
+                Tool::dir_delete(APHP_TOP . '/runtime/' . $app, true);
+            }
+        }
+        return $this->success();
     }
 }

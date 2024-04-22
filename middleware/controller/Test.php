@@ -15,8 +15,8 @@ class Test
 {
     public function run(Closure $next, array $params = []): void
     {
-        echo '开始测试';
+        trace('开始测试');
         $next();
-        echo '结束测试';
+        trace('结束测试');
     }
 }

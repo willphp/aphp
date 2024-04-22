@@ -186,7 +186,7 @@ class Validate
 
     public function required(string $value, string $field, string $params, array $data): bool
     {
-        return !empty($data[$field]);
+        return isset($data[$field]) && trim($data[$field]) !== '';
     }
 
     public function exists(string $value, string $field, string $params, array $data): bool

@@ -15,8 +15,11 @@ use aphp\core\Cookie;
 use aphp\core\Crypt;
 use aphp\core\Db;
 use aphp\core\db\Connection;
+use aphp\core\DebugBar;
 use aphp\core\Filter;
+use aphp\core\Log;
 use aphp\core\Request;
+use aphp\core\Response;
 use aphp\core\Route;
 use aphp\core\Session;
 use aphp\core\Validate;
@@ -315,7 +318,7 @@ function widget(string $name): object
 /**
  * cookie管理：设置，检测，获取，删除，获取全部，清空
  */
-function cookie(string $name = '', $value = '', array $options = [])
+function cookie(?string $name = '', $value = '', array $options = [])
 {
     $cookie = Cookie::init();
     if ('' === $name) {
@@ -451,6 +454,30 @@ function model(string $name = ''): object
 function validate(array $validate, array $data = [], bool $isBatch = false): object
 {
     return Validate::init()->make($validate, $data, $isBatch);
+}
+
+/**
+ * 记录trace到调试栏
+ */
+function trace($msg, string $type = 'debug'): void
+{
+    DebugBar::init()->trace($msg, $type);
+}
+
+/**
+ * 记录变量到日志
+ */
+function log_value($vars, string $name = 'var'): void
+{
+    Log::init()->value($vars, $name);
+}
+
+/**
+ * 错误响应
+ */
+function halt($msg = '', int $code = 400, array $params = []): void
+{
+    Response::halt($msg, $code, $params);
 }
 
 /**

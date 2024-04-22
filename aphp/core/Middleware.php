@@ -65,6 +65,9 @@ class Middleware
     {
         $middleware = [];
         $all = Config::init()->get('middleware.controller.' . $name, []); //所有控制器中间件
+        if (empty($all)) {
+            Response::halt('[' . $name . '] middleware is not exists!');
+        }
         if (empty($types)) {
             $middleware = $all;
         } else {

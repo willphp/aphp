@@ -208,6 +208,9 @@ class Route
         if ($uri == '[back]') {
             return 'javascript:history.back(-1);';
         }
+        if ($uri == '[refresh]') {
+            return 'javascript:location.reload();';
+        }
         if ($uri == '[history]') {
             return $_SERVER['HTTP_REFERER'] ?? 'javascript:history.back(-1);';
         }
