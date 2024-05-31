@@ -71,7 +71,7 @@ class Error
             exit(json_encode($res, JSON_UNESCAPED_UNICODE));
         } else {
             $tpl = APP_DEBUG ? 'show' : 'hide';
-            $error_page = APHP_TOP . '/aphp/tpl/error_' . $tpl . '.php';
+            $error_page = ROOT_PATH . '/aphp/tpl/error_' . $tpl . '.php';
             if (!is_file($error_page)) {
                 echo $msg;
             } else {
@@ -96,7 +96,7 @@ class Error
         $data = [];
         $data['code'] = $code;
         $data['error'] = $info;
-        $data['file'] = substr($file, strlen(APHP_TOP . '/'));
+        $data['file'] = substr($file, strlen(ROOT_PATH . '/'));
         $data['line'] = $line;
         $data['type'] = $isException ? 'EXCEPTION' : 'ERROR';
         $data['msg'] = $data['type'] . '[' . $code . ']: ' . $info . ' [' . $data['file'] . ':' . $line . ']';

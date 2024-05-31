@@ -14,8 +14,8 @@ return [
     'default_timezone' => 'PRC', //默认时区
     'app_list' => ['index', 'admin', 'api'], //可访问应用
     'app_api' => ['api'], //Api应用列表
-    'view_path' => ['index' => 'template'], //设置模板路径 应用=>根目录下的路径 'index' => 'template'
-    'theme_on' => ['index'], // 设置多主题 'index'
-    'theme_get' => 't', //主题切换$_GET变量如：t 设为空关闭主题切换
+    'view_path' => [], //设置模板路径 应用=>根目录下的路径 'index' => 'template'
+    'theme_on' => [], // 设置多主题 'index'
+    'theme_get' => '', //主题切换$_GET变量如：t 设为空关闭主题切换
     'error_msg' => '页面出错！请稍后再试～', //关闭Debug错误显示信息
 ];

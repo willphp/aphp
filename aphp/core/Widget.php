@@ -10,22 +10,24 @@ declare(strict_types=1);
 namespace aphp\core;
 abstract class Widget
 {
-    protected string $tag;
-    protected int $expire = 0;
-    protected string $prefix;
+    protected string $tag; // 缓存标签
+    protected int $expire = 0; // 缓存过期时间
+    protected string $prefix; // 缓存前缀
 
     public function __construct()
     {
         $path = explode('\\', get_class($this));
-        $class = name_snake(end($path));
+        $class = name_to_snake(end($path));
         if (!$this->tag) {
             $this->tag = $class;
         }
         $this->prefix = $path[1] . '@widget/' . $this->tag . '/' . $class;
     }
 
+    // 设置缓存
     abstract public function set($id = '', array $options = []);
 
+    // 获取缓存
     public function get($id = '', array $options = [])
     {
         $name = $id;
@@ -37,6 +39,7 @@ abstract class Widget
         return Cache::init()->make($name, fn() => $this->set($id, $options), $this->expire);
     }
 
+    // 刷新缓存
     public function refresh(): bool
     {
         return Cache::init()->flush($this->prefix . '/*');

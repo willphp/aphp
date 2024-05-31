@@ -39,7 +39,7 @@ class Rewrite
 
     protected function parseRule(string $app): array
     {
-        $file = APHP_TOP . '/route/' . $app . '.php';
+        $file = ROOT_PATH . '/route/' . $app . '.php';
         $routing = ['just' => [], 'flip' => []];
         $route = file_exists($file) ? include $file : [];
         if (empty($route)) {

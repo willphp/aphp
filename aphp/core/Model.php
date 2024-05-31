@@ -39,7 +39,7 @@ abstract class Model implements ArrayAccess, Iterator
     public function __construct()
     {
         if (empty($this->table)) {
-            $this->table = name_snake(basename(strtr(get_class($this), '\\', '/')));
+            $this->table = name_to_snake(basename(strtr(get_class($this), '\\', '/')));
         }
         $this->db = Db::connect($this->dbConfig, $this->table);
         if (empty($this->pk)) {
@@ -84,7 +84,7 @@ abstract class Model implements ArrayAccess, Iterator
     protected function parseAutoFieldData(array $data): array
     {
         foreach ($data as $key => $val) {
-            $method = 'get' . name_camel($key) . 'Attr';
+            $method = 'get' . name_to_camel($key) . 'Attr';
             if (method_exists($this, $method)) {
                 $data['_' . $key] = $this->$method($val, $data);
             }
@@ -282,7 +282,7 @@ abstract class Model implements ArrayAccess, Iterator
             $auto[3] ??= AT_SET;
             $auto[4] ??= IN_BOTH;
             [$field, $rule, $type, $at, $in] = $auto;
-            if (check_at_continue($at, $data, $field)) {
+            if (check_is_skip($at, $data, $field)) {
                 continue;
             }
             if ($in > IN_BOTH && $in != $this->$inAction) {
@@ -320,7 +320,7 @@ abstract class Model implements ArrayAccess, Iterator
             $filter[1] ??= AT_SET;
             $filter[2] ??= IN_BOTH;
             [$field, $at, $in] = $filter;
-            if (check_at_continue($at, $data, $field)) {
+            if (check_is_skip($at, $data, $field)) {
                 continue;
             }
             if ($in == $inAction || $in == IN_BOTH) {

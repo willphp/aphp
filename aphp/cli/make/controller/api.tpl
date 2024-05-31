@@ -8,6 +8,7 @@ class {{CLASS}}
     public function clear()
     {
         cache_clear();
+        cli('clear:runtime {{APP}}');
         $this->success('清除缓存成功', 'index/index');
     }
 }

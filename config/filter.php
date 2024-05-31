@@ -9,6 +9,7 @@ return [
     'auto_filter_req' => true, //自动过滤req参数
     'except_key' => [], //排除主键(可写入script脚本)
     'auto' => [
+        'markdown' => 'htmlspecialchars', //strip_tags
         '/^(id|p)$/' => 'intval', //id分页自动转换数字
         '/^content(_\w+|\d+)?$/' => 'remove_xss', //html内容xss过滤
         'pwd' => 'intval|md5', //演示字段md5

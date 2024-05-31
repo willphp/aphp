@@ -16,7 +16,11 @@ class Auth
     public function run(Closure $next): void
     {
         if (!session('?user')) {
+            if (IS_AJAX) {
+                halt('', 401);
+            }
             header('Location:' . url('login/login'));
+            exit();
         }
         $next();
     }

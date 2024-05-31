@@ -56,7 +56,7 @@ class Validate
             $verify[3] ??= ($this->inAction == 0) ? AT_MUST : AT_SET;
             $verify[4] ??= IN_BOTH;
             [$field, $rules, $msgs, $at, $in] = $verify;
-            if (check_at_continue($at, $data, $field)) {
+            if (check_is_skip($at, $data, $field)) {
                 continue;
             }
             if ($in > IN_BOTH && $in != $this->inAction) {

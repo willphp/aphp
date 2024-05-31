@@ -84,7 +84,7 @@ class Response
         } else {
             ob_clean();
             header('Content-type: text/html; charset=utf-8');
-            include APHP_TOP . '/aphp/tpl/response_halt.php';
+            include ROOT_PATH . '/aphp/tpl/response_halt.php';
         }
         exit;
     }

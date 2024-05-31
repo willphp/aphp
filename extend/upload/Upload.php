@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 namespace extend\upload;
-defined('APHP_TOP') or die('Access Denied');
+defined('ROOT_PATH') or die('Access Denied');
 
 use aphp\core\Tool;
 use Exception;
@@ -27,18 +27,18 @@ class Upload
 
     private function __construct(string $type = 'img')
     {
-        $this->config_file = APHP_TOP . '/config/upload.php';
+        $this->config_file = ROOT_PATH . '/config/upload.php';
         $this->config = Config::init()->get('upload.' . $type, []);
         if (empty($this->config)) {
             $this->install();
             throw new Exception('已加载默认配置，请重试');
         }
-        $this->path = Tool::dir_init(APHP_TOP . '/' . $this->config['path']);
+        $this->path = Tool::dir_init(ROOT_PATH . '/' . $this->config['path']);
     }
 
     public function install(): bool
     {
-        $source_file = APHP_TOP . '/extend/upload/config/upload.php';
+        $source_file = ROOT_PATH . '/extend/upload/config/upload.php';
         if (copy($source_file, $this->config_file)) {
             Config::init()->refresh();
             return true;
@@ -73,7 +73,7 @@ class Upload
             $filePath = $this->thumb($filePath);
         }
         $file = [];
-        $file['path'] = substr($filePath, strlen(APHP_TOP . '/public')); //新文件名
+        $file['path'] = substr($filePath, strlen(ROOT_PATH . '/public')); //新文件名
         $file['url'] = __HOST__ . $file['path'];
         $file['uptime'] = time();
         return $file;
@@ -236,7 +236,7 @@ class Upload
             $this->error = '移动临时文件失败';
             return false;
         }
-        $file['path'] = substr($filePath, strlen(APHP_TOP . '/public')); //新文件名
+        $file['path'] = substr($filePath, strlen(ROOT_PATH . '/public')); //新文件名
         //$file['url'] = __HOST__ . $file['path'];
         $file['size'] = filesize($filePath);
         $file['uptime'] = time();

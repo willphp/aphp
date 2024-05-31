@@ -18,7 +18,7 @@ class File extends Base
 
     public function connect(): void
     {
-        $this->dir = Tool::dir_init(APHP_TOP . '/runtime/session', 0777);
+        $this->dir = Tool::dir_init(ROOT_PATH . '/runtime/session', 0777);
         $this->file = $this->dir . '/' . $this->session_id . '.php';
     }
 

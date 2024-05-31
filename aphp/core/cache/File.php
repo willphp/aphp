@@ -14,7 +14,7 @@ use aphp\core\Tool;
 
 class File extends Base
 {
-    public function connect()
+    public function connect(): void
     {
     }
 
@@ -58,28 +58,28 @@ class File extends Base
             $appList = Config::init()->get('app.app_list', []);
             $appList[] = 'common';
             foreach ($appList as $app) {
-                Tool::dir_delete(APHP_TOP . '/runtime/' . $app . '/cache');
+                Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache');
             }
             return true;
         }
         //clear current app
         if (empty($path)) {
-            return Tool::dir_delete(APHP_TOP . '/runtime/' . APP_NAME . '/cache');
+            return Tool::dir_delete(ROOT_PATH . '/runtime/' . APP_NAME . '/cache');
         }
         [$app, $path] = parse_app_name($path);
         if ($path == '*') {
             //clear app
-            return Tool::dir_delete(APHP_TOP . '/runtime/' . $app . '/cache');
+            return Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache');
         }
         $path = rtrim($path, '*');
         //clear path
-        return Tool::dir_delete(APHP_TOP . '/runtime/' . $app . '/cache/' . $path, true);
+        return Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache/' . $path, true);
     }
 
     private function parseName(string $name, bool $dirMake = false): string
     {
         [$app, $name] = parse_app_name($name);
-        $file = APHP_TOP . '/runtime/' . $app . '/cache/' . $name . '.php';
+        $file = ROOT_PATH . '/runtime/' . $app . '/cache/' . $name . '.php';
         if ($dirMake) {
             Tool::dir_init(dirname($file), 0777);
         }

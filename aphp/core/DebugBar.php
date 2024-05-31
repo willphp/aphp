@@ -61,7 +61,7 @@ class DebugBar
     {
         $filesize = filesize($file);
         $this->filesize += $filesize;
-        return substr($file, strlen(APHP_TOP.'/')) . '(' . number_format($filesize / 1024, 2) . ' KB)';
+        return substr($file, strlen(ROOT_PATH . '/')) . '(' . number_format($filesize / 1024, 2) . ' KB)';
     }
 
     //添加调试栏html到页面内容后
@@ -87,7 +87,7 @@ class DebugBar
         $runtime = $this->trace['time']; //运行时间
         $errors = !empty($this->items['error']) ? count($this->items['error']) : ''; //错误统计
         ob_start();
-        include APHP_TOP . '/aphp/tpl/debug_trace.php';
+        include ROOT_PATH . '/aphp/tpl/debug_trace.php';
         return "\n" . ob_get_clean() . "\n";
     }
 

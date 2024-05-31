@@ -11,8 +11,8 @@ return [
         'auth' => [
             \middleware\controller\Auth::class, //登录验证
         ],
-        'test' => [
-            \middleware\controller\Test::class, //测试
+        'rbac' => [
+            \middleware\controller\Rbac::class, //后台验证
         ],
     ],
     //全局中间件

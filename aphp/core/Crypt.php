@@ -38,6 +38,6 @@ class Crypt
         if (!empty($salt)) {
             $this->salt = $this->makeSalt($salt);
         }
-        return openssl_decrypt(base64_decode($string), 'aes-256-cbc', $this->salt, OPENSSL_RAW_DATA, substr($this->salt, -16));
+        return (string) openssl_decrypt(base64_decode($string), 'aes-256-cbc', $this->salt, OPENSSL_RAW_DATA, substr($this->salt, -16));
     }
 }

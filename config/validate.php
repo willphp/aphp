@@ -19,4 +19,5 @@ return [
     'chs_num' => '/^[\x7f-\xff0-9]+$/', //汉字数字
     'class_method' => '/^[a-z_]+\/[a-z_]+$/', //控制器/方法：index/about
     'route_key' => '/^[a-z0-9\-_\(\):]+$/', //路由配置键名：cat-(:num)
+    'price' => '/^\d+\.?\d*$/', //金额
 ];

@@ -8,7 +8,7 @@
 declare(strict_types=1);
 
 namespace extend\thumb;
-defined('APHP_TOP') or die('Access Denied');
+defined('ROOT_PATH') or die('Access Denied');
 
 use aphp\core\Single;
 
@@ -28,7 +28,7 @@ class Thumb
             $host = substr($image, 0, -strlen($path)) . '/';
         }
         $path = ltrim($path, '/');
-        $root = APHP_TOP . '/public';
+        $root = ROOT_PATH . '/public';
         $file = pathinfo($path);
         $thumb = $file['dirname'] . '/' . $file['filename'] . '_thumb_w' . $width . 'h' . $height . '.' . $file['extension'];
         $srcFile = $root . '/' . $path;

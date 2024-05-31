@@ -39,7 +39,7 @@ class Route
             return $cache;
         }
         $route = empty($uri) ? $this->route : $this->parseRoute($uri, $params, $app);
-        $class = 'app\\' . $route['app'] . '\\controller\\' . name_camel($route['controller']);
+        $class = 'app\\' . $route['app'] . '\\controller\\' . name_to_camel($route['controller']);
         $action = $route['action'];
         $params = $route['params'];
         $path = $route['controller'] . '/' . $route['action'];
@@ -179,7 +179,7 @@ class Route
                     }
                 }
             }
-            $route['controller'] = name_snake($route['controller']);
+            $route['controller'] = name_to_snake($route['controller']);
             if (is_numeric($route['action'])) {
                 $route['action'] = '_' . $route['action'];
             }

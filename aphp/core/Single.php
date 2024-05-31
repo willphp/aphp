@@ -9,20 +9,22 @@
 namespace aphp\core;
 trait Single
 {
-    protected static object $single;
+    protected static object $single; // 单例实例
 
+    // 禁止实例化
     private function __construct()
     {
     }
 
+    // 禁止克隆
     private function __clone()
     {
     }
 
-    public static function init(): object
+    // 获取单例实例，如果不存在则创建
+    public static function init(...$args): object
     {
         static $class = [];
-        $args = func_get_args();
         if (empty($args)) {
             return static::$single ??= new static();
         }

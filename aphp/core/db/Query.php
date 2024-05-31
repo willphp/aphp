@@ -36,7 +36,7 @@ class Query implements ArrayAccess, Iterator
     protected array $bind = []; //绑定参数
     public array $data = []; //对象数据
     protected ?object $page = null; //分页对象
-    protected bool $insertLog = false; //是否为插入日志
+    protected bool $recordLog = true; //是否记录日志
 
     private function __construct(string $table = '', $config = [])
     {
@@ -183,9 +183,11 @@ class Query implements ArrayAccess, Iterator
     {
         $this->recordLog($sql, $bind, true);
         $res = $this->db->execute($sql, $bind, $getInsertId);
-        if ($res > 0 && !$this->insertLog) {
+        if ($res > 0 && $this->recordLog) {
             $realSql = $this->getRealSql($sql, $bind);
             Middleware::init()->execute('framework.database_execute', ['sql' => $realSql]);
+        } else {
+            $this->recordLog = true;
         }
         return $res;
     }
@@ -446,13 +448,6 @@ class Query implements ArrayAccess, Iterator
         return empty($sql) ? false : $this->execute($sql, $bind, $getInsertId);
     }
 
-    //新增日志
-    public function insertLog(array $data = [])
-    {
-        $this->insertLog = true;
-        return $this->insert($data);
-    }
-
     //替换新增
     public function replace(array $data = [], bool $getInsertId = false)
     {
@@ -548,6 +543,13 @@ class Query implements ArrayAccess, Iterator
     public function getSql(): object
     {
         $this->options['sql'] = true;
+        return $this;
+    }
+
+    //设置不记录日志
+    public function noLog(): object
+    {
+        $this->recordLog = false;
         return $this;
     }
 

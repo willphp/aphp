@@ -29,7 +29,7 @@ class Config
             $this->res[] = $file;
         }
         $lastTime = Tool::file_list_mtime($this->res);
-        $cacheFile = $this->cacheDir . '/' . md5(serialize($this->res) . $lastTime) . '.php';
+        $cacheFile = $this->cacheDir . '/' . md5(json_encode($this->res) . $lastTime) . '.php';
         if (file_exists($cacheFile)) {
             $data = file_get_contents($cacheFile);
             self::$items = json_validate($data) ? json_decode($data, true) : [];

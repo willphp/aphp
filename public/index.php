@@ -8,6 +8,6 @@
 
 use aphp\core\App;
 
-define('APHP_TOP', strtr(realpath(__DIR__ . '/../'), '\\', '/'));
-require APHP_TOP . '/aphp/bootstrap.php';
-App::init()->boot();
+define('ROOT_PATH', strtr(realpath(__DIR__ . '/../'), '\\', '/')); // 根目录绝对路径
+require ROOT_PATH . '/aphp/bootstrap.php'; // 加载框架引导文件
+App::init()->boot(); // 初始化并启动应用

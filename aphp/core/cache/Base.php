@@ -31,7 +31,7 @@ abstract class Base
         return $data;
     }
 
-    abstract public function connect();
+    abstract public function connect(): void;
 
     abstract public function set(string $name, $value, int $expire = 0): bool;
 

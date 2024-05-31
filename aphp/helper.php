@@ -54,7 +54,7 @@ if (!function_exists('str_ends_with')) {
 }
 if (!function_exists('json_validate')) {
     /**
-     * 验证字符串Json
+     * 验证字符串是否为Json
      */
     function json_validate(string $json): bool
     {
@@ -97,9 +97,6 @@ function dump_const(): void
     dump(get_defined_constants(true)['user']);
 }
 
-/**
- * 解析 应用@名称
- */
 function parse_app_name(string $name, string $app = ''): array
 {
     if (empty($app)) {
@@ -115,9 +112,18 @@ function parse_app_name(string $name, string $app = ''): array
 }
 
 /**
+ * 拆分 前缀.名称
+ */
+function split_prefix_name(string $name, string $default_prefix, string $needle = '.'): array
+{
+    $name = trim($name, $needle);
+    return str_contains($name, $needle) ? explode($needle, $name, 2) : [$default_prefix, $name];
+}
+
+/**
  * 驼峰转下划线
  */
-function name_snake(string $name): string
+function name_to_snake(string $name): string
 {
     return strtolower(trim(preg_replace('/([A-Z])/', '_\1\2', $name), '_'));
 }
@@ -125,18 +131,29 @@ function name_snake(string $name): string
 /**
  * 下划线转驼峰
  */
-function name_camel(string $name): string
+function name_to_camel(string $name): string
 {
     return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
 }
 
 /**
- * 解析 前缀.名称
+ * 检测是否跳过
  */
-function parse_prefix_name(string $name, string $default_prefix, string $needle = '.'): array
+function check_is_skip(int $at, array $data, string $field): bool
 {
-    $name = trim($name, $needle);
-    return str_contains($name, $needle) ? explode($needle, $name, 2) : [$default_prefix, $name];
+    if ($at === AT_NOT_NULL) {
+        return empty($data[$field]);
+    }
+    if ($at === AT_NULL) {
+        return !empty($data[$field]);
+    }
+    if ($at === AT_SET) {
+        return !isset($data[$field]);
+    }
+    if ($at === AT_NOT_SET) {
+        return isset($data[$field]);
+    }
+    return false;
 }
 
 /**
@@ -145,7 +162,7 @@ function parse_prefix_name(string $name, string $default_prefix, string $needle 
 function get_batch_func($batchFunc = []): array
 {
     if (is_string($batchFunc)) {
-        $batchFunc = explode(',', strtr($batchFunc, '|', ','));
+        $batchFunc = explode(',', str_replace('|', ',', $batchFunc));
     }
     return array_filter($batchFunc);
 }
@@ -158,10 +175,10 @@ function value_batch_func($value, $batchFunc)
     $batchFunc = get_batch_func($batchFunc);
     foreach ($batchFunc as $func) {
         if (function_exists($func)) {
-            if (is_scalar($value)) {
+            if (is_array($value)) {
+                $value = array_map(fn($v) => $func(strval($v)), $value);
+            } else {
                 $value = $func(strval($value));
-            } elseif (is_array($value)) {
-                $value = array_map(fn($v) => is_scalar($v) ? $func(strval($v)) : $v, $value);
             }
         }
     }
@@ -169,23 +186,22 @@ function value_batch_func($value, $batchFunc)
 }
 
 /**
- * 检测条件跳过
+ * 获取类单例，不存在则创建
  */
-function check_at_continue(int $at, array $data, string $field): bool
+function app(string $class, array $args = []): object
 {
-    if ($at == AT_NOT_NULL && empty($data[$field])) {
-        return true;
+    return App::make($class, $args);
+}
+
+/**
+ * 命令调用
+ */
+function cli(string $uri, string $app = '', bool $isCall = true)
+{
+    if (empty($app)) {
+        $app = APP_NAME;
     }
-    if ($at == AT_NULL && !empty($data[$field])) {
-        return true;
-    }
-    if ($at == AT_SET && !isset($data[$field])) {
-        return true;
-    }
-    if ($at == AT_NOT_SET && isset($data[$field])) {
-        return true;
-    }
-    return false;
+    return Cli::run($uri, $app, $isCall);
 }
 
 /**
@@ -202,25 +218,6 @@ function encrypt(string $string, string $salt = ''): string
 function decrypt(string $string, string $salt = ''): string
 {
     return Crypt::init()->decrypt($string, $salt);
-}
-
-/**
- * 获取类单例
- */
-function app(string $class): object
-{
-    return App::make($class);
-}
-
-/**
- * 命令调用
- */
-function cli(string $uri, string $app = '', bool $isCall = true)
-{
-    if (empty($app)) {
-        $app = APP_NAME;
-    }
-    return Cli::run($uri, $app, $isCall);
 }
 
 /**
@@ -311,8 +308,21 @@ function cache_clear(string $path = ''): bool
 function widget(string $name): object
 {
     [$app, $name] = parse_app_name($name);
-    $class = 'app\\' . $app . '\\widget\\' . name_camel($name);
+    $class = 'app\\' . $app . '\\widget\\' . name_to_camel($name);
     return App::make($class);
+}
+
+/**
+ * 根据标签名更新部件缓存
+ */
+function widget_refresh(string $tag, string $app = ''): void
+{
+    if (empty($app)) {
+        $app = APP_NAME;
+    }
+    $cache = Cache::init();
+    $cache->flush($app . '@widget/' . $tag . '/*');
+    $cache->flush('common@widget/' . $tag . '/*');
 }
 
 /**
@@ -423,6 +433,15 @@ function view(string $file = '', array $vars = [], bool $isCall = false): object
 }
 
 /**
+ * 视图传值
+ */
+function view_with($vars, $value = ''): object
+{
+    return View::init()->with($vars, $value);
+}
+
+
+/**
  * 数据库快速操作
  */
 function pdo($config = []): object
@@ -444,7 +463,7 @@ function db(string $table = '', $config = []): object
 function model(string $name = ''): object
 {
     [$app, $name] = parse_app_name($name);
-    $class = 'app\\' . $app . '\\model\\' . name_camel($name);
+    $class = 'app\\' . $app . '\\model\\' . name_to_camel($name);
     return App::make($class);
 }
 
@@ -501,6 +520,14 @@ function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8
         $slice = join('', array_slice($match[0], $start, $length));
     }
     return $suffix ? $slice . '...' : $slice;
+}
+
+/**
+ * 获取网站版本
+ */
+function site_ver(): string
+{
+    return APP_DEBUG ? date('YmdHis') : site('version', date('Y-m-d'));
 }
 
 /**

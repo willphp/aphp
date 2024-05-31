@@ -16,11 +16,11 @@ class Cli
         $cmd = explode(':', array_shift($uri));
         $action = $cmd[1] ?? 'cli';
         $isCmd = true;
-        $class = 'aphp\\cli\\' . name_camel($cmd[0]);
+        $class = 'aphp\\cli\\' . name_to_camel($cmd[0]);
         if (!method_exists($class, $action)) {
-            $class = 'app\\' . $app . '\\command\\' . name_camel($cmd[0]);
+            $class = 'app\\' . $app . '\\command\\' . name_to_camel($cmd[0]);
             if (!method_exists($class, $action)) {
-                $class = 'app\\' . $app . '\\controller\\' . name_camel($cmd[0]);
+                $class = 'app\\' . $app . '\\controller\\' . name_to_camel($cmd[0]);
                 $isCmd = false;
             }
         }
@@ -29,7 +29,7 @@ class Cli
             $args = [];
             if (empty(!$uri)) {
                 foreach ($uri as $k => $v) {
-                    [$k, $v] = parse_prefix_name($v, strval($k), ':');
+                    [$k, $v] = split_prefix_name($v, strval($k), ':');
                     $args[$k] = $v;
                 }
                 Filter::init()->input($args);

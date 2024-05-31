@@ -53,7 +53,7 @@
                 <a href="https://doc.aphp.top/" target="_blank" class="green">开发手册</a>
             </div>
             <div class="aphp-page-menu">
-                <a href="{:url('index/index')}">首页</a> | <a href="{:url('index/ok')}">成功</a> | <a href="{:url('abc/abc')}">404</a>
+                <a href="{:url('index/index')}">首页</a> | <a href="{:url('abc/abc')}">404</a>
             </div>
             <div class="aphp-page-body cl">
                 <p style="color:red;">公告：{:site('site_notice')}</p>

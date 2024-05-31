@@ -7,12 +7,22 @@
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
-namespace aphp\core;
-class Abc
-{
-    use Single;
+namespace middleware\controller;
 
-    private function __construct()
+use Closure;
+
+class Rbac
+{
+    public function run(Closure $next, array $params = []): void
     {
+        if (!session('?user')) {
+            if (IS_AJAX) {
+                halt('', 401);
+            }
+            header('Location:' . url('login/login'));
+            exit();
+        }  elseif (session('user.level') < 3) {
+            halt('', 403);
+        }
     }
 }

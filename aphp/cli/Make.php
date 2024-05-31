@@ -33,7 +33,7 @@ class Make extends Command
     {
         $app = $req[0] ?? 'index';
         $namespace = 'app\\' . $app;
-        $path = APHP_TOP . '/' . strtr($namespace, '\\', '/');
+        $path = ROOT_PATH . '/' . strtr($namespace, '\\', '/');
         if (is_dir($path)) {
             return $this->error($app . ' already exists');
         }
@@ -42,11 +42,12 @@ class Make extends Command
         foreach ($build as $dir) {
             if (!is_dir($path . '/' . $dir)) mkdir($path . '/' . $dir, 0755, true);
         }
-        if (!file_exists(APHP_TOP . '/app/common.php')) {
-            file_put_contents(APHP_TOP . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//User-Defined Functions");
+        if (!file_exists(ROOT_PATH . '/app/common.php')) {
+            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//User-Defined Functions");
         }
-        if (!file_exists(APHP_TOP . '/route/' . $app . '.php')) {
-            file_put_contents(APHP_TOP . '/route/' . $app . '.php', "<?php\nreturn [\n\t'index' => 'index/index',\n];");
+        if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
+            Tool::dir_init(ROOT_PATH . '/route/' );
+            file_put_contents(ROOT_PATH . '/route/' . $app . '.php', "<?php\nreturn [\n\t'index' => 'index/index',\n];");
         }
         cli('make:ctrl ' . $app . '@index index');
         cli('make:ctrl ' . $app . '@error error');
@@ -62,12 +63,13 @@ class Make extends Command
         [$app, $name] = parse_app_name($name);
         $tpl = $req[1] ?? 'default';
         $namespace = 'app\\' . $app;
-        $class = name_camel($name);
+        $class = name_to_camel($name);
         $tpl_file = $this->_parse_tpl_file($tpl, 'controller', $app);
-        $make_file = APHP_TOP . '/' . strtr($namespace, '\\', '/') . '/controller/' . $class . '.php';
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/controller/' . $class . '.php';
         $replace = [
             '{{NAMESPACE}}' => $namespace,
             '{{CLASS}}' => $class,
+            '{{APP}}' => $app,
         ];
         return $this->_make_file($tpl_file, $make_file, $replace);
     }
@@ -79,9 +81,9 @@ class Make extends Command
         $tpl = $req[2] ?? 'default';
         [$app, $name] = parse_app_name($name);
         $namespace = 'app\\' . $app;
-        $class = name_camel($name);
+        $class = name_to_camel($name);
         $tpl_file = $this->_parse_tpl_file($tpl, 'model', $app);
-        $make_file = APHP_TOP . '/' . strtr($namespace, '\\', '/') . '/model/' . $class . '.php';
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/model/' . $class . '.php';
         $replace = [
             '{{NAMESPACE}}' => $namespace,
             '{{CLASS}}' => $class,
@@ -98,9 +100,9 @@ class Make extends Command
         $tag = $req[1] ?? $name;
         $tpl = $req[2] ?? 'default';
         $namespace = 'app\\' . $app;
-        $class = name_camel($name);
+        $class = name_to_camel($name);
         $tpl_file = $this->_parse_tpl_file($tpl, 'widget', $app);
-        $make_file = APHP_TOP . '/' . strtr($namespace, '\\', '/') . '/widget/' . $class . '.php';
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/widget/' . $class . '.php';
         $replace = [
             '{{NAMESPACE}}' => $namespace,
             '{{CLASS}}' => $class,
@@ -115,9 +117,9 @@ class Make extends Command
         [$app, $name] = parse_app_name($name);
         $tpl = $req[1] ?? $name;
         $namespace = 'app\\' . $app;
-        $class = name_camel($name);
+        $class = name_to_camel($name);
         $tpl_file = $this->_parse_tpl_file($tpl, 'command', $app);
-        $make_file = APHP_TOP . '/' . strtr($namespace, '\\', '/') . '/command/' . $class . '.php';
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/command/' . $class . '.php';
         $replace = [
             '{{NAMESPACE}}' => $namespace,
             '{{CLASS}}' => $class,
@@ -136,7 +138,7 @@ class Make extends Command
             $view_dir = THEME_ON ? VIEW_PATH . '/default' : VIEW_PATH;
         } else {
             $config = Config::init()->get('app');
-            $view_dir = !empty($config['view_path'][$app]) ? APHP_TOP . '/' . $config['view_path'][$app] : APHP_TOP . '/app/' . $app . '/view';
+            $view_dir = !empty($config['view_path'][$app]) ? ROOT_PATH . '/' . $config['view_path'][$app] : ROOT_PATH . '/app/' . $app . '/view';
             if (!empty($config['theme_on']) && in_array($app, $config['theme_on'])) {
                 $view_dir .= '/default';
             }
@@ -151,11 +153,11 @@ class Make extends Command
         if (empty($app)) {
             $app = APP_NAME;
         }
-        $file = APHP_TOP . '/app/' . $app . '/command/make/' . $type . '/' . $tpl . '.tpl';
+        $file = ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/' . $tpl . '.tpl';
         if (!is_file($file)) {
-            $file = APHP_TOP . '/aphp/cli/make/' . $type . '/' . $tpl . '.tpl';
+            $file = ROOT_PATH . '/aphp/cli/make/' . $type . '/' . $tpl . '.tpl';
             if (!is_file($file)) {
-                $file = APHP_TOP . '/aphp/cli/make/' . $type . '/default.tpl';
+                $file = ROOT_PATH . '/aphp/cli/make/' . $type . '/default.tpl';
             }
         }
         return $file;
@@ -163,7 +165,7 @@ class Make extends Command
 
     protected function _make_file(string $tpl_file, string $make_file, array $replace = []): ?bool
     {
-        $make = substr($make_file, strlen(APHP_TOP . '/'));
+        $make = substr($make_file, strlen(ROOT_PATH . '/'));
         if (!is_file($tpl_file)) {
             return $this->error(basename($tpl_file) . ' Template Not Exist');
         }

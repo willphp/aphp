@@ -18,7 +18,7 @@ class Db
     public static function connect($config = [], string $table = ''): object
     {
         static $conn = [];
-        $sign = empty($config) ? 'default_' . $table : md5(serialize($config)) . '_' . $table;
+        $sign = empty($config) ? 'default_' . $table : md5(json_encode($config)) . '_' . $table;
         $conn[$sign] ??= Query::init($table, $config);
         return static::$link = $conn[$sign];
     }

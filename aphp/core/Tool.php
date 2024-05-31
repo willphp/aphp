@@ -103,7 +103,7 @@ class Tool
     public static function dir_init(string $dir, int $auth = 0755): string
     {
         if (!self::dir_create($dir, $auth)) {
-            throw new Exception('Failed to create ' . substr($dir, strlen(APHP_TOP . '/')) . ' directory.');
+            throw new Exception('Failed to create ' . substr($dir, strlen(ROOT_PATH . '/')) . ' directory.');
         }
         return $dir;
     }

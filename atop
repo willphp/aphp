@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
 use aphp\core\App;
-define('APHP_TOP', strtr(realpath(__DIR__), '\\', '/'));
-require APHP_TOP . '/aphp/bootstrap.php';
+define('ROOT_PATH', strtr(realpath(__DIR__ . '/'), '\\', '/'));
+require ROOT_PATH . '/aphp/bootstrap.php';
 App::init(['index'])->boot();
