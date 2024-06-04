@@ -321,17 +321,13 @@ class Query implements ArrayAccess, Iterator
     //键名=>字段值
     public function column(string $fields, string $key = '')
     {
-        if (empty($key)) {
-            $key = $this->getPk();
-        }
-        $getOne = false; //是否获取单行字段值
-        $fieldHasKey = true; //字段是否包含键名
-        if ($fields != '*') {
+        $isGetOne = !empty($fields) && $fields != '*' && !str_contains($fields, ','); //是否获取一维数组
+        $isClearKey = false;
+        if (!empty($key)) {
             $fields = explode(',', $fields);
-            $getOne = 1 == count($fields);
             if (!in_array($key, $fields)) {
-                $fieldHasKey = false;
                 $fields[] = $key;
+                $isClearKey = true;
             }
         }
         $res = $this->field($fields)->select();
@@ -339,12 +335,14 @@ class Query implements ArrayAccess, Iterator
             return $res;
         }
         $data = [];
-        foreach ($res as $row) {
-            $k = $row[$key];
-            if (!$fieldHasKey) {
-                unset($row[$key]);
+        foreach ($res as $k => $v) {
+            if (!empty($key)) {
+                $k = $v[$key];
             }
-            $data[$k] = $getOne ? current($row) : $row;
+            if ($isClearKey) {
+                unset($v[$key]);
+            }
+            $data[$k] = $isGetOne ? current($v) : $v;
         }
         return $data;
     }

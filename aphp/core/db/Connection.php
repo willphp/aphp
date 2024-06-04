@@ -167,8 +167,13 @@ class Connection
         if (empty($bind)) {
             return $sql;
         }
+        $is_key_string = is_string(array_key_first($bind));
         $key = array_map(fn($v) => is_string($v) ? '/:' . $v . '/' : '/[?]/', array_keys($bind));
         $val = array_map(fn($v) => $this->quoteValue($v), $bind);
+        if ($is_key_string) {
+            $sql = preg_replace($key, $key, $sql, 1);
+            return str_replace($key, $val, $sql);
+        }
         return preg_replace($key, $val, $sql, 1);
     }
 
