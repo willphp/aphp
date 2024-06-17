@@ -15,7 +15,7 @@ APHP框架(原WillPHP框架)是一个MVC超轻量级PHP8开发框架
 
 ### 开发手册
 
-开发手册： [https://doc.aphp.top](https://doc.aphp.top)
+开发手册： [https://www.aphp.top/md_1.html](https://www.aphp.top/md_1.html)
 
 ### 下载安装
 
@@ -27,7 +27,15 @@ Composer安装：`composer create-project willphp/aphp blog --prefer-dist`
 
 > 如无需composer扩展，建议删除vendor目录，加速框架运行！ 
 
-### URL重写
+### 安装指南
+
+1. 上传并解压安装包到网站目录
+2. 设置-网站目录-运行目录到`/public`
+3. 设置-伪静态规则(看`url_rewrite.txt`)
+4. [本地]重命名`env.example.env`为`.env`并修改其中数据库配置
+5. [线上]修改`config/database.php`中数据库配置
+
+### 伪静态设置
 
 Nginx规则：
 
@@ -55,4 +63,4 @@ Apache规则：
 
 QQ群1：325825297  QQ群2：16008861
 
-官网：[aphp.top](https://www.aphp.top) 作者：大松栩(24203741@qq.com) 
+官网：[aphp.top](https://www.aphp.top) 作者：无念(24203741@qq.com) 
