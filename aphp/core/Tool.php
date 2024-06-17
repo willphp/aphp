@@ -14,14 +14,14 @@ use Exception;
 class Tool
 {
     // get array value (name: key.key)
-    public static function arr_get(array $data, string $name, $default = '')
+    public static function arr_get(array $data, string $name, $default = '', bool $to_array = false)
     {
         $keys = explode('.', $name);
         $val = $data;
         foreach ($keys as $key) {
             $val = $val[$key] ?? $default;
         }
-        return $val;
+        return $to_array && !is_array($val) ? self::str_to_array($val) : $val;
     }
 
     // set array value (name: key.key)
@@ -142,5 +142,28 @@ class Tool
             }
         }
         return number_format($size / 1024, 2) . ' KB';
+    }
+
+    // string to array
+    public static function str_to_array(string $options, string $sep = '|', string $eq = '='): array
+    {
+        $is_key = str_contains($options, $eq); // 是否有主键
+        $options = array_diff(explode($sep, $options), ['']); // 删除空值
+        if (!$is_key) {
+            return $options;
+        }
+        $arr = [];
+        $i = 0;
+        foreach ($options as $k => $v) {
+            if (str_contains($v, $eq)) {
+                [$i, $v] = explode($eq, $v, 2);
+            } elseif ($k != 0) {
+                $i ++;
+            }
+            if (is_string($i)) $i = trim($i);
+            if (isset($arr[$i])) $i ++;
+            $arr[$i] = trim($v);
+        }
+        return $arr;
     }
 }

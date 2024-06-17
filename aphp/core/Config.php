@@ -56,12 +56,12 @@ class Config
         }
     }
 
-    public function get(string $name = '', $default = '')
+    public function get(string $name = '', $default = '', bool $to_array = false)
     {
         if (empty($name)) {
             return self::$items;
         }
-        return Tool::arr_get(self::$items, $name, $default);
+        return Tool::arr_get(self::$items, $name, $default, $to_array);
     }
 
     public function set(string $name, $value = '')

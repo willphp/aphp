@@ -50,7 +50,7 @@
             <div class="aphp-page-foot cl">
                 <a href="https://qm.qq.com/cgi-bin/qm/qr?k=U7SzseDDXSbG9sB1CTEf5U10oFJOKR8-&jump_from=webapi" target="_blank" class="red">Q群:325825297</a>
                 <a href="https://gitee.com/willphp/aphp" target="_blank" class="blue">下载新版</a>
-                <a href="https://doc.aphp.top/" target="_blank" class="green">开发手册</a>
+                <a href="https://www.aphp.top/md_1.html" target="_blank" class="green">开发手册</a>
             </div>
             <div class="aphp-page-menu">
                 <a href="{:url('index/index')}">首页</a> | <a href="{:url('abc/abc')}">404</a>

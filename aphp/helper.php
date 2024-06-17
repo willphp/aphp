@@ -22,6 +22,7 @@ use aphp\core\Request;
 use aphp\core\Response;
 use aphp\core\Route;
 use aphp\core\Session;
+use aphp\core\Tool;
 use aphp\core\Validate;
 use aphp\core\View;
 
@@ -238,9 +239,9 @@ function config(string $name = '', $value = '')
 /**
  * 获取配置
  */
-function config_get(string $name = '', $default = '')
+function config_get(string $name = '', $default = '', bool $to_array = false)
 {
-    return Config::init()->get($name, $default);
+    return Config::init()->get($name, $default, $to_array);
 }
 
 /**
@@ -254,21 +255,23 @@ function config_load(string $file = ''): void
 /**
  * 刷新配置
  */
+
 function config_refresh(): bool
 {
     return Config::init()->refresh();
 }
 
+
 /**
  * site配置获取
  */
-function site(string $name = '', $default = '')
+function site(string $name = '', $default = '', bool $to_array = false)
 {
     $config = Config::init();
     if ('' === $name) {
         return $config->get('site');
     }
-    return str_starts_with($name, '?') ? $config->has('site.' . substr($name, 1)) : $config->get('site.' . $name, $default);
+    return str_starts_with($name, '?') ? $config->has('site.' . substr($name, 1)) : $config->get('site.' . $name, $default, $to_array);
 }
 
 /**
@@ -523,11 +526,110 @@ function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8
 }
 
 /**
+ * 时间多久之前
+ */
+function get_time_ago(int $time): string
+{
+    $etime = time() - $time;
+    if ($etime < 1) {
+        return '刚刚';
+    }
+    $interval = [31536000 => '年前', 2592000 => '个月前', 604800=>'星期前', 86400=>'天前', 3600=>'小时前', 60=>'分钟前', 1=>'秒前'];
+    foreach ($interval as $k => $v) {
+        $ok = floor($etime / $k);
+        if ($ok != 0) {
+            return $ok.$v;
+        }
+    }
+    return '刚刚';
+}
+
+/**
  * 获取网站版本
  */
 function site_ver(): string
 {
     return APP_DEBUG ? date('YmdHis') : site('version', date('Y-m-d'));
+}
+
+/**
+ * ids过滤转换
+ */
+function ids_filter(string $ids, bool $to_array = false, bool $gt_0 = true)
+{
+    $ids = array_filter(explode(',', $ids), 'is_numeric');
+    $ids = array_unique($ids);
+    if ($gt_0) {
+        $ids = array_filter($ids, fn(int $n)=>$n>0);
+    }
+    ksort($ids);
+    return $to_array ? $ids : implode(',', $ids);
+}
+
+/**
+ * 验证表名
+ */
+function is_table(string $table): bool
+{
+    return pdo()->checkTable($table);
+}
+
+/**
+ * 获取前后关联id
+ */
+function get_prev_next(int $id, array $keys): array
+{
+    $k = array_search($id, $keys);
+    if ($k === false) {
+        return [0, 0];
+    }
+    $prev_id = $keys[$k-1] ?? 0;
+    $next_id = $keys[$k+1] ?? 0;
+    return [$prev_id, $next_id];
+}
+
+/**
+ * 选项转换数组
+ */
+function str_to_array(string $options, string $sep = '|', string $eq = '='): array
+{
+    return Tool::str_to_array($options, $sep, $eq);
+}
+
+/**
+ * form-select生成
+ */
+function form_select(string $name, $options, $selected = '', string $attr = ''): string
+{
+    if (!is_array($options)) {
+        $options = str_to_array($options);
+    }
+    if (!empty($attr)) {
+        $attr = ' '.clear_html($attr);
+    }
+    $select = '<select name="' . $name .'"'.$attr. '>'."\n";
+    foreach ($options as $k => $v) {
+        $select .= "\t<option value=\"{$k}\"".($k == $selected ? ' selected="selected"' : '').">{$v}</option>\n";
+    }
+    return $select."</select>\n";
+}
+
+/**
+ * form-radio生成
+ */
+function form_radio(string $name, $options, $selected = '', string $attr = ''): string
+{
+    if (!is_array($options)) {
+        $options = str_to_array($options);
+    }
+    if (!empty($attr)) {
+        $attr = ' '.clear_html($attr);
+    }
+    $radio = '';
+    foreach ($options as $k => $v) {
+        $radio .= '<label'.$attr.'><input type="radio" name="'.$name.'" value="'.$k.'"'.($k == $selected ? ' checked="checked"' : '').' />'.$v.'</label>'."\n";
+    }
+    return $radio;
 }
 
 /**
@@ -581,4 +683,79 @@ function remove_xss(string $val): string
         }
     }
     return $val;
+}
+
+/**
+ * curl请求
+ */
+function get_curl(string $url, array $post = [], array $header = [], bool $get_header = false, string $cookie = '', string $referer = '', string $ua = '', bool $nobody = false, int $timeout = 30): string
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    if (!empty($post)) {
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+    }
+    $http = ['Accept: */*', 'Accept-Encoding: gzip,deflate,sdch', 'Accept-Language: zh-CN,zh;q=0.8', 'Connection: close'];
+    $header = array_merge($http, $header);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+    if ($get_header) {
+        curl_setopt($ch, CURLOPT_HEADER, true);
+    }
+    if (!empty($cookie)) {
+        curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+    }
+    if (!empty($referer)) {
+        if ($referer == '1') {
+            $referer = 'https://i.qq.com/';
+        }
+        curl_setopt($ch, CURLOPT_REFERER, $referer);
+    }
+    if (!empty($ua)) {
+        $ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36';
+    }
+    curl_setopt($ch, CURLOPT_USERAGENT, $ua);
+    if ($nobody) {
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+    }
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $ret = curl_exec($ch);
+    curl_close($ch);
+    return $ret ? trim($ret) : '';
+}
+
+/**
+ * 获取客户ip
+ */
+function get_ip(bool $int = false)
+{
+    $k = $int ? 1 : 0;
+    static $ips = null;
+    if (null !== $ips) return $ips[$k];
+    $ip = '';
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $pos = array_search('unknown', $arr);
+        if (false !== $pos) unset($arr[$pos]);
+        $ip = trim($arr[0]);
+    } elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $long = ip2long((string)$ip);
+    $ips = $long ? [$ip, $long] : ['0.0.0.0', 0];
+    return $ips[$k];
+}
+
+/**
+ * 获取整型ip
+ */
+function get_int_ip(): int
+{
+    return get_ip(true);
 }

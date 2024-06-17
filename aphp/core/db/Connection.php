@@ -62,6 +62,11 @@ class Connection
         return $this->config['db_driver'] . ':host=' . $this->config['db_host'] . $port . ';dbname=' . $this->config['db_name'] . $charset;
     }
 
+    public function checkTable(string $table): bool
+    {
+        return (bool)preg_match('/^' . $this->prefix . '\w{1,32}$/', $table);
+    }
+
     public function getConfig(string $name = '')
     {
         if (empty($name)) {

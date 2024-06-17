@@ -76,17 +76,6 @@ trait Jump
         exit();
     }
 
-    protected function _check_login(string $auth = 'user')
-    {
-        if (!session('?'.$auth)) {
-            if (IS_AJAX) {
-                $this->_json(401);
-            }
-            $this->_url('login/login');
-            exit();
-        }
-    }
-
     protected function isAjax(): bool
     {
         return IS_AJAX || IS_API || $this->isApi;
