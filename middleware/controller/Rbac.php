@@ -24,5 +24,6 @@ class Rbac
         }  elseif (session('user.level') < 3) {
             halt('', 403);
         }
+		$next();
     }
 }

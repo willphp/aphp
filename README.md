@@ -15,7 +15,9 @@ APHP框架(原WillPHP框架)是一个MVC超轻量级PHP8开发框架
 
 ### 开发手册
 
-开发手册： [https://www.aphp.top/md_1.html](https://www.aphp.top/md_1.html)
+内置文档：查看`doc_aphp`目录
+
+在线手册： [https://www.aphp.top/md_1.html](https://www.aphp.top/md_1.html)
 
 ### 下载安装
 

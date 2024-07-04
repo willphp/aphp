@@ -142,20 +142,21 @@ abstract class Model implements ArrayAccess, Iterator
     //模型操作：新增，更新
     final public function save(array $data = [])
     {
-        $inAction = $this->getInAction(); //当前操作
+        $action_scene = $this->getActionScene(); //当前操作
+        $action_scene = $this->getActionScene(); //当前操作
         $this->filterFieldFill($data); //1.过滤填充
         //2.自动验证
-        if (!$this->autoValidate($inAction)) {
+        if (!$this->autoValidate($action_scene)) {
             return $this->respond();
         }
         //3.自动处理
-        if (!$this->autoOperation($inAction)) {
+        if (!$this->autoOperation($action_scene)) {
             return $this->respond();
         }
-        $this->autoFilter($inAction); //4.自动过滤
-        $this->autoTime($inAction); //5.自动时间
+        $this->autoFilter($action_scene); //4.自动过滤
+        $this->autoTime($action_scene); //5.自动时间
         $res = false;
-        if ($inAction == IN_INSERT) {
+        if ($action_scene == IN_INSERT) {
             if (isset($this->saveData[$this->pk])) {
                 unset($this->saveData[$this->pk]);
             }
@@ -169,7 +170,7 @@ abstract class Model implements ArrayAccess, Iterator
                 $this->_after_insert(array_merge($this->saveData, $this->data));
                 $this->resetWidget(); //重置widget缓存
             }
-        } elseif ($inAction == IN_UPDATE) {
+        } elseif ($action_scene == IN_UPDATE) {
             $this->saveData = array_merge($this->data, $this->saveData);
             $this->_before_update($this->saveData);
             if (!empty($this->errors)) {
@@ -230,19 +231,13 @@ abstract class Model implements ArrayAccess, Iterator
     {
     }
 
-    //获取当前操作： 2 新增 3 更新
-    final public function getInAction(): int
+    //获取当前操作场景： 2 新增 3 更新
+    final public function getActionScene(): int
     {
         if (empty($this->data) && isset($this->saveData[$this->pk])) {
             $this->data[$this->pk] = $this->saveData[$this->pk];
         }
         return empty($this->data[$this->pk]) ? IN_INSERT : IN_UPDATE;
-    }
-
-    //验证附加条件
-    protected function _validate_map(array $data = []): array
-    {
-        return [];
     }
 
     //1.过滤填充字段
@@ -260,18 +255,24 @@ abstract class Model implements ArrayAccess, Iterator
         $this->saveData = array_merge($this->saveData, $data);
     }
 
-    //2.自动验证字段
-    final public function autoValidate(int $inAction): bool
+    //2.自动验证字段 need_where
+    final public function autoValidate(int $action_scene): bool
     {
         if (!empty($this->validate)) {
-            $this->errors = Validate::init($this)->setAction($inAction)->setMap($this->_validate_map($this->saveData))->make($this->validate, $this->saveData, $this->isBatch)->getError();
+            $this->errors = Validate::init($this)->setScene($action_scene)->setWhere($this->_validate_where($this->saveData))->make($this->validate, $this->saveData, $this->isBatch)->getError();
             return empty($this->errors);
         }
         return true;
     }
 
+    // 验证附加条件设置
+    protected function _validate_where(array $data): array
+    {
+        return [];
+    }
+
     //3.自动处理字段
-    final public function autoOperation(int $inAction): bool
+    final public function autoOperation(int $action_scene): bool
     {
         if (empty($this->auto)) {
             return true;
@@ -285,7 +286,7 @@ abstract class Model implements ArrayAccess, Iterator
             if (check_is_skip($at, $data, $field)) {
                 continue;
             }
-            if ($in > IN_BOTH && $in != $this->$inAction) {
+            if ($in > IN_BOTH && $in != $this->$action_scene) {
                 continue;
             }
             $data[$field] ??= '';
@@ -310,7 +311,7 @@ abstract class Model implements ArrayAccess, Iterator
     }
 
     //4.自动过滤字段
-    final public function autoFilter(int $inAction): bool
+    final public function autoFilter(int $action_scene): bool
     {
         if (empty($this->filter)) {
             return true;
@@ -323,7 +324,7 @@ abstract class Model implements ArrayAccess, Iterator
             if (check_is_skip($at, $data, $field)) {
                 continue;
             }
-            if ($in == $inAction || $in == IN_BOTH) {
+            if ($in == $action_scene || $in == IN_BOTH) {
                 unset($data[$field]);
             }
         }
@@ -331,13 +332,13 @@ abstract class Model implements ArrayAccess, Iterator
     }
 
     //5.自动时间(创建更新时间)
-    final public function autoTime(int $inAction): void
+    final public function autoTime(int $action_scene): void
     {
         $format = ['date' => 'Y-m-d', 'datetime' => 'Y-m-d H:i:s', 'timestamp' => 'Ymd His'];
         $type = $this->autoTimeType;
         if ($type == 'int' || isset($format[$type])) {
             $time = isset($format[$type]) ? date($format[$type], $_SERVER['REQUEST_TIME']) : $_SERVER['REQUEST_TIME'];
-            if ($inAction == IN_INSERT && !empty($this->createTime)) {
+            if ($action_scene == IN_INSERT && !empty($this->createTime)) {
                 $this->saveData[$this->createTime] = $time;
             }
             if (!empty($this->updateTime)) {

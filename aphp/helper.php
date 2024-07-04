@@ -597,42 +597,6 @@ function str_to_array(string $options, string $sep = '|', string $eq = '='): arr
 }
 
 /**
- * form-select生成
- */
-function form_select(string $name, $options, $selected = '', string $attr = ''): string
-{
-    if (!is_array($options)) {
-        $options = str_to_array($options);
-    }
-    if (!empty($attr)) {
-        $attr = ' '.clear_html($attr);
-    }
-    $select = '<select name="' . $name .'"'.$attr. '>'."\n";
-    foreach ($options as $k => $v) {
-        $select .= "\t<option value=\"{$k}\"".($k == $selected ? ' selected="selected"' : '').">{$v}</option>\n";
-    }
-    return $select."</select>\n";
-}
-
-/**
- * form-radio生成
- */
-function form_radio(string $name, $options, $selected = '', string $attr = ''): string
-{
-    if (!is_array($options)) {
-        $options = str_to_array($options);
-    }
-    if (!empty($attr)) {
-        $attr = ' '.clear_html($attr);
-    }
-    $radio = '';
-    foreach ($options as $k => $v) {
-        $radio .= '<label'.$attr.'><input type="radio" name="'.$name.'" value="'.$k.'"'.($k == $selected ? ' checked="checked"' : '').' />'.$v.'</label>'."\n";
-    }
-    return $radio;
-}
-
-/**
  * 清理html代码
  */
 function clear_html(string $string): string
