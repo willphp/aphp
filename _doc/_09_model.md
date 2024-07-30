@@ -213,4 +213,14 @@ $cate->getPk();     //获取表主键
 $cate->getPrefix(); //获取表前缀
 $cate->where('status', 1)->order('id DESC')->paginate(10); //列表分页
 $cate->where('id', 1)->delete(); //删除
+// 过滤 字段 => 值, 允许字段, 禁止字段
+$cate->filterFieldFill(['user' => 'admin'], ['*'], ['user']); //过滤
+if (empty($data)) {
+    $this->error('字段禁止修改');
+}
+// 验证单个字段
+$errors = $cate->validateField('sort', '11a');
+if (!empty($errors)) {
+    $this->error(current($errors)); //排序必须为数字
+}
 ```

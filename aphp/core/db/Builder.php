@@ -222,41 +222,50 @@ class Builder
             return '';
         }
         $express = $logic = [];
-        $i = 1;
+        $i = 0;
         foreach ($where as $wh) {
-            $arg_count = count($wh); //参数数量
-            $tmp = false;
+            $i ++;
+            $arg_count = count($wh); // 参数数量
+            $whereOr = isset($wh[3]) ? strtoupper($wh[3]) : 'AND'; // 默认逻辑连接符
             if ($arg_count == 1) {
-                $tmp = $wh[0];
-            }
-            if ($arg_count == 2) {
-                $tmp = $this->getExpress($wh[0], $wh[1]);
-            }
-            if ($arg_count >= 3) {
-                $tmp = $this->getExpress($wh[0], $wh[2], $wh[1]);
-            }
-            if ($tmp) {
-                $express[$i] = $tmp;
-                $logic[$i] = isset($wh[3]) ? strtoupper($wh[3]) : 'AND';
-                $i++;
+                $express[$i] = $wh[0];
+                $logic[$i] = $whereOr;
+            } elseif ($arg_count == 2 && is_array($wh[1])) {
+                $this->query->bind($wh[1]); // 条件参数绑定
+                $express[$i] = $wh[0];
+                $logic[$i] = $whereOr;
+            } elseif ($arg_count >= 2) {
+                $value = $arg_count == 2 ? $wh[1] : $wh[2];
+                $op = $arg_count == 2 ? '=' : $wh[1];
+                if (str_contains($wh[0], '|') || str_contains($wh[0], '&')) {
+                    if (str_contains($wh[0], '|')) {
+                        $whereOr = 'OR';
+                    }
+                    $wh[0] = str_replace(['&', '|'], ' ', $wh[0]);
+                    $fieldList = explode(' ', $wh[0]);
+                    foreach ($fieldList as $field) {
+                        $express[$i] = $this->getExpress($field, $value, $op);
+                        $logic[$i] = $whereOr;
+                        $i ++;
+                    }
+                } else {
+                    $express[$i] = $this->getExpress($wh[0], $value, $op);
+                    $logic[$i] = $whereOr;
+                }
             }
         }
         return $this->linkExpress($express, $logic);
     }
 
-    public function getExpress(string $field, $condition, string $op = '=')
+    public function getExpress(string $field, $condition, string $op = '='): string
     {
-        if (is_array($condition) && $op == '=') {
-            $this->query->bind($condition);
-            return $field;
-        }
         $op = strtoupper($op);
         if (in_array($op, ['=', '<>', '!=', '>', '>=', '<', '<=', 'LIKE', 'NOT LIKE'])) {
             $express = $this->parseValue($condition);
             if (is_scalar($express)) {
                 return $this->parseKey($field) . ' ' . $op . ' ' . $express;
             }
-            return false;
+            return '';
         }
         if (in_array($op, ['IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN'])) {
             if (!is_array($condition)) {
@@ -268,7 +277,7 @@ class Builder
             }
             return $this->parseKey($field) . ' ' . $op . ' (' . implode(',', $express) . ')';
         }
-        return false;
+        return '';
     }
 
     protected function linkExpress(array $express, array $logic): string

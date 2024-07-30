@@ -226,6 +226,8 @@ where('id', 'in', '1,2')        //in,not in 支持数组
 where('name', 'like', '%ad%')   //like,not like
 where('id', 'between', '1,3')   //between,not between
 where('id=:id AND status=:status', ['id'=>2, 'status'=>1])  //绑定参数
+where('user|email', 'admin') //user=admin OR email=admin
+where('id&status', 1) //id=1 AND status=1
 ```
 
 连接方式：

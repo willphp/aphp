@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-namespace {{NAMESPACE}}\controller;
+namespace {{$namespace}}\controller;
 use aphp\core\Jump;
-class {{CLASS}}
+class {{$class}}
 {
 	use Jump;
     public function __call(string $name, array $arguments)

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-namespace {{NAMESPACE}}\widget;
+namespace {{$namespace}}\widget;
 use aphp\core\Widget;
-class {{CLASS}} extends Widget
+class {{$class}} extends Widget
 {
-    protected string $tag = '{{TAG}}';
+    protected string $tag = '{{$tag}}';
     protected int $expire = 0;
     public function set($id = '', array $options = [])
     {

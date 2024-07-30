@@ -145,12 +145,16 @@ class Tool
     }
 
     // string to array
-    public static function str_to_array(string $options, string $sep = '|', string $eq = '='): array
+    public static function str_to_array(string $options, string $sep = '|', string $eq = '=', array $replace = ['[or]' => '|', '[eq]' => '=']): array
     {
         $is_key = str_contains($options, $eq); // 是否有主键
+        $is_replace = str_contains($options, '['); // 是否有替换
+        if (str_contains($options, "\n")) {
+            $sep = "\n";
+        }
         $options = array_diff(explode($sep, $options), ['']); // 删除空值
         if (!$is_key) {
-            return $options;
+            return $is_replace ? array_map(fn($v) => strtr($v, $replace), $options) : $options;
         }
         $arr = [];
         $i = 0;
@@ -164,6 +168,6 @@ class Tool
             if (isset($arr[$i])) $i ++;
             $arr[$i] = trim($v);
         }
-        return $arr;
+        return $is_replace ? array_map(fn($v) => strtr($v, $replace), $arr) : $arr;
     }
 }

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace {{NAMESPACE}}\model;
+namespace {{$namespace}}\model;
 use aphp\core\Model;
-class {{CLASS}} extends Model
+class {{$class}} extends Model
 {
-	protected string $table = '{{TABLE}}';
-	protected string $pk = '{{PK}}';
+	protected string $table = '{{$table_name}}';
+	protected string $pk = '{{$pk|default='pk'}}';
 }

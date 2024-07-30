@@ -143,8 +143,7 @@ abstract class Model implements ArrayAccess, Iterator
     final public function save(array $data = [])
     {
         $action_scene = $this->getActionScene(); //当前操作
-        $action_scene = $this->getActionScene(); //当前操作
-        $this->filterFieldFill($data); //1.过滤填充
+        $this->saveData = array_merge($this->saveData, $this->filterFieldFill($data)); //1.过滤填充
         //2.自动验证
         if (!$this->autoValidate($action_scene)) {
             return $this->respond();
@@ -241,10 +240,16 @@ abstract class Model implements ArrayAccess, Iterator
     }
 
     //1.过滤填充字段
-    protected function filterFieldFill(array $data): void
+    public function filterFieldFill(array $data, array $allowFill = [], array $denyFill = []): array
     {
+        if (!empty($allowFill)) {
+            $this->allowFill = array_merge($this->allowFill, $allowFill);
+        }
+        if (!empty($denyFill)) {
+            $this->denyFill = array_merge($this->denyFill, $denyFill);
+        }
         if (empty($this->allowFill) && empty($this->denyFill)) {
-            return;
+            return [];
         }
         if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
             $data = Tool::arr_key_filter($data, $this->allowFill, true);
@@ -252,7 +257,7 @@ abstract class Model implements ArrayAccess, Iterator
         if (!empty($this->denyFill)) {
             $data = ($this->denyFill[0] == '*') ? [] : Tool::arr_key_filter($data, $this->denyFill);
         }
-        $this->saveData = array_merge($this->saveData, $data);
+        return $data;
     }
 
     //2.自动验证字段 need_where
@@ -263,6 +268,13 @@ abstract class Model implements ArrayAccess, Iterator
             return empty($this->errors);
         }
         return true;
+    }
+
+    // 验证单个字段值
+    public function validateField(string $field, $value): array
+    {
+        $validate = array_filter($this->validate, fn($v)=>$v[0] == $field);
+        return !empty($validate) ? validate($validate, [$field => $value])->getError() : [];
     }
 
     // 验证附加条件设置

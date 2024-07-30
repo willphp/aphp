@@ -4,15 +4,15 @@
   "type": "project",
   "keywords": [
     "aphp",
-    "一鱼框架",
-    "framework",
+    "一鱼PHP框架",
+    "aphp框架",
     "ORM"
   ],
   "homepage": "https://www.aphp.top/",
   "license": "Apache-2.0",
   "authors": [
     {
-      "name": "大松栩",
+      "name": "无念",
       "email": "24203741@qq.com"
     }
   ],

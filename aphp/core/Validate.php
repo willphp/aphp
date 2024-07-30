@@ -61,7 +61,8 @@ class Validate
             if (check_is_skip($at, $data, $field)) {
                 continue;
             }
-            if ($in > IN_BOTH && $in != $this->scene) {
+            // 修复未设置场景可跳过BUG
+            if ($this->scene != 0 && $in > IN_BOTH && $in != $this->scene) {
                 continue;
             }
             if ($rules instanceof Closure) {

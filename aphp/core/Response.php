@@ -35,7 +35,7 @@ class Response
                 }
                 echo $res;
                 if (IS_CLI && $trace) {
-                    echo "\n[".CLI_COMMAND."]";
+                    echo "\n[Command: ".CLI_COMMAND."]\n";
                 }
             }
         } else {

@@ -14,6 +14,7 @@ use aphp\core\Single;
 abstract class Command
 {
     use Single;
+
     protected bool $isCall;
 
     private function __construct(bool $isCall = false)
@@ -27,7 +28,7 @@ abstract class Command
     {
         if (!$this->isCall) {
             if (empty($msg)) $msg = 'success!';
-            die(PHP_EOL . "\033[;36m $msg \x1B[0m" . PHP_EOL);
+            die(PHP_EOL . "\033[;36m $msg \x1B[0m" . PHP_EOL . "\n");
         }
         return true;
     }
@@ -36,7 +37,7 @@ abstract class Command
     {
         if (!$this->isCall) {
             if (empty($msg)) $msg = 'fail!';
-            die(PHP_EOL . "\033[;41m $msg \x1B[0m" . PHP_EOL);
+            die(PHP_EOL . "\033[;41m $msg \x1B[0m" . PHP_EOL . "\n");
         }
         return false;
     }

@@ -12,8 +12,8 @@ return [
         'db_driver' => 'mysql', //数据库驱动
         'db_host' => 'localhost', //数据库服务器
         'db_port' => '3306', //服务器端口
-        'db_name' => 'www_aphp_top', //数据库名
         'db_charset' => 'utf8mb4', //默认字符编码
+		'db_name' => 'www_aphp_top', //数据库名
         'db_user' => 'root', //数据库用户名
         'db_pass' => '123456', //数据库密码
         'table_prefix' => 'aphp_', //表前缀

@@ -14,26 +14,144 @@ use aphp\core\Tool;
 
 class Make extends Command
 {
+    protected array $replace = [];
+
     public function cli(): bool
     {
         if (!$this->isCall) {
-            echo "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-            echo "0. make:app     -[app]                                      \n";
-            echo "1. make:ctrl    -[app@ctrl] -[tpl]                          \n";
-            echo "2. make:model   -[app@table] -[pk] -[tpl]                   \n";
-            echo "3. make:widget  -[app@name] -[tag] -[tpl]                   \n";
-            echo "4. make:command -[app@name] -[tpl]                          \n";
-            echo "5. make:view    -[app@ctrl] -[method] -[tpl]                \n";
-            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n";
+            echo "| 1. make:ctrl    [app_name@ctrl_name] [tpl:default] [-f]                    |\n";
+            echo "| 2. make:model   [app_name@table_name] -[pk] -[tpl:default] [-f]            |\n";
+            echo "| 3. make:view    [app_name@ctrl_name] -[method] -[tpl:default] [-f]         |\n";
+            echo "| 4. make:widget  [app_name@widget_name] -[tag] -[tpl:default] [-f]          |\n";
+            echo "| 5. make:command [app_name@command_name] -[tpl:default] [-f]                |\n";
+            echo "| 6. make:app     [app_name]                                                 |\n";
+            echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n";
+            echo "| 7. clear:runtime [app_name(or *)]                                          |\n";
+            echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|";
         }
         return true;
     }
 
+    // 生成控制器：make:ctrl 应用名@控制器名 来源模板 -f 覆盖生成
+    public function ctrl(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@test'; // 应用@控制器名
+        [$app, $name] = parse_app_name($name);
+        $tpl = $req[1] ?? 'default'; // 默认模板
+        $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
+        $namespace = 'app\\' . $app; // 命名空间
+        $class = name_to_camel($name); // 类名
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'controller'); // 获取模板文件
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/controller/' . $class . '.php'; // 生成的文件名
+        // 模板替换数据
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeCtrl';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name); //获取替换数据配置
+        }
+        $replace['namespace'] ??= $namespace;
+        $replace['class'] ??= $class;
+        $replace['app'] ??= $app;
+        return $this->_make_file($tpl_file, $make_file, $replace, $is_cover);
+    }
+
+    // 生成模型类：make:model 应用名@表名 主键 来源模板 -f 覆盖生成
+    public function model(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@test'; // 应用@模型名
+        $pk = $req[1] ?? 'id'; // 主键
+        $tpl = $req[2] ?? 'default'; // 模板
+        $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
+        [$app, $name] = parse_app_name($name);
+        $namespace = 'app\\' . $app; // 命名空间
+        $class = name_to_camel($name); // 类名
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'model'); // 获取模板文件
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/model/' . $class . '.php'; // 生成的文件名
+        // 模板替换数据
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeModel';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name); //获取替换数据配置
+        }
+        $replace['namespace'] ??= $namespace;
+        $replace['class'] ??= $class;
+        $replace['table_name'] ??= $name;
+        $replace['pk'] ??= $pk;
+        return $this->_make_file($tpl_file, $make_file, $replace, $is_cover);
+    }
+
+    // 生成视图：make:view 应用名@控制器名 方法名 来源模板 -f 覆盖生成
+    public function view(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@index'; // 应用@控制器名
+        [$app, $name] = parse_app_name($name);
+        $method = $req[1] ?? $name; // 方法名
+        $tpl = $req[2] ?? $method; // 模板
+        $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'view'); // 获取模板文件
+        $make_file = $this->_get_view_file($app, $name, $method); // 生成的文件名
+        // 模板替换数据
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeView';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name, ['tpl' => $tpl]); //获取替换数据配置
+        }
+        return $this->_make_file($tpl_file, $make_file, $replace, $is_cover);
+    }
+
+    // 生成部件：make:widget 应用名@部件名 标签名 来源模板 -f 覆盖生成
+    public function widget(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@test'; // 应用@部件名
+        [$app, $name] = parse_app_name($name);
+        $tag = $req[1] ?? $name; // 标签名
+        $tpl = $req[2] ?? 'default'; // 模板
+        $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
+        $namespace = 'app\\' . $app; // 命名空间
+        $class = name_to_camel($name); // 类名
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'widget'); // 获取模板文件
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/widget/' . $class . '.php'; // 生成的文件名
+        // 模板替换数据
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeWidget';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name); //获取替换数据配置
+        }
+        $replace['namespace'] ??= $namespace;
+        $replace['class'] ??= $class;
+        $replace['tag'] ??= $tag;
+        return $this->_make_file($tpl_file, $make_file, $replace, $is_cover);
+    }
+
+    // 生成命令：make:command 应用名@命令名 来源模板 -f 覆盖生成
+    public function command(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@test'; // 应用@命令名
+        [$app, $name] = parse_app_name($name);
+        $tpl = $req[1] ?? $name; // 模板
+        $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
+        $namespace = 'app\\' . $app; // 命名空间
+        $class = name_to_camel($name); // 类名
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'command'); // 获取模板文件
+        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/command/' . $class . '.php'; // 生成的文件名
+        // 模板替换数据
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeCommand';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name); //获取替换数据配置
+        }
+        $replace['namespace'] ??= $namespace;
+        $replace['class'] ??= $class;
+        return $this->_make_file($tpl_file, $make_file, $replace, $is_cover);
+    }
+
+    // 生成应用：make:app 应用名
     public function app(array $req = []): ?bool
     {
-        $app = $req[0] ?? 'index';
-        $namespace = 'app\\' . $app;
-        $path = ROOT_PATH . '/' . strtr($namespace, '\\', '/');
+        $app = $req[0] ?? 'index'; // 应用名
+        $namespace = 'app\\' . $app; // 命名空间
+        $path = ROOT_PATH . '/' . strtr($namespace, '\\', '/'); // 应用路径
         if (is_dir($path)) {
             return $this->error($app . ' already exists');
         }
@@ -43,10 +161,10 @@ class Make extends Command
             if (!is_dir($path . '/' . $dir)) mkdir($path . '/' . $dir, 0755, true);
         }
         if (!file_exists(ROOT_PATH . '/app/common.php')) {
-            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//User-Defined Functions");
+            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//User Functions");
         }
         if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
-            Tool::dir_init(ROOT_PATH . '/route/' );
+            Tool::dir_init(ROOT_PATH . '/route/');
             file_put_contents(ROOT_PATH . '/route/' . $app . '.php', "<?php\nreturn [\n\t'index' => 'index/index',\n];");
         }
         cli('make:ctrl ' . $app . '@index index');
@@ -57,128 +175,75 @@ class Make extends Command
         return $this->success($app . ' App Build Success');
     }
 
-    public function ctrl(array $req = []): ?bool
+    // 获取生成的模板路径
+    protected function _get_view_file(string $app, string $class, string $method): string
     {
-        $name = $req[0] ?? 'index@test';
-        [$app, $name] = parse_app_name($name);
-        $tpl = $req[1] ?? 'default';
-        $namespace = 'app\\' . $app;
-        $class = name_to_camel($name);
-        $tpl_file = $this->_parse_tpl_file($tpl, 'controller', $app);
-        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/controller/' . $class . '.php';
-        $replace = [
-            '{{NAMESPACE}}' => $namespace,
-            '{{CLASS}}' => $class,
-            '{{APP}}' => $app,
-        ];
-        return $this->_make_file($tpl_file, $make_file, $replace);
-    }
-
-    public function model(array $req = []): ?bool
-    {
-        $name = $req[0] ?? 'index@test';
-        $pk = $req[1] ?? 'id';
-        $tpl = $req[2] ?? 'default';
-        [$app, $name] = parse_app_name($name);
-        $namespace = 'app\\' . $app;
-        $class = name_to_camel($name);
-        $tpl_file = $this->_parse_tpl_file($tpl, 'model', $app);
-        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/model/' . $class . '.php';
-        $replace = [
-            '{{NAMESPACE}}' => $namespace,
-            '{{CLASS}}' => $class,
-            '{{TABLE}}' => $name,
-            '{{PK}}' => $pk,
-        ];
-        return $this->_make_file($tpl_file, $make_file, $replace);
-    }
-
-    public function widget(array $req = []): ?bool
-    {
-        $name = $req[0] ?? 'index@test';
-        [$app, $name] = parse_app_name($name);
-        $tag = $req[1] ?? $name;
-        $tpl = $req[2] ?? 'default';
-        $namespace = 'app\\' . $app;
-        $class = name_to_camel($name);
-        $tpl_file = $this->_parse_tpl_file($tpl, 'widget', $app);
-        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/widget/' . $class . '.php';
-        $replace = [
-            '{{NAMESPACE}}' => $namespace,
-            '{{CLASS}}' => $class,
-            '{{TAG}}' => $tag,
-        ];
-        return $this->_make_file($tpl_file, $make_file, $replace);
-    }
-
-    public function command(array $req = []): ?bool
-    {
-        $name = $req[0] ?? 'index@test';
-        [$app, $name] = parse_app_name($name);
-        $tpl = $req[1] ?? $name;
-        $namespace = 'app\\' . $app;
-        $class = name_to_camel($name);
-        $tpl_file = $this->_parse_tpl_file($tpl, 'command', $app);
-        $make_file = ROOT_PATH . '/' . strtr($namespace, '\\', '/') . '/command/' . $class . '.php';
-        $replace = [
-            '{{NAMESPACE}}' => $namespace,
-            '{{CLASS}}' => $class,
-        ];
-        return $this->_make_file($tpl_file, $make_file, $replace);
-    }
-
-    public function view(array $req = []): ?bool
-    {
-        $name = $req[0] ?? 'index@index';
-        [$app, $name] = parse_app_name($name);
-        $method = $req[1] ?? $name;
-        $tpl = $req[2] ?? $method;
-        $tpl_file = $this->_parse_tpl_file($tpl, 'view', $app);
-        if ($app == APP_NAME) {
-            $view_dir = THEME_ON ? VIEW_PATH . '/default' : VIEW_PATH;
-        } else {
-            $config = Config::init()->get('app');
-            $view_dir = !empty($config['view_path'][$app]) ? ROOT_PATH . '/' . $config['view_path'][$app] : ROOT_PATH . '/app/' . $app . '/view';
-            if (!empty($config['theme_on']) && in_array($app, $config['theme_on'])) {
-                $view_dir .= '/default';
+        $path = THEME_ON ? VIEW_PATH . '/default' : VIEW_PATH;
+        if ($app != APP_NAME) {
+            $view_path = config_get('app.view_path', [], true);
+            $theme_on = config_get('app.theme_on', [], true);
+            $path = $view_path[$app] ?: ROOT_PATH . '/app/' . $app . '/view';
+            if (in_array($app, $theme_on)) {
+                $path .= '/default';
             }
         }
-        $make_dir = Tool::dir_init($view_dir . '/' . $name);
-        $make_file = $make_dir . '/' . $method . '.html';
-        return $this->_make_file($tpl_file, $make_file);
+        return Tool::dir_init($path . '/' . $class) . '/' . $method . '.html';
     }
 
-    protected function _parse_tpl_file(string $tpl, string $type, string $app = ''): string
+    // 获取模板文件
+    protected function _get_tpl_file(string $app, string $tpl, string $type): string
     {
-        if (empty($app)) {
-            $app = APP_NAME;
-        }
-        $file = ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/' . $tpl . '.tpl';
-        if (!is_file($file)) {
-            $file = ROOT_PATH . '/aphp/cli/make/' . $type . '/' . $tpl . '.tpl';
-            if (!is_file($file)) {
-                $file = ROOT_PATH . '/aphp/cli/make/' . $type . '/default.tpl';
+        $tpl_list = [
+            ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/' . $tpl . '.tpl',
+            ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/default.tpl',
+            ROOT_PATH . '/aphp/cli/make/' . $type . '/' . $tpl . '.tpl',
+        ];
+        foreach ($tpl_list as $file) {
+            if (is_file($file)) {
+                return $file;
             }
         }
-        return $file;
+        return ROOT_PATH . '/aphp/cli/make/' . $type . '/default.tpl';
     }
 
-    protected function _make_file(string $tpl_file, string $make_file, array $replace = []): ?bool
+    // 生成文件
+    protected function _make_file(string $tpl_file, string $make_file, array $replace = [], bool $is_cover = false): ?bool
     {
         $make = substr($make_file, strlen(ROOT_PATH . '/'));
         if (!is_file($tpl_file)) {
             return $this->error(basename($tpl_file) . ' Template Not Exist');
         }
-        if (is_file($make_file)) {
+        if (!$is_cover && is_file($make_file)) {
             return $this->error($make . ' File Already Exist');
         }
         $content = file_get_contents($tpl_file);
         if (!empty($content)) {
-            $search = array_keys($replace);
-            $to = array_values($replace);
-            $content = str_replace($search, $to, $content);
+            $this->replace = $replace;
+            $content = $this->_template_replace($content);
         }
         $result = (bool)file_put_contents($make_file, $content);
         return $result ? $this->success($make . ' Build Success') : $this->error($make . ' Build Fail');
+    }
+
+    // 模板替换
+    protected function _template_replace(string $content): string
+    {
+        return preg_replace_callback_array(
+            [
+                '/{{\s*\$([a-zA-Z_][a-zA-Z0-9_]*)\s*}}/i' => function ($match) {
+                    return $this->replace[$match[1]] ?? '';
+                },
+                '/{{\s*\$([a-zA-Z_][a-zA-Z0-9_]*)\|default=\'(.+?)\'\s*}}/i' => function ($match) {
+                    return $this->replace[$match[1]] ?? $match[2];
+                },
+                '/{{\s*:([a-zA-Z_][a-zA-Z0-9_]*)\(\'(.*?)\'\)\s*}}/i' => function ($match) {
+                    return $match[1]($match[2]);
+                },
+                '/{{\s*\$([a-zA-Z_][a-zA-Z0-9_]*)\s*==\s*\'(.+?)\'\s*\?\s*\'(.+?)\'\s*:\s*\'(.+?)\'\s*}}/i' => function ($match) {
+                    return (isset($this->replace[$match[1]]) && $this->replace[$match[1]] == $match[2]) ? $match[3] : $match[4];
+                }
+            ],
+            $content
+        );
     }
 }

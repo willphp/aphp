@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-namespace {{NAMESPACE}}\command;
+namespace {{$namespace}}\command;
 use aphp\cli\Command;
-class {{CLASS}} extends Command
+class {{$class}} extends Command
 {
 	public function cli()
 	{

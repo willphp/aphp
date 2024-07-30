@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-namespace {{NAMESPACE}}\controller;
-class {{CLASS}}
+namespace {{$namespace}}\controller;
+class {{$class}}
 {
     public function index()
     {
