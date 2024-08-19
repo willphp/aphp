@@ -8,14 +8,23 @@
 
 ```
 |++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|
-| 1. make:ctrl    [app_name@ctrl_name] [tpl:default] [-f]                    |
-| 2. make:model   [app_name@table_name] -[pk] -[tpl:default] [-f]            |
-| 3. make:view    [app_name@ctrl_name] -[method] -[tpl:default] [-f]         |
-| 4. make:widget  [app_name@widget_name] -[tag] -[tpl:default] [-f]          |
-| 5. make:command [app_name@command_name] -[tpl:default] [-f]                |
+| 1. make:ctrl    [app_name@ctrl_name] [tpl:_def] [-f]                       |
+| 2. make:model   [app_name@table_name] [pk] [tpl:_def] [-f]                 |
+| 3. make:view    [app_name@ctrl_name] [method] [tpl:_def] [-f]              |
+| 4. make:widget  [app_name@widget_name] [tag] [tpl:_def] [-f]               |
+| 5. make:command [app_name@command_name] [tpl:_def] [-f]                    |
 | 6. make:app     [app_name]                                                 |
+| 7. make:table   [app_name@table_name] [tpl:_def] [-f]                      |
 |++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|
-| 7. clear:runtime [app_name(or *)]                                          |
+| 0. clear:runtime [app_name(or *)]                                          |
+|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|
+| 1. remove:ctrl [app_name@ctrl_name]                                        |
+| 2. remove:model [app_name@model_name]                                      |
+| 3. remove:view [app_name@ctrl_name] [method(or *)]                         |
+| 4. remove:widget [app_name@widget_name]                                    |
+| 5. remove:command [app_name@command_name]                                  |
+| 6. remove:app [app_name]                                                   |
+| 7. remove:table [table_name]                                               |
 |++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|
 ```
 
@@ -44,9 +53,17 @@
 
 命令格式：`php aphpcli make:app 应用名`
 
+### 生成表
+
+命令格式：`php aphpcli make:table 应用名@表名 来源模板 -f 覆盖生成`
+
 ### 清空运行目录
 
 命令格式：`php aphpcli clear:runtime 应用1 应用2 (*全部应用)`
+
+### 删除
+
+命令格式：`php aphpcli remove:类型 参数`
 
 ### 来源模板
 
