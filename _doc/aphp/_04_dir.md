@@ -5,6 +5,8 @@
 ```
 www  WEB部署目录
 │
+├─_doc                  开发文档
+│
 ├─aphp                  框架核心
 │
 ├─app                   应用目录
@@ -50,7 +52,7 @@ www  WEB部署目录
 ├─vendor                composer类库(可选)
 |
 ├─.gitignore            git忽略配置
-├─atop                  命令行入口
+├─aphpcli               命令行入口
 ├─env.example.env       本地.env示例
 ├─composer.json         composer设置
 ├─LICENSE               授权协议

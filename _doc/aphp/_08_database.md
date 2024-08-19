@@ -90,6 +90,7 @@ db('blog')->order('id DESC')->limit(10)->select(); //二维数组
 db('cate')->column('cname', 'id'); //[id=>cname]一维数组
 db('cate')->column('id,cname'); //返回二维数组
 db('cate')->column('*', 'id'); //返回二维数组
+db()->getColumn('admin.id=username@status=1'); //表名.主键=字段@条件
 ```
 
 多行分页：

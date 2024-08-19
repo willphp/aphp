@@ -77,29 +77,29 @@ protected function _before_insert(array &$data): void
 
 ```php
 //条件常量
-const AT_MUST = 1; //必须
-const AT_NOT_NULL = 2; //有值
-const AT_NULL = 3; //空值
-const AT_SET = 4; //有字段
-const AT_NOT_SET = 5; //无字段
-//时机常量
-const IN_BOTH = 1; //全部操作
-const IN_INSERT = 2; //新增
-const IN_UPDATE = 3; //更新
+const IF_MUST = 1;  //必须
+const IF_VALUE = 2; //有值
+const IF_EMPTY = 3; //空值
+const IF_ISSET = 4; //有字段
+const IF_UNSET = 5; //无字段
+//场景常量
+const AC_BOTH = 1;   //全部操作
+const AC_INSERT = 2; //新增
+const AC_UPDATE = 3; //更新
 ```
 
 ### 自动验证
 
-验证规则设置同`表单验证`，多个`时机常量`参数，示例如下：
+验证规则设置同`表单验证`，附加`场景常量`参数，示例如下：
 
 ```php
-//格式:'字段', '验证规则[|...]', '错误提示[|...]', [条件常量], [时机常量]
+//格式:'字段', '验证规则[|...]', '错误提示[|...]', [条件常量], [场景常量]
 protected array $validate = [    
-    ['username', 'required|unique', '用户必须|用户已存在', AT_MUST, IN_INSERT],
-    ['password', '/^\w{6,12}$/', '密码6-12位', 1, 2],  
-    ['repassword', 'confirm:password', '确认密码不一致', 1, 2],    
-    ['iq', 'checkIq', 'IQ必须大于100', 1, 1],
-    ['email', 'email', '邮箱格式错误', AT_NOT_NULL, IN_BOTH],             
+    ['username', 'required|unique', '用户必须|用户已存在', IF_MUST, AC_INSERT],
+    ['password', '/^\w{6,12}$/', '密码6-12位', IF_MUST, AC_INSERT],  
+    ['repassword', 'confirm:password', '确认密码不一致', IF_MUST, AC_INSERT],    
+    ['iq', 'checkIq', 'IQ必须大于100', IF_MUST, AC_BOTH],
+    ['email', 'email', '邮箱格式错误', IF_VALUE, AC_BOTH],             
 ];
 //自定义验证规则
 public function checkIq($value, string $field, string $params, array $data): bool
@@ -122,10 +122,10 @@ method      //自定义方法
 示例代码：
 
 ```php
-//格式:'字段', '处理规则', '处理方式', [条件常量], [时机常量]
+//格式:'字段', '处理规则', '处理方式', [条件常量], [场景常量]
 protected array $auto = [
-    ['password', 'setPwd', 'method', AT_NOT_NULL, IN_BOTH],    
-    ['status', '1', 'string', AT_MUST, IN_INSERT],          
+    ['password', 'setPwd', 'method', AT_NOT_NULL, AC_BOTH],    
+    ['status', '1', 'string', IF_MUST, AC_INSERT],          
     ['add_time', 'time', 'function', 1, 2],     
     ['new_time', 'add_time', 'field', 1, 1],     
 ];
@@ -139,9 +139,9 @@ public function setPwd(string $val, array $data): string
 ### 自动过滤
 
 ```php
-//格式:'字段', [条件常量], [时机常量]
+//格式:'字段', [条件常量], [场景常量]
 protected array $filter = [
-    ['password', AT_NULL, IN_UPDATE], //为空时过滤不更新
+    ['password', IF_EMPTY, AC_UPDATE], //为空时过滤不更新
 ];
 ```
 

@@ -7,7 +7,7 @@
 ```php
 function get_thumb(string $image, int $width, int $height, int $thumbType = 6): string
 {
-    return \aphp\core\Thumb::init()->getThumb($image, $width, $height, $thumbType);
+    return \extend\thumb\Thumb::init()->getThumb($image, $width, $height, $thumbType);
 }
 ```
 

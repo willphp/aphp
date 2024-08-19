@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 查询器类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -316,6 +318,16 @@ class Query implements ArrayAccess, Iterator
             return $res;
         }
         return $res[$field] ?? '';
+    }
+
+    //根据设置获取column
+    public function getColumn(string $setting)
+    {
+        if (preg_match('/^(\w+)\.(\w+)=(\w+)@?(.*)$/', $setting, $match)) {
+            [,$table, $pk, $field, $where] = $match;
+            return $this->table($table)->where($where)->column($field, $pk);
+        }
+        return false;
     }
 
     //键名=>字段值

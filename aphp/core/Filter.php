@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 输入过滤类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -39,14 +41,14 @@ class Filter
         }
         if (is_numeric($key) && isset($this->auto['*'])) {
             $func = $this->auto['*'];
-            $val = str_contains($func, '|') ? value_batch_func($val, $func) : $func(strval($val));
+            $val = str_contains($func, '|') ? run_batch_func($val, $func) : $func(strval($val));
             return;
         }
         $ok_key = [];
         foreach ($this->auto as $regx => $func) {
             if ($regx == $key || (str_starts_with($regx, '/') && preg_match($regx, $key)) || (!in_array($key, $ok_key) && $regx == '*')) {
                 $ok_key[] = $key;
-                $val = str_contains($func, '|') ? value_batch_func($val, $func) : $func(strval($val));
+                $val = str_contains($func, '|') ? run_batch_func($val, $func) : $func(strval($val));
             }
         }
     }

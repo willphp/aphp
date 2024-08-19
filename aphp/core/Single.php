@@ -1,11 +1,13 @@
 <?php
 /*------------------------------------------------------------------
+ | 单例核心类 2024-08-13 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
-
+declare(strict_types=1);
 namespace aphp\core;
 trait Single
 {
@@ -21,7 +23,7 @@ trait Single
     {
     }
 
-    // 获取单例实例，如果不存在则创建
+    // 获取单例实例，不存在创建
     public static function init(...$args): object
     {
         static $class = [];

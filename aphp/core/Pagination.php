@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 分页类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,13 +15,13 @@ class Pagination
 {
     use Single;
 
-    private int $totalRow;
-    private int $pageSize;
-    private int $showNum;
-    private int $totalPage;
-    private string $getVar;
-    private int $currentNum;
-    private int $offset;
+    private int $totalRow; // 总记录数
+    private int $pageSize; // 每页记录数
+    private int $showNum; // 显示页码数
+    private int $totalPage; // 总页数
+    private string $getVar; // 分页变量
+    private int $currentNum; // 当前页码
+    private int $offset; // 开始数
     private array $options = ['home' => 'home', 'end' => 'end', 'up' => 'Previous', 'down' => 'Next', 'pre' => '&laquo;', 'next' => '&raquo;', 'header' => 'records', 'unit' => 'page', 'theme' => 0];
     private array $search = ['%total%', '%header%', '%current%', '%pages%', '%unit%', '%home%', '%up%', '%pre%', '%number%', '%next%', '%down%', '%end%'];
     private string $html = '[%total% %header%] [%current%/%pages% %unit%] %home% %up% %pre% %number% %next% %down% %end%';
@@ -48,11 +50,11 @@ class Pagination
     public function getAttr(string $type = '')
     {
         $attr = [];
-        $attr['total'] = $this->totalRow; //总记录数
-        $attr['current'] = $this->currentNum; //当前页码
-        $attr['offset'] = $this->offset; //开始数
-        $attr['page_size'] = $this->pageSize; //每页记录数
-        $attr['page_count'] = $this->totalPage; //总页数
+        $attr['total'] = $this->totalRow; // 总记录数
+        $attr['current'] = $this->currentNum; // 当前页码
+        $attr['offset'] = $this->offset; // 开始数
+        $attr['page_size'] = $this->pageSize; // 每页记录数
+        $attr['page_count'] = $this->totalPage; // 总页数
         if (empty($type)) {
             return $attr;
         }

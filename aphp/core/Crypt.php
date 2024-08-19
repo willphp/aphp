@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 加密解密类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -16,7 +18,7 @@ class Crypt
 
     private function __construct()
     {
-        $appKey = Config::init()->get('app.app_key', 'b64f03169423386de0b080a248ca3526');
+        $appKey = Config::init()->get('app.app_key', '4abe69c30e2fa23fc72b031995c9946c');
         $this->salt = $this->makeSalt($appKey);
     }
 

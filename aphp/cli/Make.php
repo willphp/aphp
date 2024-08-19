@@ -1,15 +1,15 @@
 <?php
 /*------------------------------------------------------------------
+ | 生成命令类 2024-08-14 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\cli;
-
-use aphp\core\Config;
 use aphp\core\Tool;
 
 class Make extends Command
@@ -20,25 +20,65 @@ class Make extends Command
     {
         if (!$this->isCall) {
             echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n";
-            echo "| 1. make:ctrl    [app_name@ctrl_name] [tpl:default] [-f]                    |\n";
-            echo "| 2. make:model   [app_name@table_name] -[pk] -[tpl:default] [-f]            |\n";
-            echo "| 3. make:view    [app_name@ctrl_name] -[method] -[tpl:default] [-f]         |\n";
-            echo "| 4. make:widget  [app_name@widget_name] -[tag] -[tpl:default] [-f]          |\n";
-            echo "| 5. make:command [app_name@command_name] -[tpl:default] [-f]                |\n";
+            echo "| 1. make:ctrl    [app_name@ctrl_name] [tpl:_def] [-f]                       |\n";
+            echo "| 2. make:model   [app_name@table_name] [pk] [tpl:_def] [-f]                 |\n";
+            echo "| 3. make:view    [app_name@ctrl_name] [method] [tpl:_def] [-f]              |\n";
+            echo "| 4. make:widget  [app_name@widget_name] [tag] [tpl:_def] [-f]               |\n";
+            echo "| 5. make:command [app_name@command_name] [tpl:_def] [-f]                    |\n";
             echo "| 6. make:app     [app_name]                                                 |\n";
+            echo "| 7. make:table   [app_name@table_name] [tpl:_def] [-f]                      |\n";
             echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n";
-            echo "| 7. clear:runtime [app_name(or *)]                                          |\n";
-            echo "|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|";
         }
         return true;
     }
+
+    // 生成表：make:table 应用名@表名 来源模板 -f 覆盖生成
+    public function table(array $req = []): ?bool
+    {
+        $name = $req[0] ?? 'index@test'; // 应用@表名
+        $tpl = $req[1] ?? '_def'; // 来源模板
+        $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
+        [$app, $name] = parse_app_name($name);
+        $tpl_file = $this->_get_tpl_file($app, $tpl, 'table'); // 获取模板文件
+        if (!is_file($tpl_file)) {
+            return $this->error('模板文件不存在');
+        }
+        $replace = [];
+        $widget_class = 'app\\' . $app . '\\widget\\MakeTable';
+        if (class_exists($widget_class)) {
+            $replace = app($widget_class)->set($name); //获取替换数据配置
+        }
+        $replace['table_prefix'] ??= 'aphp_';
+        $replace['table_name'] ??= $name;
+        $replace['table_engine'] ??= 'InnoDB';
+        $replace['table_charset'] ??= 'utf8mb4';
+        $replace['table_collate'] ??= 'utf8mb4_general_ci';
+        $replace['table_comment'] ??= $name.'表';
+        $sql = file_get_contents($tpl_file);
+        if (!empty($sql)) {
+            $this->replace = $replace;
+            $sql = $this->_template_replace($sql);
+            $db = db();
+            $hasTable = $db->hasTable($replace['table_name']);
+            if ($hasTable) {
+                if (!$is_cover) {
+                    return $this->error('表已存在');
+                }
+                $db->execute('DROP TABLE IF EXISTS `' . $replace['table_prefix'] . $replace['table_name'] . '`;');
+            }
+            $db->execute($sql);
+            return $this->success('表创建成功');
+        }
+        return $this->error('表创建失败');
+    }
+
 
     // 生成控制器：make:ctrl 应用名@控制器名 来源模板 -f 覆盖生成
     public function ctrl(array $req = []): ?bool
     {
         $name = $req[0] ?? 'index@test'; // 应用@控制器名
         [$app, $name] = parse_app_name($name);
-        $tpl = $req[1] ?? 'default'; // 默认模板
+        $tpl = $req[1] ?? '_def'; // 默认模板
         $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
         $namespace = 'app\\' . $app; // 命名空间
         $class = name_to_camel($name); // 类名
@@ -61,7 +101,7 @@ class Make extends Command
     {
         $name = $req[0] ?? 'index@test'; // 应用@模型名
         $pk = $req[1] ?? 'id'; // 主键
-        $tpl = $req[2] ?? 'default'; // 模板
+        $tpl = $req[2] ?? '_def'; // 模板
         $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
         [$app, $name] = parse_app_name($name);
         $namespace = 'app\\' . $app; // 命名空间
@@ -106,7 +146,7 @@ class Make extends Command
         $name = $req[0] ?? 'index@test'; // 应用@部件名
         [$app, $name] = parse_app_name($name);
         $tag = $req[1] ?? $name; // 标签名
-        $tpl = $req[2] ?? 'default'; // 模板
+        $tpl = $req[2] ?? '_def'; // 模板
         $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
         $namespace = 'app\\' . $app; // 命名空间
         $class = name_to_camel($name); // 类名
@@ -161,7 +201,7 @@ class Make extends Command
             if (!is_dir($path . '/' . $dir)) mkdir($path . '/' . $dir, 0755, true);
         }
         if (!file_exists(ROOT_PATH . '/app/common.php')) {
-            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//User Functions");
+            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//自定义函数");
         }
         if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
             Tool::dir_init(ROOT_PATH . '/route/');
@@ -178,12 +218,12 @@ class Make extends Command
     // 获取生成的模板路径
     protected function _get_view_file(string $app, string $class, string $method): string
     {
-        $path = THEME_ON ? VIEW_PATH . '/default' : VIEW_PATH;
+        $path = MULTI_THEME ? VIEW_PATH . '/default' : VIEW_PATH;
         if ($app != APP_NAME) {
-            $view_path = config_get('app.view_path', [], true);
-            $theme_on = config_get('app.theme_on', [], true);
-            $path = $view_path[$app] ?: ROOT_PATH . '/app/' . $app . '/view';
-            if (in_array($app, $theme_on)) {
+            $view_path = config_get('app.app_view_path', [], true);
+            $multi_theme = config_get('app.app_multi_theme', [], true);
+            $path = !empty($view_path[$app]) ? ROOT_PATH . '/'. $view_path[$app] : ROOT_PATH . '/app/' . $app . '/view';
+            if (in_array($app, $multi_theme)) {
                 $path .= '/default';
             }
         }
@@ -195,7 +235,7 @@ class Make extends Command
     {
         $tpl_list = [
             ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/' . $tpl . '.tpl',
-            ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/default.tpl',
+            ROOT_PATH . '/app/' . $app . '/command/make/' . $type . '/_def.tpl',
             ROOT_PATH . '/aphp/cli/make/' . $type . '/' . $tpl . '.tpl',
         ];
         foreach ($tpl_list as $file) {
@@ -203,7 +243,7 @@ class Make extends Command
                 return $file;
             }
         }
-        return ROOT_PATH . '/aphp/cli/make/' . $type . '/default.tpl';
+        return ROOT_PATH . '/aphp/cli/make/' . $type . '/_def.tpl';
     }
 
     // 生成文件
@@ -216,6 +256,7 @@ class Make extends Command
         if (!$is_cover && is_file($make_file)) {
             return $this->error($make . ' File Already Exist');
         }
+        Tool::dir_init(dirname($make_file)); // 生成目录
         $content = file_get_contents($tpl_file);
         if (!empty($content)) {
             $this->replace = $replace;

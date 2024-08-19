@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 调试栏类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -12,10 +14,10 @@ class DebugBar
 {
     use Single;
 
-    protected array $tabs; //调试栏选项
-    protected array $trace = []; //追踪信息
-    protected array $items = ['debug' => [], 'error' => [], 'sql' => []]; //数据信息
-    protected int $filesize = 0; //统计文件大小
+    protected array $tabs; // 调试栏选项
+    protected array $trace = []; // 追踪信息
+    protected array $items = ['debug' => [], 'error' => [], 'sql' => []]; // 数据信息
+    protected int $filesize = 0; // 统计文件大小
 
     private function __construct()
     {
@@ -27,7 +29,7 @@ class DebugBar
         $this->items['error'] = Error::init()->getError();
     }
 
-    //获取追踪信息
+    // 获取追踪信息
     public function getTrace(): array
     {
         $trace = [];
@@ -41,7 +43,7 @@ class DebugBar
         return $trace;
     }
 
-    //记录信息到调试栏
+    // 记录信息到调试栏
     public function trace($msg, string $type = 'debug'): void
     {
         $type = strtolower($type);
@@ -49,14 +51,14 @@ class DebugBar
         $this->items[$type][] = $msg;
     }
 
-    //获取html脚注
+    // 获取html脚注
     public function getHtmlFooter(): string
     {
         $trace = $this->trace;
         return '<!--Processed in ' . $trace['time'] . ', Memory ' . $trace['memory'] . ', ' . count($this->items['sql']) . ' queries, ' . $trace['total'] . ' files(' . $trace['filesize'] . ')-->';
     }
 
-    //格式化文件名(大小)
+    // 格式化文件名(大小)
     private function formatFileName(string $file): string
     {
         $filesize = filesize($file);
@@ -64,7 +66,7 @@ class DebugBar
         return substr($file, strlen(ROOT_PATH . '/')) . '(' . number_format($filesize / 1024, 2) . ' KB)';
     }
 
-    //添加调试栏html到页面内容后
+    // 添加调试栏html到页面内容后
     public function appendDebugBar(string $content = ''): string
     {
         if (IS_AJAX || !APP_TRACE || Config::init()->get('debug_bar.is_hide', false)) {
@@ -80,12 +82,12 @@ class DebugBar
         return $content;
     }
 
-    //获取调试栏html
+    // 获取调试栏html
     protected function getDebugBarHtml(): string
     {
         [$tabs, $trace] = $this->parseTrace();
-        $runtime = $this->trace['time']; //运行时间
-        $errors = !empty($this->items['error']) ? count($this->items['error']) : ''; //错误统计
+        $runtime = $this->trace['time']; // 运行时间
+        $errors = !empty($this->items['error']) ? count($this->items['error']) : ''; // 错误统计
         ob_start();
         include ROOT_PATH . '/aphp/tpl/debug_trace.php';
         return "\n" . ob_get_clean() . "\n";

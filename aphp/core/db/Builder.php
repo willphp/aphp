@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 生成器类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -248,6 +250,7 @@ class Builder
                         $logic[$i] = $whereOr;
                         $i ++;
                     }
+                    $logic[$i-1] = 'AND';
                 } else {
                     $express[$i] = $this->getExpress($wh[0], $value, $op);
                     $logic[$i] = $whereOr;
@@ -282,21 +285,15 @@ class Builder
 
     protected function linkExpress(array $express, array $logic): string
     {
+        $express = array_values($express);
+        $logic = array_values($logic);
         $where = '';
-        $count = count($express);
-        $logic[$count] = 'AND';
-        for ($i = 1; $i <= $count; $i++) {
-            $left = $right = $link = '';
-            if ($logic[$i] != 'AND' && ($i == 1 || ($i < $count && $logic[$i - 1] == 'AND'))) {
-                $left = '(';
-            }
-            if ($i > 1 && $logic[$i - 1] != 'AND' && $logic[$i] == 'AND') {
-                $right = ')';
-            }
-            if ($i > 1 && $i <= $count) {
-                $link = ' ' . $logic[$i - 1] . ' ';
-            }
-            $where .= $link . $left . $express[$i] . $right;
+        foreach ($express as $k => $v) {
+            $link = isset($logic[$k+1]) ? ' '.$logic[$k].' ' : '';
+            $logic[$k-1] ??= 'AND';
+            $left = ($logic[$k] != 'AND' && $logic[$k-1] == 'AND')  ? '(' : '';
+            $right = ($logic[$k] == 'AND' && $logic[$k-1] != 'AND') ? ')' : '';
+            $where .= $left . $v . $right.$link;
         }
         return $where;
     }

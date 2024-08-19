@@ -26,7 +26,7 @@ Composer安装：`composer create-project willphp/aphp blog --prefer-dist`
 4. 设置-伪静态规则(看`url_rewrite.txt`)
 5. 修改`config/database.php`中数据库配置
 6. 访问域名
-7. 可设置定时任务shell命令：`php atop [应用@]命令类:方法 参数值`
+7. 可设置定时任务shell命令：`php aphpcli [应用@]命令类:方法 参数值`
 
 ### 小皮面版
 

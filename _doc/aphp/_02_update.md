@@ -1,5 +1,22 @@
 ## 更新日志
 
+#### APHPv5.2.0 2024-08-19
+
+- 优化：重命名条件常量AT_常量为IF_常量，如：AT_MUST => IF_MUST
+- 优化：重命名场景常量IN_常量为AC_常量， 如：IN_UPDAET => AC_UPDATE
+- 新增：db()->getColumn('表名.主键=字段@条件')
+- 新增：模型属性：string $tag 对应相关widget的tag
+- 修复：一些BUG
+
+#### APHPv5.1.6 2024-08-01
+
+- 加强：命令行生成命令：`make`，添加生成表
+- 添加：命令行删除命令：`remove`
+- 优化：文件上传扩展，重置上传配置
+- 修复：where('username|email')存在的BUG
+- 模板：添加标签：{!empty $var:}不为空时{/empty}
+- 模板：添加{$vo.time|date=Y-m-d} //格式化日期
+
 #### APHPv5.1.5 2024-07-30
 
 - 优化：修改命令行入口`atop`为`aphpcli`

@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 中间件类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -18,7 +20,7 @@ class Middleware
 
     protected array $params = [];
 
-    //执行中间件
+    // 执行中间件
     public function execute($name = [], array $params = []): bool
     {
         $middleware = [];
@@ -34,7 +36,7 @@ class Middleware
         return true;
     }
 
-    //添加应用层中间件
+    // 添加应用层中间件
     public function add(string $name, array $middleware)
     {
         $config = Config::init();
@@ -42,7 +44,7 @@ class Middleware
         return $config->set('middleware.' . $name, array_merge($web, $middleware));
     }
 
-    //中间件执行过程
+    // 中间件执行过程
     public function exec(array $middleware = []): bool
     {
         $middleware = array_reverse(array_unique($middleware));
@@ -51,7 +53,7 @@ class Middleware
         return true;
     }
 
-    //运行中件间run方法
+    // 运行中件间run方法
     protected function run(Closure $callback, string $class): void
     {
         if (method_exists($class, 'run')) {
@@ -60,7 +62,7 @@ class Middleware
         }
     }
 
-    //设置控制器中间件
+    // 设置控制器中间件
     public function set(string $name, array $types = []): bool
     {
         $middleware = [];
@@ -82,7 +84,7 @@ class Middleware
         return $this->exec($middleware);
     }
 
-    //解析控制器中的中间件设置
+    // 解析控制器中的中间件设置
     public function controller(object $controller): void
     {
         $class = new ReflectionClass($controller);

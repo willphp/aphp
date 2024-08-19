@@ -18,6 +18,7 @@ abstract class Model implements ArrayAccess, Iterator
 {
     protected string $table = ''; //表名
     protected string $pk = ''; //主键
+    protected string $tag = ''; //缓存标识
     protected array $allowFill = ['*']; //允许填充字段
     protected array $denyFill = []; //禁止填充字段
     protected string $autoTimeType = 'int'; //自动写入时间类型int|date|datetime|timestamp
@@ -131,12 +132,13 @@ abstract class Model implements ArrayAccess, Iterator
         return true;
     }
 
-    //重置widget缓存
-    public function resetWidget(): void
+    // 重载widget
+    public function widgetReload(): void
     {
-        $cache = Cache::init();
-        $cache->flush(APP_NAME . '@widget/' . $this->table . '/*');
-        $cache->flush('common@widget/' . $this->table . '/*');
+        if (empty($this->tag)) {
+            $this->tag = $this->table;
+        }
+        widget_reload($this->tag, APP_NAME);
     }
 
     //模型操作：新增，更新
@@ -155,7 +157,7 @@ abstract class Model implements ArrayAccess, Iterator
         $this->autoFilter($action_scene); //4.自动过滤
         $this->autoTime($action_scene); //5.自动时间
         $res = false;
-        if ($action_scene == IN_INSERT) {
+        if ($action_scene == AC_INSERT) {
             if (isset($this->saveData[$this->pk])) {
                 unset($this->saveData[$this->pk]);
             }
@@ -167,9 +169,9 @@ abstract class Model implements ArrayAccess, Iterator
             if (is_numeric($res) && $res > 0) {
                 $this->setData($this->db->find($res));
                 $this->_after_insert(array_merge($this->saveData, $this->data));
-                $this->resetWidget(); //重置widget缓存
+                $this->widgetReload(); // 重载widget
             }
-        } elseif ($action_scene == IN_UPDATE) {
+        } elseif ($action_scene == AC_UPDATE) {
             $this->saveData = array_merge($this->data, $this->saveData);
             $this->_before_update($this->saveData);
             if (!empty($this->errors)) {
@@ -182,7 +184,7 @@ abstract class Model implements ArrayAccess, Iterator
                 $this->setData($this->db->find($id));
                 $after = array_merge($this->saveData, $this->data);
                 $this->_after_update($before, $after);
-                $this->resetWidget(); //重置widget缓存
+                $this->widgetReload(); // 重载widget
             }
         }
         $this->saveData = [];
@@ -199,7 +201,7 @@ abstract class Model implements ArrayAccess, Iterator
             if ($this->db->delete($id)) {
                 $this->setData([]);
                 $this->_after_delete($data);
-                $this->resetWidget(); //重置widget缓存
+                $this->widgetReload(); // 重载widget
                 return true;
             }
         }
@@ -236,7 +238,7 @@ abstract class Model implements ArrayAccess, Iterator
         if (empty($this->data) && isset($this->saveData[$this->pk])) {
             $this->data[$this->pk] = $this->saveData[$this->pk];
         }
-        return empty($this->data[$this->pk]) ? IN_INSERT : IN_UPDATE;
+        return empty($this->data[$this->pk]) ? AC_INSERT : AC_UPDATE;
     }
 
     //1.过滤填充字段
@@ -291,14 +293,14 @@ abstract class Model implements ArrayAccess, Iterator
         }
         $data = &$this->saveData;
         foreach ($this->auto as $auto) {
-            $auto[2] ??= 'string'; //处理方式：string field method function
-            $auto[3] ??= AT_SET;
-            $auto[4] ??= IN_BOTH;
-            [$field, $rule, $type, $at, $in] = $auto;
-            if (check_is_skip($at, $data, $field)) {
+            $auto[2] ??= 'string'; // 处理方式：string field method function
+            $auto[3] ??= IF_ISSET;
+            $auto[4] ??= AC_BOTH;
+            [$field, $rule, $type, $if, $scene] = $auto;
+            if (check_if_skip($if, $data, $field)) {
                 continue;
             }
-            if ($in > IN_BOTH && $in != $this->$action_scene) {
+            if ($scene > AC_BOTH && $scene != $action_scene) {
                 continue;
             }
             $data[$field] ??= '';
@@ -307,7 +309,7 @@ abstract class Model implements ArrayAccess, Iterator
             } elseif ($type == 'method') {
                 $data[$field] = call_user_func_array([$this, $rule], [$data[$field], $data]);
             } elseif ($type == 'function') {
-                $batchFunc = get_batch_func($rule);
+                $batchFunc = parse_batch_func($rule);
                 foreach ($batchFunc as $func) {
                     if (!function_exists($func)) {
                         $this->errors[] = $func . ': function does not exist';
@@ -330,13 +332,13 @@ abstract class Model implements ArrayAccess, Iterator
         }
         $data = &$this->saveData;
         foreach ($this->filter as $filter) {
-            $filter[1] ??= AT_SET;
-            $filter[2] ??= IN_BOTH;
-            [$field, $at, $in] = $filter;
-            if (check_is_skip($at, $data, $field)) {
+            $filter[1] ??= IF_ISSET;
+            $filter[2] ??= AC_BOTH;
+            [$field, $if, $scene] = $filter;
+            if (check_if_skip($if, $data, $field)) {
                 continue;
             }
-            if ($in == $action_scene || $in == IN_BOTH) {
+            if ($scene == $action_scene || $scene == AC_BOTH) {
                 unset($data[$field]);
             }
         }
@@ -350,7 +352,7 @@ abstract class Model implements ArrayAccess, Iterator
         $type = $this->autoTimeType;
         if ($type == 'int' || isset($format[$type])) {
             $time = isset($format[$type]) ? date($format[$type], $_SERVER['REQUEST_TIME']) : $_SERVER['REQUEST_TIME'];
-            if ($action_scene == IN_INSERT && !empty($this->createTime)) {
+            if ($action_scene == AC_INSERT && !empty($this->createTime)) {
                 $this->saveData[$this->createTime] = $time;
             }
             if (!empty($this->updateTime)) {

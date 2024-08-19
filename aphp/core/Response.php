@@ -1,15 +1,18 @@
 <?php
 /*------------------------------------------------------------------
+ | 请求响应类 2024-08-14 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core;
 class Response
 {
+    // 输出响应
     public static function output($res = null, bool $trace = false): void
     {
         if (is_null($res)) {
@@ -27,7 +30,7 @@ class Response
                     if ($trace) {
                         $res = DebugBar::init()->appendDebugBar($res);
                     }
-                    if (Config::init()->get('debug_bar.is_show_foot', false)) {
+                    if (Config::init()->get('debug_bar.show_html_footer', false)) {
                         $res .= "\n".DebugBar::init()->getHtmlFooter();
                     }
                 } elseif (is_bool($res)) {

@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 验证器类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -15,13 +17,13 @@ class Validate
 {
     use Single;
 
-    protected ?object $model = null;
-    protected string $table = '';
-    protected string $pk = 'id';
+    protected ?object $model = null; // 模型
+    protected string $table = ''; // 模型表
+    protected string $pk = 'id'; // 模型表主键
     protected int $scene = 0; // 操作场景
     protected array $where = []; // 验证附加条件
-    protected array $regex = []; //regex
-    protected array $errors = []; //error info
+    protected array $regex = []; // 自定义正则
+    protected array $errors = []; // 错误信息
 
     private function __construct(?object $model = null)
     {
@@ -47,7 +49,7 @@ class Validate
         return $this;
     }
 
-    //rule format：[field, rule, [tips], [condition], [scene]],
+    // validate格式：[字段, 验证规则, [提示], [条件], [场景]],
     public function make(array $validate, array $data = [], bool $isBatch = false): object
     {
         if (empty($data)) {
@@ -55,14 +57,14 @@ class Validate
         }
         foreach ($validate as $verify) {
             $verify[2] ??= '';
-            $verify[3] ??= ($this->scene == 0) ? AT_MUST : AT_SET;
-            $verify[4] ??= IN_BOTH;
-            [$field, $rules, $tips, $at, $in] = $verify;
-            if (check_is_skip($at, $data, $field)) {
+            $verify[3] ??= ($this->scene == 0) ? IF_MUST : IF_ISSET;
+            $verify[4] ??= AC_BOTH;
+            [$field, $rules, $tips, $if, $scene] = $verify;
+            if (check_if_skip($if, $data, $field)) {
                 continue;
             }
             // 修复未设置场景可跳过BUG
-            if ($this->scene != 0 && $in > IN_BOTH && $in != $this->scene) {
+            if ($this->scene != 0 && $scene > AC_BOTH && $scene != $this->scene) {
                 continue;
             }
             if ($rules instanceof Closure) {
@@ -462,7 +464,7 @@ class Validate
         if (empty($table)) return false;
         $where = $this->where;
         $where[$field] = $value;
-        if (($this->scene == 0 && isset($data[$pk])) || ($this->scene == IN_UPDATE && $table == $this->table)) {
+        if (($this->scene == 0 && isset($data[$pk])) || ($this->scene == AC_UPDATE && $table == $this->table)) {
             $where[] = [$pk, '<>', $data[$pk]];
         }
         $where += $need_where;

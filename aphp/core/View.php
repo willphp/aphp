@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 视图类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -29,7 +31,7 @@ class View
         if (Config::init()->get('view.cache', false)) {
             $this->expire = Config::init()->get('view.expire', 0);
         }
-        if (THEME_ON) {
+        if (MULTI_THEME) {
             $this->theme = $this->getTheme();
         }
         define('__THEME__', $this->theme);
@@ -39,11 +41,11 @@ class View
     protected function getTheme(): string
     {
         $default = Config::init()->get('site.theme', 'default');
-        $theme_get = Config::init()->get('app.theme_get');
-        if (empty($theme_get)) {
+        $get_var = Config::init()->get('app.theme_get_var');
+        if (empty($get_var)) {
             return $default;
         }
-        $theme = input('get.'.$theme_get, '', 'clear_html');
+        $theme = input('get.'.$get_var, '', 'clear_html');
         if (!empty($theme)) {
             Cookie::init()->set('__theme__', $theme);
             return $theme;
@@ -96,7 +98,7 @@ class View
             $tpl .= Config::init()->get('view.suffix', '.html');
         }
         $this->viewFile = $this->viewPath . '/' . $tpl;
-        if (THEME_ON && !file_exists($this->viewFile)) {
+        if (MULTI_THEME && !file_exists($this->viewFile)) {
             $this->viewFile = VIEW_PATH . '/default/' . $tpl;
         }
         if (!file_exists($this->viewFile) && !$isCall) {

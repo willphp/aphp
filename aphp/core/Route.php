@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 路由类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -230,7 +232,6 @@ class Route
         [$app, $uri] = parse_app_name($uri, $this->app);
         $route = $this->parseRoute($uri, $params, $app);
         $url = Rewrite::init($route['app'])->replace($route['rewrite'], true);
-
         return __URL__ . '/' . $url . $suffix;
     }
 

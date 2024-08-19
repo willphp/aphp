@@ -4,8 +4,8 @@
   "type": "project",
   "keywords": [
     "aphp",
-    "一鱼PHP框架",
-    "aphp框架",
+    "一鱼框架",
+    "framework",
     "ORM"
   ],
   "homepage": "https://www.aphp.top/",
@@ -24,7 +24,8 @@
     "ext-mbstring": "*",
     "ext-gd": "*",
     "ext-openssl": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-ctype": "*"
   },
   "autoload": {
     "psr-4": {

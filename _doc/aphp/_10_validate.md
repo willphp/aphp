@@ -10,7 +10,7 @@
 
 ```php
 $rule = [
-    ['email', 'email', '邮箱错误', AT_MUST]
+    ['email', 'email', '邮箱错误', IF_MUST]
 ];
 $data = ['email' => 'abc@163'];
 $v=validate($rule, $data);
@@ -22,14 +22,14 @@ $v->isFail(); //失败返回true
 ### 验证条件
 
 ```php
-const AT_MUST = 1; //必须(默认)
-const AT_NOT_NULL = 2; //有值
-const AT_NULL = 3; //空值
-const AT_SET = 4; //有字段
-const AT_NOT_SET = 5; //无字段
+const IF_MUST = 1;  // 必须(默认)
+const IF_VALUE = 2; // 有值
+const IF_EMPTY = 3; // 空值
+const IF_ISSET = 4; // 有字段
+const IF_UNSET = 5; // 无字段
 ```
 
->验证条件可以填写常量或数字，默认为 AT_MUST
+>验证条件可以填写常量或数字，默认为 IF_MUST
 
 ### 内置规则
 
@@ -149,10 +149,10 @@ exists:user,username,status=1&group_id=_group_id
 
 ```php
 $rule = [
-    ['name', 'required|unique:user.id,name', '必须|用户已存在', 2], //有值时
-    ['pwd', '/^\w{5,12}$/', '密码5~12位', 2], //有值时
-    ['mobile', 'mobile', '手机号错误', AT_MUST], //必须
-    ['email', 'email', '邮箱错误', 4], //有字段时
+    ['name', 'required|unique:user.id,name', '必须|用户已存在', IF_VALUE], //有值时
+    ['pwd', '/^\w{5,12}$/', '密码5~12位', IF_VALUE], //有值时
+    ['mobile', 'mobile', '手机号错误', IF_MUST], //必须
+    ['email', 'email', '邮箱错误', IF_ISSET], //有字段时
     ['age', fn($val)=>($val>=18 && $val<=60), '年龄18~60'],
 ];
 $data = ['name'=>'', 'pwd'=>'123', 'mobile'=>'x12323332333', 'age'=>12];

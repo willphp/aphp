@@ -57,7 +57,7 @@
             </div>
             <div class="aphp-page-body cl">
                 <p style="color:red;">公告：{:site('site_notice')}</p>
-                <h4>开始使用 <small>[内置文档：查看doc_aphp目录]</small></h4>
+                <h4>开始使用 <small>[内置文档：查看_doc/aphp目录]</small></h4>
                 <ol>
                     <li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>
                     <li>[本地]打开<code class="blue">.env</code>文件配置本地数据库</li>

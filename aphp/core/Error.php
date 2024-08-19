@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 错误处理类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -15,7 +17,7 @@ class Error
 {
     use Single;
 
-    protected array $errors = [];
+    protected array $errors = []; // 错误信息
 
     private function __construct()
     {
@@ -24,36 +26,51 @@ class Error
         set_exception_handler([$this, 'exception']);
     }
 
+    // 设置错误信息
+    public function setError(string $msg): void
+    {
+        $this->errors[] = $msg;
+    }
+
+    // 获取错误信息
+    public function getError(): array
+    {
+        return $this->errors;
+    }
+
+    // 错误处理
     public function error(int $code, string $info, string $file, int $line): void
     {
-        $data = $this->parseError($code, $info, $file, $line);
+        $data = $this->_parse_error($code, $info, $file, $line);
         $this->setError($data['msg']);
         if ($code == E_NOTICE) {
             if (!IS_CLI && APP_DEBUG && !APP_TRACE) {
                 echo '<p style="color:#900">[ERROR] ' . $info . ' [' . $data['file'] . ':' . $line . ']<p>';
             }
         } elseif (!in_array($code, [E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED])) {
-            $this->showError($data);
+            $this->_show_error($data);
         } else {
             Log::init()->write($data['msg'], $data['type']);
         }
     }
 
+    // 异常处理
     public function exception(Throwable $exception): void
     {
         $code = $exception->getCode();
         $info = $exception->getMessage();
         $file = $exception->getFile();
         $line = $exception->getLine();
-        $data = $this->parseError($code, $info, $file, $line, true);
+        $data = $this->_parse_error($code, $info, $file, $line, true);
         $this->setError($data['msg']);
-        $this->showError($data);
+        $this->_show_error($data);
     }
 
-    protected function showError(array $data): void
+    // 显示错误信息
+    protected function _show_error(array $data): void
     {
         if (IS_CLI) {
-            die(PHP_EOL . "\033[;41m " . $data['msg'] . " \x1B[0m" . PHP_EOL);
+            die(PHP_EOL . "\033[;41m " . $data['msg'] . " \x1B[0m\n" . PHP_EOL);
         }
         if (!APP_DEBUG || IS_AJAX) {
             Log::init()->write($data['msg'], $data['type']);
@@ -81,17 +98,8 @@ class Error
         exit();
     }
 
-    public function setError(string $msg): void
-    {
-        $this->errors[] = $msg;
-    }
-
-    public function getError(): array
-    {
-        return $this->errors;
-    }
-
-    protected function parseError(int $code, string $info, string $file, int $line, bool $isException = false): array
+    // 解析错误信息
+    protected function _parse_error(int $code, string $info, string $file, int $line, bool $isException = false): array
     {
         $data = [];
         $data['code'] = $code;

@@ -1,19 +1,21 @@
 <?php
 /*------------------------------------------------------------------
+ | 数据库连接类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core\db;
 
 use aphp\core\Config;
+use aphp\core\DebugBar;
 use Closure;
 use Exception;
 use PDO;
-use aphp\core\DebugBar;
 use aphp\core\Single;
 
 class Connection
@@ -22,8 +24,8 @@ class Connection
 
     protected array $config;
     public string $prefix;
-    protected ?object $pdo = null; //pdo
-    protected ?object $stmt = null; //PDOStatement
+    protected ?object $pdo = null; // pdo
+    protected ?object $stmt = null; // PDOStatement
     protected array $bind = [];
     protected int $numRows = 0;
     protected bool $transResult = true;
@@ -105,7 +107,7 @@ class Connection
         if (!empty($bind)) {
             $sql = $this->getRealSql($sql, $bind);
         }
-        DebugBar::init()->trace($sql, 'sql');
+        DebugBar::init()->trace($sql, 'sql'); // 调试
     }
 
     public function query(string $sql, array $bind = [], bool $getObj = false)

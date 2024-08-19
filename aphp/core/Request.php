@@ -1,9 +1,11 @@
 <?php
 /*------------------------------------------------------------------
+ | 输入请求类 2024-08-15 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -35,7 +37,7 @@ class Request
                 $value = $this->items['post'][$name] ?? $this->items['get'][$name] ?? $default;
             }
         }
-        return empty($batchFunc) ? $value : value_batch_func($value, $batchFunc);
+        return empty($batchFunc) ? $value : run_batch_func($value, $batchFunc);
     }
 
     public function setRequest(string $name, $value = ''): bool

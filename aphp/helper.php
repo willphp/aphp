@@ -1,11 +1,12 @@
 <?php
 /*------------------------------------------------------------------
+ | 助手函数 2024-08-13 by 无念
+ |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
-declare(strict_types=1);
 
 use aphp\core\App;
 use aphp\core\Cache;
@@ -26,37 +27,30 @@ use aphp\core\Tool;
 use aphp\core\Validate;
 use aphp\core\View;
 
+// =======================PHP8兼容函数===========================
 if (!function_exists('str_contains')) {
-    /**
-     * 字符串包含
-     */
+    // 字符串包含
     function str_contains(string $haystack, string $needle): bool
     {
         return $needle !== '' && mb_strpos($haystack, $needle) !== false;
     }
 }
 if (!function_exists('str_starts_with')) {
-    /**
-     * 字符串开始包含
-     */
+    // 字符串开始包含
     function str_starts_with(string $haystack, string $needle): bool
     {
         return $needle !== '' && strncmp($haystack, $needle, strlen($needle)) === 0;
     }
 }
 if (!function_exists('str_ends_with')) {
-    /**
-     * 字符串结束包含
-     */
+    // 字符串结束包含
     function str_ends_with(string $haystack, string $needle): bool
     {
         return $needle !== '' && substr($haystack, -strlen($needle)) === $needle;
     }
 }
 if (!function_exists('json_validate')) {
-    /**
-     * 验证字符串是否为Json
-     */
+    // 验证字符串是否为Json
     function json_validate(string $json): bool
     {
         json_decode($json);
@@ -64,9 +58,8 @@ if (!function_exists('json_validate')) {
     }
 }
 
-/**
- * 调试输出
- */
+// =======================调试输出函数===========================
+// 调试输出
 function dump(...$vars): void
 {
     ob_start();
@@ -81,154 +74,116 @@ function dump(...$vars): void
     echo $output;
 }
 
-/**
- * 输出并结束
- */
+// 输出并结束
 function dd(...$vars): void
 {
     dump(...$vars);
     exit();
 }
 
-/**
- * 输出用户常量
- */
+// 输出用户常量
 function dump_const(): void
 {
     dump(get_defined_constants(true)['user']);
 }
 
-function parse_app_name(string $name, string $app = ''): array
+// =======================框架必要函数===========================
+// 驼峰转下划线
+function name_to_snake(string $name): string
 {
-    if (empty($app)) {
-        $app = APP_NAME;
-    }
-    $name = trim(strtolower($name), '@.');
-    if (str_contains($name, '@')) {
-        [$app, $name] = explode('@', $name, 2);
-    } elseif (str_contains($name, '.')) {
-        [$app, $name] = explode('.', $name, 2);
-    }
-    return [$app, $name];
+    return strtolower(trim(preg_replace('/([A-Z])/', '_\1\2', $name), '_'));
 }
 
-/**
- * 拆分 前缀.名称
- */
+// 下划线转驼峰
+function name_to_camel(string $name): string
+{
+    return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+}
+
+// 拆分 前缀.名称
 function split_prefix_name(string $name, string $default_prefix, string $needle = '.'): array
 {
     $name = trim($name, $needle);
     return str_contains($name, $needle) ? explode($needle, $name, 2) : [$default_prefix, $name];
 }
 
-/**
- * 驼峰转下划线
- */
-function name_to_snake(string $name): string
+// 解析应用@(.)名称
+function parse_app_name(string $name, string $app = ''): array
 {
-    return strtolower(trim(preg_replace('/([A-Z])/', '_\1\2', $name), '_'));
+    if (empty($app)) {
+        $app = APP_NAME;
+    }
+    $name = str_replace('@', '.', $name);
+    return split_prefix_name($name, $app);
 }
 
-/**
- * 下划线转驼峰
- */
-function name_to_camel(string $name): string
+// 检查条件是否跳过
+function check_if_skip(int $if, array $data, string $field): bool
 {
-    return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
-}
-
-/**
- * 检测是否跳过
- */
-function check_is_skip(int $at, array $data, string $field): bool
-{
-    if ($at === AT_NOT_NULL) {
+    if ($if === IF_VALUE) {
         return empty($data[$field]);
     }
-    if ($at === AT_NULL) {
+    if ($if === IF_EMPTY) {
         return !empty($data[$field]);
     }
-    if ($at === AT_SET) {
+    if ($if === IF_ISSET) {
         return !isset($data[$field]);
     }
-    if ($at === AT_NOT_SET) {
+    if ($if === IF_UNSET) {
         return isset($data[$field]);
     }
     return false;
 }
 
-/**
- * 获取批量函数
- */
-function get_batch_func($batchFunc = []): array
+// 解析批量函数
+function parse_batch_func($func = []): array
 {
-    if (is_string($batchFunc)) {
-        $batchFunc = explode(',', str_replace('|', ',', $batchFunc));
+    if (is_string($func)) {
+        $func = explode(',', str_replace('|', ',', $func));
     }
-    return array_filter($batchFunc);
+    return array_filter($func);
 }
 
-/**
- * 进行批量函数处理
- */
-function value_batch_func($value, $batchFunc)
+// 选项转换数组
+function str_to_array(string $options, string $sep = '|', string $eq = '='): array
 {
-    $batchFunc = get_batch_func($batchFunc);
-    foreach ($batchFunc as $func) {
-        if (function_exists($func)) {
-            if (is_array($value)) {
-                $value = array_map(fn($v) => $func(strval($v)), $value);
-            } else {
-                $value = $func(strval($value));
-            }
+    if (empty($options)) {
+        return [];
+    }
+    return Tool::str_to_array($options, $sep, $eq);
+}
+
+// 对值执行批量函数
+function run_batch_func($value, $func)
+{
+    $func = parse_batch_func($func);
+    foreach ($func as $fn) {
+        if (function_exists($fn)) {
+            $value = is_array($value) ? array_map(fn($v) => $fn(strval($v)), $value) : $fn(strval($value));
         }
     }
     return $value;
 }
 
-/**
- * 获取类单例，不存在则创建
- */
+// =======================框架助手函数===========================
+// 获取类单例，不存在则创建
 function app(string $class, array $args = []): object
 {
     return App::make($class, $args);
 }
 
-/**
- * 命令调用
- */
+// 调用命令
 function cli(string $uri, string $app = '', bool $isCall = true)
 {
-    if (empty($app)) {
-        $app = APP_NAME;
-    }
     return Cli::run($uri, $app, $isCall);
 }
 
-/**
- * 字符串加密
- */
-function encrypt(string $string, string $salt = ''): string
-{
-    return Crypt::init()->encrypt($string, $salt);
-}
-
-/**
- * 字符串解密
- */
-function decrypt(string $string, string $salt = ''): string
-{
-    return Crypt::init()->decrypt($string, $salt);
-}
-
-/**
- * 配置管理：设置，检测，获取，获取全部
- */
+// 配置管理：设置，检测，获取单个，获取全部
 function config(string $name = '', $value = '')
 {
     $config = Config::init();
     if ('' === $name) {
-        return $config->all();
+        return $config->get();
     }
     if ('' === $value) {
         return str_starts_with($name, '?') ? $config->has(substr($name, 1)) : $config->get($name);
@@ -236,35 +191,13 @@ function config(string $name = '', $value = '')
     return $config->set($name, $value);
 }
 
-/**
- * 获取配置
- */
+// 获取配置(加强)
 function config_get(string $name = '', $default = '', bool $to_array = false)
 {
     return Config::init()->get($name, $default, $to_array);
 }
 
-/**
- * 加载配置文件
- */
-function config_load(string $file = ''): void
-{
-    Config::init()->load($file);
-}
-
-/**
- * 刷新配置
- */
-
-function config_refresh(): bool
-{
-    return Config::init()->refresh();
-}
-
-
-/**
- * site配置获取
- */
+// 获取站点配置
 function site(string $name = '', $default = '', bool $to_array = false)
 {
     $config = Config::init();
@@ -274,9 +207,19 @@ function site(string $name = '', $default = '', bool $to_array = false)
     return str_starts_with($name, '?') ? $config->has('site.' . substr($name, 1)) : $config->get('site.' . $name, $default, $to_array);
 }
 
-/**
- * 缓存管理：设置，检测，获取，删除
- */
+// 加载新配置
+function config_load(array $load): void
+{
+    Config::init()->load($load);
+}
+
+// 重载配置
+function config_reload(): bool
+{
+    return Config::init()->reload();
+}
+
+// 缓存管理：设置，检测，获取，删除
 function cache(string $name, $value = '', int $expire = 0)
 {
     $cache = Cache::init();
@@ -289,25 +232,19 @@ function cache(string $name, $value = '', int $expire = 0)
     return $cache->set($name, $value, $expire);
 }
 
-/**
- * 缓存获取：不存在则制作
- */
+// 缓存获取：不存在则创建
 function cache_make(string $name, ?Closure $closure = null, int $expire = 0)
 {
     return Cache::init()->make($name, $closure, $expire);
 }
 
-/**
- * 清除缓存：指定路径
- */
+// 清除缓存：指定路径
 function cache_clear(string $path = ''): bool
 {
     return Cache::init()->flush($path);
 }
 
-/**
- * 获取部件(缓存)对象
- */
+// 获取部件(缓存)对象
 function widget(string $name): object
 {
     [$app, $name] = parse_app_name($name);
@@ -315,10 +252,8 @@ function widget(string $name): object
     return App::make($class);
 }
 
-/**
- * 根据标签名更新部件缓存
- */
-function widget_refresh(string $tag, string $app = ''): void
+// 根据标签名重载部件缓存
+function widget_reload(string $tag, string $app = ''): void
 {
     if (empty($app)) {
         $app = APP_NAME;
@@ -328,9 +263,19 @@ function widget_refresh(string $tag, string $app = ''): void
     $cache->flush('common@widget/' . $tag . '/*');
 }
 
-/**
- * cookie管理：设置，检测，获取，删除，获取全部，清空
- */
+// 字符串加密
+function encrypt(string $string, string $salt = ''): string
+{
+    return Crypt::init()->encrypt($string, $salt);
+}
+
+// 字符串解密
+function decrypt(string $string, string $salt = ''): string
+{
+    return Crypt::init()->decrypt($string, $salt);
+}
+
+// cookie管理：设置，检测，获取，删除，获取全部，清空
 function cookie(?string $name = '', $value = '', array $options = [])
 {
     $cookie = Cookie::init();
@@ -349,9 +294,7 @@ function cookie(?string $name = '', $value = '', array $options = [])
     return $cookie->set($name, $value, $options);
 }
 
-/**
- * session管理：设置，检测，获取，删除，获取全部，清空
- */
+// session管理：设置，检测，获取，删除，获取全部，清空
 function session(?string $name = '', $value = '')
 {
     $session = Session::init();
@@ -370,99 +313,80 @@ function session(?string $name = '', $value = '')
     return $session->set($name, $value);
 }
 
-/**
- * session闪存：用于Ajax设置临时数据，如验证码
- */
+// session闪存：用于Ajax设置临时数据，如验证码
 function session_flash(string $name = '', $value = '')
 {
     return Session::init()->flash($name, $value);
 }
 
-/**
- * 过滤数据
- */
-function filter_data(array $data): array
+// 输入过滤
+function input_filter(array $data): array
 {
     Filter::init()->input($data);
     return $data;
 }
 
-/**
- * 获取输入请求
- */
+// 获取输入请求并处理
 function input(string $name, $default = null, $batchFunc = [])
 {
     return Request::init()->getRequest($name, $default, $batchFunc);
 }
 
-/**
- * url生成
- */
+// url生成
 function url(string $route = '', array $params = [], string $suffix = '*'): string
 {
     return Route::init()->buildUrl($route, $params, $suffix);
 }
 
-/**
- * 获取当前控制器
- */
+// 获取当前控制器
 function get_controller(): string
 {
     return Route::init()->getController();
 }
 
-/**
- * 获取当前方法
- */
+// 获取当前方法
 function get_action(): string
 {
     return Route::init()->getAction();
 }
 
-/**
- * 调用控制器方法
- */
+// 调用控制器方法
 function action(string $uri, array $params = [], string $app = '')
 {
     return Route::init()->dispatch($uri, $params, $app);
 }
 
-/**
- * 获取视图对象
- */
+// 获取视图对象
 function view(string $file = '', array $vars = [], bool $isCall = false): object
 {
     return View::init()->make($file, $vars, $isCall);
 }
 
-/**
- * 视图传值
- */
+// 视图传值
 function view_with($vars, $value = ''): object
 {
     return View::init()->with($vars, $value);
 }
 
-
-/**
- * 数据库快速操作
- */
+// 数据库快速操作
 function pdo($config = []): object
 {
     return Connection::init($config);
 }
 
-/**
- * 获取数据表对象
- */
+// 验证表名
+function is_table(string $table): bool
+{
+    return pdo()->checkTable($table);
+}
+
+// 获取数据表对象
 function db(string $table = '', $config = []): object
 {
     return Db::connect($config, $table);
 }
 
-/**
- * 获取模型对象
- */
+// 获取模型对象
 function model(string $name = ''): object
 {
     [$app, $name] = parse_app_name($name);
@@ -470,41 +394,32 @@ function model(string $name = ''): object
     return App::make($class);
 }
 
-/**
- * 获取验证器对象
- */
+// 获取验证器对象
 function validate(array $validate, array $data = [], bool $isBatch = false): object
 {
     return Validate::init()->make($validate, $data, $isBatch);
 }
 
-/**
- * 记录trace到调试栏
- */
-function trace($msg, string $type = 'debug'): void
-{
-    DebugBar::init()->trace($msg, $type);
-}
-
-/**
- * 记录变量到日志
- */
-function log_value($vars, string $name = 'var'): void
-{
-    Log::init()->value($vars, $name);
-}
-
-/**
- * 错误响应
- */
+// 错误响应输出并中止
 function halt($msg = '', int $code = 400, array $params = []): void
 {
     Response::halt($msg, $code, $params);
 }
 
-/**
- * 字符串截取
- */
+// 记录变量到日志
+function log_value($vars, string $name = 'var'): void
+{
+    Log::init()->value($vars, $name);
+}
+
+// 记录trace到调试栏
+function trace($msg, string $type = 'debug'): void
+{
+    DebugBar::init()->trace($msg, $type);
+}
+
+// =======================加强函数===========================
+// 字符串截取
 function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8'): string
 {
     if (function_exists("mb_substr")) {
@@ -525,9 +440,7 @@ function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8
     return $suffix ? $slice . '...' : $slice;
 }
 
-/**
- * 时间多久之前
- */
+// 时间多久之前
 function get_time_ago(int $time): string
 {
     $etime = time() - $time;
@@ -544,17 +457,13 @@ function get_time_ago(int $time): string
     return '刚刚';
 }
 
-/**
- * 获取网站版本
- */
+// 获取网站版本
 function site_ver(): string
 {
     return APP_DEBUG ? date('YmdHis') : site('version', date('Y-m-d'));
 }
 
-/**
- * ids过滤转换
- */
+// ids过滤转换
 function ids_filter(string $ids, bool $to_array = false, bool $gt_0 = true)
 {
     $ids = array_filter(explode(',', $ids), 'is_numeric');
@@ -566,17 +475,7 @@ function ids_filter(string $ids, bool $to_array = false, bool $gt_0 = true)
     return $to_array ? $ids : implode(',', $ids);
 }
 
-/**
- * 验证表名
- */
-function is_table(string $table): bool
-{
-    return pdo()->checkTable($table);
-}
-
-/**
- * 获取前后关联id
- */
+// 获取前后关联id
 function get_prev_next(int $id, array $keys): array
 {
     $k = array_search($id, $keys);
@@ -588,17 +487,7 @@ function get_prev_next(int $id, array $keys): array
     return [$prev_id, $next_id];
 }
 
-/**
- * 选项转换数组
- */
-function str_to_array(string $options, string $sep = '|', string $eq = '='): array
-{
-    return Tool::str_to_array($options, $sep, $eq);
-}
-
-/**
- * 清理html代码
- */
+// 清理html代码
 function clear_html(string $string): string
 {
     $string = strip_tags($string);
@@ -606,9 +495,7 @@ function clear_html(string $string): string
     return trim($string);
 }
 
-/**
- * 清除xss脚本
- */
+// 清除xss脚本
 function remove_xss(string $val): string
 {
     $val = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $val);
@@ -649,9 +536,7 @@ function remove_xss(string $val): string
     return $val;
 }
 
-/**
- * curl请求
- */
+// curl请求
 function get_curl(string $url, array $post = [], array $header = [], bool $get_header = false, string $cookie = '', string $referer = '', string $ua = '', bool $nobody = false, int $timeout = 30): string
 {
     $ch = curl_init();
@@ -692,9 +577,7 @@ function get_curl(string $url, array $post = [], array $header = [], bool $get_h
     return $ret ? trim($ret) : '';
 }
 
-/**
- * 获取客户ip
- */
+// 获取ip
 function get_ip(bool $int = false)
 {
     $k = $int ? 1 : 0;
@@ -716,9 +599,7 @@ function get_ip(bool $int = false)
     return $ips[$k];
 }
 
-/**
- * 获取整型ip
- */
+// 获取整型ip
 function get_int_ip(): int
 {
     return get_ip(true);
