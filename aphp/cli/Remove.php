@@ -128,6 +128,7 @@ class Remove extends Command
         $db = db();
         $table_prefix = $db->getPrefix();
         $db->execute('DROP TABLE IF EXISTS `' . $table_prefix . $table . '`;');
+        cache('field/' . $table . '_field', null); // 清除表字段缓存
         return $this->success();
     }
 

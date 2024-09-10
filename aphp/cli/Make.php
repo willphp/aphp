@@ -67,6 +67,7 @@ class Make extends Command
                 $db->execute('DROP TABLE IF EXISTS `' . $replace['table_prefix'] . $replace['table_name'] . '`;');
             }
             $db->execute($sql);
+            cache('field/' . $replace['table_name'] . '_field', null); // 清除表字段缓存
             return $this->success('表创建成功');
         }
         return $this->error('表创建失败');

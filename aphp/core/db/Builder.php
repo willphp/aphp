@@ -14,7 +14,7 @@ namespace aphp\core\db;
 use aphp\core\Single;
 use aphp\core\Tool;
 
-class Builder
+class  Builder
 {
     use Single;
 

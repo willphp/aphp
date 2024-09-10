@@ -83,8 +83,7 @@ class Upload
     {
         [$mime, $data] = explode(',', $base64);
         $mime = strtolower($mime);
-        $mime_map = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
-        $ext = $mime_map[$mime] ?? '';
+        $ext = $this->_ext($mime);
         if ($ext == '') {
             $this->error = '文件类型不允许';
             return [];
@@ -112,6 +111,18 @@ class Upload
         $file['api_type'] = $this->config['api_type'];
         $file['upload_time'] = time();
         return $file;
+    }
+
+    // 获取文件后缀
+    protected function _ext(string $mime): string
+    {
+        $mime_map = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
+        foreach ($mime_map as  $type => $ext) {
+            if (str_contains($mime, $type)) {
+                return $ext;
+            }
+        }
+        return '';
     }
 
     // 获取上传

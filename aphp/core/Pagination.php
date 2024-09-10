@@ -85,7 +85,7 @@ class Pagination
                 $this->getEnd(),
             ], $this->html);
             if ($this->options['theme'] == 1) {
-                $html = '<nav><ul class="' . $class . '">' . str_replace(['[', ']'], ['<li>', '</li>'], $html) . '</ul></nav>';
+                $html = '<nav><ul class="' . $class . '">' . str_replace(['[', ']'], ['<li class="page-item">', '</li>'], $html) . '</ul></nav>';
             } else {
                 $html = '<div class="' . $class . '">' . str_replace(['[', ']'], ' ', $html) . '</div>';
             }
@@ -152,9 +152,9 @@ class Pagination
             for ($i = $start; $i <= $end; $i++) {
                 if ($this->currentNum == $i) {
                     if ($this->options['theme'] == 1) {
-                        $links .= '<li class="' . $active . '"><a href="javascript:;">' . $i . '</a></li>';
+                        $links .= '<li class="page-item ' . $active . '"><a href="javascript:;" class="page-link">' . $i . '</a></li>';
                     } else {
-                        $links .= '[<a href="javascript:;" class="' . $active . '">' . $i . '</a>]';
+                        $links .= '[<a href="javascript:;" class="page-link ' . $active . '">' . $i . '</a>]';
                     }
                 } else {
                     $links .= $this->getLink($i, $i);
@@ -168,7 +168,7 @@ class Pagination
     {
         if ($pageNum > 0) {
             $url = $this->getUrl($pageNum);
-            return '[<a href="' . $url . '">' . $name . '</a>]';
+            return '[<a href="' . $url . '" class="page-link">' . $name . '</a>]';
         }
         return '';
     }

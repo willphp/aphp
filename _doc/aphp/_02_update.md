@@ -1,5 +1,14 @@
 ## 更新日志
 
+#### APHPv5.2.1 2024-08-21
+
+- 修复：上传saveBase64Image的错误问题
+- 新增：验证string -0825
+- 优化：make创建表后清除表字段缓存 -0825
+- 模板：模板支持{foreach $变量名[键名] as $变量} -0828
+- 修复：自动过滤排序字段except_field
+- 优化：url生成：url('about/index') about.html
+
 #### APHPv5.2.0 2024-08-19
 
 - 优化：重命名条件常量AT_常量为IF_常量，如：AT_MUST => IF_MUST

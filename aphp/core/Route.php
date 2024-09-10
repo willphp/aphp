@@ -232,6 +232,9 @@ class Route
         [$app, $uri] = parse_app_name($uri, $this->app);
         $route = $this->parseRoute($uri, $params, $app);
         $url = Rewrite::init($route['app'])->replace($route['rewrite'], true);
+        if (str_ends_with($url, '/index')) {
+            $url = substr($url, 0, -6); // remove index
+        }
         return __URL__ . '/' . $url . $suffix;
     }
 

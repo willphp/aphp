@@ -9,7 +9,7 @@
  |-----------------------------------------------------------------*/
 return [
     'auto_filter_req' => true, // 自动过滤req参数
-    'except_field' => [], // 排除字段(可写入script脚本)
+    'except_field' => ['content'], // 排除字段(可写入script脚本)
     'auto' => [
         'markdown' => 'htmlspecialchars', // strip_tags
         '/^(id|p)$/' => 'intval', // id分页自动转换数字

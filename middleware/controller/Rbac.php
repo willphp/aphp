@@ -19,12 +19,14 @@ class Rbac
     {
         if (!session('?user')) {
             if (IS_AJAX) {
-                halt('', 401);
+                halt('', 401); // 验证登录
             }
             header('Location:' . url('login/login'));
             exit();
         }
-        // if (check_auth() === 0) halt('', 403); // 验证权限
+        //if (check_auth() === 0) {
+        //    halt('', 403); // 验证权限
+        //}
         $next();
     }
 }

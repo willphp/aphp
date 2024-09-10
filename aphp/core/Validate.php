@@ -207,6 +207,12 @@ class Validate
         return array_map(fn($v)=>empty($v) ? 0 : 1, $check);
     }
 
+    // 字母数字下划线
+    public function string(string $value, string $field, string $params, array $data): bool
+    {
+        return (bool)preg_match('/^\w+$/', $value);
+    }
+
     // 纯字母
     public function alpha(string $value, string $field, string $params, array $data): bool
     {

@@ -19,7 +19,7 @@ class Auth
     {
         if (!session('?user')) {
             if (IS_AJAX) {
-                halt('', 401);
+                halt('', 401); // 验证登录
             }
             header('Location:' . url('login/login'));
             exit();
