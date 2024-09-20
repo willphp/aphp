@@ -578,11 +578,10 @@ function get_curl(string $url, array $post = [], array $header = [], bool $get_h
 }
 
 // 获取ip
-function get_ip(bool $int = false)
+function get_ip()
 {
-    $k = $int ? 1 : 0;
-    static $ips = null;
-    if (null !== $ips) return $ips[$k];
+    static $ip = null;
+    if (null !== $ip) return $ip;
     $ip = '';
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
@@ -595,12 +594,11 @@ function get_ip(bool $int = false)
         $ip = $_SERVER['REMOTE_ADDR'];
     }
     $long = ip2long((string)$ip);
-    $ips = $long ? [$ip, $long] : ['0.0.0.0', 0];
-    return $ips[$k];
+    return $long ? $ip : '0.0.0.0';
 }
 
 // 获取整型ip
 function get_int_ip(): int
 {
-    return get_ip(true);
+    return ip2long(get_ip());
 }

@@ -204,8 +204,8 @@ class  Builder
                     $result[$item] = $val;
                 } else {
                     $key = str_replace('.', '_', $key);
-                    $this->query->bind('data__' . $key, $val);
-                    $result[$item] = ':data__' . $key;
+                    $this->query->bind('data__' . $key.'__', $val);
+                    $result[$item] = ':data__' . $key.'__';
                 }
             }
         }
@@ -279,6 +279,10 @@ class  Builder
                 return '(' . $this->parseKey($field) . ' ' . $op . ' ' . implode(' AND ', $express) . ')';
             }
             return $this->parseKey($field) . ' ' . $op . ' (' . implode(',', $express) . ')';
+        }
+        if ($op == 'FIND_IN_SET') {
+            $express = $this->parseValue($condition);
+            return 'FIND_IN_SET(' . $express . ',' . $this->parseKey($field) . ')';
         }
         return '';
     }

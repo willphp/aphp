@@ -45,9 +45,6 @@ class Route
         $action = $route['action'];
         $params = $route['params'];
         $path = $route['controller'] . '/' . $route['action'];
-        if (!empty($params) && !$isCall) {
-            Request::init()->setGet($params);
-        }
         if (str_starts_with($action, '_') && !$isCall) {
             $code = substr($action, 1);
             $code = is_numeric($code) ? (int)$code : 405;
@@ -60,7 +57,19 @@ class Route
             if (IS_GET && $view = View::init()->make('', [], true)->toString()) {
                 return $view;
             }
-            $this->error(404, ['path' => $path]);
+            $empty = Config::init()->get('route.empty_to', []);
+            $class = $empty['class'] ?? 'app\\index\\controller\\Empty';
+            $action = $empty['action'] ?? 'empty';
+            if (!empty($empty['params'])) {
+                $params[$empty['params']] = $path;
+            }
+            // 默认处理
+            if (!method_exists($class, $action)) {
+                $this->error(404, ['path' => $path]);
+            }
+        }
+        if (!empty($params) && !$isCall) {
+            Request::init()->setGet($params);
         }
         Middleware::init()->execute('framework.controller_start', ['path' => $route['path']]);
         $class = App::make($class);

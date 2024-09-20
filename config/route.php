@@ -20,4 +20,9 @@ return [
         ':string' => '[a-zA-Z0-9\-_]+', // string
         ':alpha' => '[a-zA-Z\x7f-\xff0-9-_]+', // alpha
     ],
+    'empty_to' => [
+        'class' => 'app\\index\\controller\\Index', // 空控制器
+        'action' => 'index', // 空方法
+        'params' => 'route', // 空参数
+    ],
 ];

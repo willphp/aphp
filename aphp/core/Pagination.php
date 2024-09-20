@@ -1,6 +1,6 @@
 <?php
 /*------------------------------------------------------------------
- | 分页类 2024-08-15 by 无念
+ | 分页类 2024/9/20 0020 by 无念
  |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
@@ -20,6 +20,7 @@ class Pagination
     private int $showNum; // 显示页码数
     private int $totalPage; // 总页数
     private string $getVar; // 分页变量
+    private array $unsetGetVar; // 不需要保留的get参数
     private int $currentNum; // 当前页码
     private int $offset; // 开始数
     private array $options = ['home' => 'home', 'end' => 'end', 'up' => 'Previous', 'down' => 'Next', 'pre' => '&laquo;', 'next' => '&raquo;', 'header' => 'records', 'unit' => 'page', 'theme' => 0];
@@ -30,6 +31,7 @@ class Pagination
     {
         $config = Config::init()->get('pagination', []);
         $this->getVar = $getVar ?: $config['page_var'] ?: 'p';
+        $this->unsetGetVar = $config['unset_get_var'] ?: [];
         $this->html = $config['page_html'] ?: $this->html;
         if (isset($config['options'])) {
             $this->options = array_merge($this->options, $config['options']);
@@ -176,7 +178,9 @@ class Pagination
     private function getUrl(int $pageNum): string
     {
         $get = $_GET;
-        if (isset($get['csrf_token'])) unset($get['csrf_token']);
+        foreach ($this->unsetGetVar as $var) {
+            if (isset($get[$var])) unset($get[$var]);
+        }
         if ($pageNum > 1) {
             $get[$this->getVar] = $pageNum;
         } elseif (isset($get[$this->getVar])) {

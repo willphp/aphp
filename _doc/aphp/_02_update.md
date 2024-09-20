@@ -1,6 +1,14 @@
 ## 更新日志
 
-#### APHPv5.2.1 2024-08-21
+#### APHPv5.2.2 2024-09-20
+
+- 优化：get_ip函数(去除参数)
+- 修复：getSql获取insert语句的BUG
+- 新增：where条件支持where('tag_ids', 'find_in_set', 6)
+- 增强：分页URL生成可设置不需要保留的get参数
+- 增强：路由可设置空控制器空方法
+
+#### APHPv5.2.1 2024-09-10
 
 - 修复：上传saveBase64Image的错误问题
 - 新增：验证string -0825

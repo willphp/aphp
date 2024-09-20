@@ -9,6 +9,7 @@
  |-----------------------------------------------------------------*/
 return [
     'page_var' => 'p', // 分页$_GET变量
+    'unset_get_var' => ['csrf_token','route'], // 不需要保留的get参数
     'page_size' => 10, // 每页显示数量
     'show_num' => 5, // 页面显示页码数量
     'options' => [
@@ -20,7 +21,7 @@ return [
         'next' => '下n页',
         'header' => '条记录',
         'unit' => '页',
-        'theme' => 1,
+        'theme' => 0,
     ],
     'page_html' => '%up% %number% %down%', //显示的html
 ];
