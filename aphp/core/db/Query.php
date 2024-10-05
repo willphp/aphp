@@ -710,7 +710,7 @@ class Query implements ArrayAccess, Iterator
                     $this->options['where'][] = $v;
                 }
             }
-        } else {
+        } elseif (!empty($field)) {
             $this->options['where'][] = func_get_args();
         }
         return $this;

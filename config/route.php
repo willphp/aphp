@@ -19,10 +19,16 @@ return [
         ':float' => '[0-9\.\-]+', // float
         ':string' => '[a-zA-Z0-9\-_]+', // string
         ':alpha' => '[a-zA-Z\x7f-\xff0-9-_]+', // alpha
+        ':keyword' => '[a-zA-Z\x7f-\xff0-9-%\+]+', // keyword
     ],
     'empty_to' => [
         'class' => 'app\\index\\controller\\Index', // 空控制器
         'action' => 'index', // 空方法
         'params' => 'route', // 空参数
+    ],
+    'auto_rewrite' => true, // 自动重写路由
+    'rewrite_rule' => [
+        '([a-zA-Z]+)_([0-9]+)' => '${1}/index/p/${2}',
+        '([a-zA-Z]+)/([a-zA-Z]+)_([0-9]+)' => '${1}/${2}/id/${3}',
     ],
 ];

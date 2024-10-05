@@ -75,7 +75,8 @@ class Error
         if (!APP_DEBUG || IS_AJAX) {
             Log::init()->write($data['msg'], $data['type']);
         }
-        $msg = APP_DEBUG ? $data['error'] : Config::init()->get('app.error_msg', 'Page error! Please try again later～');
+        $is_install = str_contains($_SERVER['REQUEST_URI'], 'install');
+        $msg = APP_DEBUG || $is_install ? $data['error'] : Config::init()->get('app.error_msg', 'Page error! Please try again later～');
         ob_clean();
         if (IS_AJAX) {
             header('Content-type: application/json; charset=utf-8');

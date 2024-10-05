@@ -15,13 +15,13 @@ return [
     'options' => [
         'home' => '首页',
         'end' => '尾页',
-        'up' => '&laquo;',
-        'down' => '&raquo;',
+        'up' => '上一页',
+        'down' => '下一页',
         'pre' => '上n页',
         'next' => '下n页',
         'header' => '条记录',
         'unit' => '页',
         'theme' => 0,
     ],
-    'page_html' => '%up% %number% %down%', //显示的html
+    'page_html' => '%home% %up% %pre% %number% %next% %down% %end%', //显示的html
 ];

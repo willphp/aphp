@@ -200,7 +200,7 @@ class Route
         $route['path'] = ($route['is_plugin'] ? $route['app'] : $route['app'] . '/') . $route['controller'] . '/' . $route['action'];
         $route['rewrite'] = $route['controller'] . '/' . $route['action'];
         if (!empty($route['params'])) {
-            ksort($route['params']);
+            //ksort($route['params']);
             $args_str = http_build_query($route['params']);
             $route['path'] .= '?' . $args_str;
             $route['rewrite'] .= '/' . str_replace(['=', '&'], '/', $args_str);

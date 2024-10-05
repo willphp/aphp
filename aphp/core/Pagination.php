@@ -187,7 +187,7 @@ class Pagination
             unset($get[$this->getVar]);
         }
         $get = array_filter($get);
-        ksort($get);
+        //ksort($get);
         return Route::init()->buildPageUrl($get);
     }
 
