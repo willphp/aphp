@@ -1,14 +1,16 @@
 <?php
 /*------------------------------------------------------------------
- | 命令行运行 2024-08-14 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace aphp\core;
+/**
+ * 命令行运行类
+ */
 class Cli
 {
     public static function run(string $uri, string $app = '', bool $isCall = false)
@@ -49,7 +51,7 @@ class Cli
             Response::output($res, APP_TRACE);
             return true;
         } elseif (!$isCall) {
-            Response::halt('', 404, ['path' => $class. ':' . $method]);
+            Response::halt('', 404, ['path' => $class . ':' . $method]);
         }
         return false;
     }

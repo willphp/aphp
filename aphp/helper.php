@@ -1,12 +1,11 @@
 <?php
 /*------------------------------------------------------------------
- | 助手函数 2024-08-13 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
+declare(strict_types=1);
 
 use aphp\core\App;
 use aphp\core\Cache;
@@ -400,6 +399,26 @@ function validate(array $validate, array $data = [], bool $isBatch = false): obj
     return Validate::init()->make($validate, $data, $isBatch);
 }
 
+// 调用扩展
+function extend(string $name, array $args = [])
+{
+    $method = 'init';
+    if (str_contains($name, '::')) {
+        [$name, $method] = explode('::', $name);
+    }
+    if (str_contains($name, '.')) {
+        $name = explode('.', $name);
+        $end = array_pop($name);
+        $class = '\\extend\\' . implode('\\', $name) . '\\' . ucfirst($end);
+    } else {
+        $class = '\\extend\\' . $name . '\\' . ucfirst($name);
+    }
+    if (method_exists($class, $method)) {
+        return call_user_func_array([$class, $method], $args);
+    }
+    return null;
+}
+
 // 错误响应输出并中止
 function halt($msg = '', int $code = 400, array $params = []): void
 {
@@ -447,11 +466,11 @@ function get_time_ago(int $time): string
     if ($etime < 1) {
         return '刚刚';
     }
-    $interval = [31536000 => '年前', 2592000 => '个月前', 604800=>'星期前', 86400=>'天前', 3600=>'小时前', 60=>'分钟前', 1=>'秒前'];
+    $interval = [31536000 => '年前', 2592000 => '个月前', 604800 => '星期前', 86400 => '天前', 3600 => '小时前', 60 => '分钟前', 1 => '秒前'];
     foreach ($interval as $k => $v) {
         $ok = floor($etime / $k);
         if ($ok != 0) {
-            return $ok.$v;
+            return $ok . $v;
         }
     }
     return '刚刚';
@@ -469,7 +488,7 @@ function ids_filter(string $ids, bool $to_array = false, bool $gt_0 = true)
     $ids = array_filter(explode(',', $ids), 'is_numeric');
     $ids = array_unique($ids);
     if ($gt_0) {
-        $ids = array_filter($ids, fn(int $n)=>$n>0);
+        $ids = array_filter($ids, fn(int $n) => $n > 0);
     }
     ksort($ids);
     return $to_array ? $ids : implode(',', $ids);
@@ -482,8 +501,8 @@ function get_prev_next(int $id, array $keys): array
     if ($k === false) {
         return [0, 0];
     }
-    $prev_id = $keys[$k-1] ?? 0;
-    $next_id = $keys[$k+1] ?? 0;
+    $prev_id = $keys[$k - 1] ?? 0;
+    $next_id = $keys[$k + 1] ?? 0;
     return [$prev_id, $next_id];
 }
 

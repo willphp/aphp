@@ -1,5 +1,11 @@
 ## 更新日志
 
+#### APHPv5.2.5 2024-10-20
+
+- 新增：email.smtp扩展
+- 新增：扩展调用函数extend()，如：extend('email.smtp')->send(...)
+- 新增：db()查询支持cahce($expire=0)缓存，如：db('news')->cahce(10)->find()
+
 #### APHPv5.2.3 2024-10-05
 
 - 模板：支持复杂变量输出，如：{:echo($a\[$b\]\['c'])}  

@@ -109,3 +109,15 @@ class Api
 ```
 
 使用接口处理上传： `{:url('api/upload')}?type=avatar`
+
+### 邮件发送
+
+```php
+$smtp = extend('email.smtp');
+$r = $smtp->send('邮箱@qq.com', '标题', '内容');
+if ($r) {
+	echo '发送成功';
+} else {
+	echo $smtp->error;
+}
+```

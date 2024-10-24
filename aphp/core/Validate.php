@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 验证器类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\core;
 
 use Closure;
 
+/**
+ * 验证器
+ */
 class Validate
 {
     use Single;
@@ -204,7 +205,7 @@ class Validate
     {
         $keys = explode(',', $params);
         $check = Tool::arr_key_filter($data, $keys, true);
-        return array_map(fn($v)=>empty($v) ? 0 : 1, $check);
+        return array_map(fn($v) => empty($v) ? 0 : 1, $check);
     }
 
     // 字母数字下划线
@@ -326,7 +327,7 @@ class Validate
     // 数字最小值，字符串最小长度
     public function min(string $value, string $field, string $params, array $data): bool
     {
-        return is_numeric($value)? $value >= $params : mb_strlen($value) >= $params;
+        return is_numeric($value) ? $value >= $params : mb_strlen($value) >= $params;
     }
 
     // 数字最大值，字符串最大长度
@@ -354,7 +355,7 @@ class Validate
     {
         $params = explode(',', $params);
         $now = time();
-        return  $now >= strtotime($params[0]) && $now <= strtotime($params[1]);
+        return $now >= strtotime($params[0]) && $now <= strtotime($params[1]);
     }
 
     // 以...开头

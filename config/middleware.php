@@ -1,20 +1,21 @@
 <?php
 /*------------------------------------------------------------------
- | 中间件配置 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
+/**
+ * 中间件配置
+ */
 return [
     //控制器中间件
     'controller' => [
         'auth' => [
             \middleware\controller\Auth::class, // 登录验证
         ],
-        'rbac' => [
-            \middleware\controller\Rbac::class, // 权限验证
+        'test' => [
+            \middleware\controller\Test::class, // 检测测试
         ],
     ],
     //全局中间件

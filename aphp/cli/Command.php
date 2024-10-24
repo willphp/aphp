@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 命令行基类 2024-08-14 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\cli;
 
 use aphp\core\Single;
 
+/**
+ * 命令基类
+ */
 abstract class Command
 {
     use Single;

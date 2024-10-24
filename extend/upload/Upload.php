@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 上传类 2024-08-19 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -17,13 +15,16 @@ use extend\thumb\Thumb;
 use aphp\core\Config;
 use aphp\core\Single;
 
+/**
+ * 上传处理类
+ */
 class Upload
 {
     use Single;
 
     protected array $config; // 上传配置
     protected array $type = ['image' => 'jpg|jpeg|gif|png']; // 文件类型
-    protected array $imageExt = ['jpg','jpeg', 'gif', 'png']; // 图片后缀
+    protected array $imageExt = ['jpg', 'jpeg', 'gif', 'png']; // 图片后缀
     protected string $dir; // 存储路径
     protected string $error = ''; // 错误信息
 
@@ -117,7 +118,7 @@ class Upload
     protected function _ext(string $mime): string
     {
         $mime_map = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
-        foreach ($mime_map as  $type => $ext) {
+        foreach ($mime_map as $type => $ext) {
             if (str_contains($mime, $type)) {
                 return $ext;
             }

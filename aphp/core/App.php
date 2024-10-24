@@ -1,24 +1,28 @@
 <?php
 /*------------------------------------------------------------------
- | 主框架类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace aphp\core;
+/**
+ * 框架核心类
+ */
 final class App
 {
     use Single;
+
+    // 单例模式
     private static array $instances = []; // 单例列表
     private string $app; // 应用名称
     private string $uri; // URI请求
 
     private function __construct(array $binds = [])
     {
-        $this->app = $this->parseName($binds); // 解析应用名称
+        $this->app = $this->parseName($binds); // 解析名称
         $this->uri = $this->getUri(); // 获取URI请求
         $this->initConst($this->app); // 初始化常量
         Error::init(); // 错误处理

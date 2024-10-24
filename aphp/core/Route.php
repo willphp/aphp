@@ -1,17 +1,19 @@
 <?php
 /*------------------------------------------------------------------
- | 路由类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core;
 
 use ReflectionMethod;
+
+/*
+ * 路由类
+ */
 
 class Route
 {
@@ -22,12 +24,14 @@ class Route
     protected string $action;
     protected array $route;
     protected string $path;
+    protected array $config; // 配置
 
     private function __construct(string $app = '', string $uri = '?')
     {
+        $this->config = Config::init()->get('route');
         $this->app = $app ?: APP_NAME;
-        $this->controller = Config::init()->get('route.default_controller', 'index');
-        $this->action = Config::init()->get('route.default_action', 'index');
+        $this->controller = $this->config['default_controller'] ?? 'index';
+        $this->action = $this->config['default_action'] ?? 'index';
         $this->route = $this->parseRoute($uri);
         $this->controller = $this->route['controller'];
         $this->action = $this->route['action'];
@@ -57,11 +61,12 @@ class Route
             if (IS_GET && $view = View::init()->make('', [], true)->toString()) {
                 return $view;
             }
-            $empty = Config::init()->get('route.empty_to', []);
-            $class = $empty['class'] ?? 'app\\index\\controller\\Empty';
-            $action = $empty['action'] ?? 'empty';
-            if (!empty($empty['params'])) {
-                $params[$empty['params']] = $path;
+            if ($this->config['empty_jump_to']) {
+                $class = $this->config['jump_to']['class'] ?? 'app\\index\\controller\\Empty';
+                $action = $this->config['jump_to']['action'] ?? 'empty';
+                if (!empty($this->config['jump_to']['params'])) {
+                    $params[$this->config['jump_to']['params']] = $path;
+                }
             }
             // 默认处理
             if (!method_exists($class, $action)) {
@@ -226,7 +231,7 @@ class Route
             return $_SERVER['HTTP_REFERER'] ?? 'javascript:history.back(-1);';
         }
         if ($suffix == '*') {
-            $suffix = Config::init()->get('route.url_auto_suffix', '.html');
+            $suffix = $this->config['url_auto_suffix'] ?? '.html';
         }
         if (str_starts_with($uri, '@')) {
             $suffix = str_contains($uri, '.') ? '' : $suffix;
@@ -236,7 +241,7 @@ class Route
         if (preg_match('#^[a-zA-Z0-9\-_]+$#', $action[0])) {
             $uri = $this->controller . '/' . $uri;
         }
-        $clear_suffix = Config::init()->get('route.url_clear_suffix', '.html');
+        $clear_suffix = $this->config['url_clear_suffix'] ?? '.html';
         $uri = !empty($clear_suffix) ? str_replace($clear_suffix, '', $uri) : $uri;
         [$app, $uri] = parse_app_name($uri, $this->app);
         $route = $this->parseRoute($uri, $params, $app);

@@ -26,6 +26,7 @@ www  WEB部署目录
 │  ├─cookie.php         Cookie
 │  ├─database.php       数据库
 │  ├─debug_bar.php      调试栏
+│  ├─email.php          邮件
 │  ├─filter.php         自动过滤
 │  ├─middleware.php     中间件
 │  ├─pagination.php     分页
@@ -34,6 +35,7 @@ www  WEB部署目录
 │  ├─session.php        Session
 │  ├─site.php           网站  
 │  ├─template.php       模板引擎
+│  ├─upload.php       	上传
 │  ├─validate.php       验证规则
 │  └─view.php           视图
 │

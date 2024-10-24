@@ -1,7 +1,7 @@
 APHP框架开发文档
 ======================================================
-最新文档：https://www.aphp.top/md_1.html
-下载地址：https://www.aphp.top/doc/down/id/1.html
+最新文档：https://doc.aphp.top
+下载地址：https://doc.aphp.top/doc/down/id/1.html
 ======================================================
 关于框架：aphp/_01_about
 更新日志：aphp/_02_update
@@ -16,6 +16,7 @@ APHP框架开发文档
 缓存部件：aphp/_11_cache
 扩展模块：aphp/_12_extend
 命令模式：aphp/_13_cli
+函数说明：aphp/_14_function
 ======================================================
 
 应用开发文档

@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 缩略图类 2024-08-19 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -14,6 +12,9 @@ defined('ROOT_PATH') or die('Access Denied');
 
 use aphp\core\Single;
 
+/**
+ * 缩略图类
+ */
 class Thumb
 {
     use Single;

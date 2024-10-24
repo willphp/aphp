@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 视图类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\core;
 
 use Exception;
 
+/**
+ * 视图类
+ */
 class View
 {
     use Single;
@@ -35,7 +36,7 @@ class View
             $this->theme = $this->getTheme();
         }
         define('__THEME__', $this->theme);
-        $this->viewPath = rtrim(VIEW_PATH . '/'. $this->theme, '/');
+        $this->viewPath = rtrim(VIEW_PATH . '/' . $this->theme, '/');
     }
 
     protected function getTheme(): string
@@ -45,7 +46,7 @@ class View
         if (empty($get_var)) {
             return $default;
         }
-        $theme = input('get.'.$get_var, '', 'clear_html');
+        $theme = input('get.' . $get_var, '', 'clear_html');
         if (!empty($theme)) {
             Cookie::init()->set('__theme__', $theme);
             return $theme;
@@ -104,7 +105,7 @@ class View
         if (!file_exists($this->viewFile) && !$isCall) {
             throw new Exception($tpl . ' Template Not Exist');
         }
-        $this->compileFile = rtrim(RUNTIME_PATH . '/view/'. $this->theme, '/') . '/' . preg_replace('/\W/', '_', $tpl) . '.php';
+        $this->compileFile = rtrim(RUNTIME_PATH . '/view/' . $this->theme, '/') . '/' . preg_replace('/\W/', '_', $tpl) . '.php';
         return $this;
     }
 

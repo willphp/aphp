@@ -50,14 +50,14 @@
             <div class="aphp-page-foot cl">
                 <a href="https://qm.qq.com/cgi-bin/qm/qr?k=U7SzseDDXSbG9sB1CTEf5U10oFJOKR8-&jump_from=webapi" target="_blank" class="red">Q群:325825297</a>
                 <a href="https://gitee.com/willphp/aphp" target="_blank" class="blue">下载新版</a>
-                <a href="https://www.aphp.top/md_1.html" target="_blank" class="green">开发手册</a>
+                <a href="https://doc.aphp.top" target="_blank" class="green">在线文档</a>
             </div>
             <div class="aphp-page-menu">
                 <a href="{:url('index/index')}">首页</a> | <a href="{:url('abc/abc')}">404</a>
             </div>
             <div class="aphp-page-body cl">
                 <p style="color:red;">公告：{:site('site_notice')}</p>
-                <h4>开始使用 <small>[内置文档：查看_doc/aphp目录]</small></h4>
+                <h4>开始使用 <small>[内置文档：查看_doc目录]</small></h4>
                 <ol>
                     <li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>
                     <li>[本地]打开<code class="blue">.env</code>文件配置本地数据库</li>
@@ -68,7 +68,7 @@
             </div>
             <div class="aphp-copyright cl">
                 CopyRight &copy; 2020-{:date('Y')} <a href="https://www.aphp.top" title="aphp官网" target="_blank">aphp.top</a>
-                by DaSongXu
+                by 无念
             </div>
         </div>
         <div class="aphp-page-actions"></div>

@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 工具类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\core;
 
 use Exception;
 
+/**
+ * 工具类
+ */
 class Tool
 {
     // get array value (name: key.key)
@@ -164,10 +165,10 @@ class Tool
             if (str_contains($v, $eq)) {
                 [$i, $v] = explode($eq, $v, 2);
             } elseif ($k != 0) {
-                $i ++;
+                $i++;
             }
             if (is_string($i)) $i = trim($i);
-            if (isset($arr[$i])) $i ++;
+            if (isset($arr[$i])) $i++;
             $arr[$i] = trim($v);
         }
         return $is_replace ? array_map(fn($v) => strtr($v, $replace), $arr) : $arr;

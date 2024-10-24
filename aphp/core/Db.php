@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 数据库操作类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\core;
 
 use aphp\core\db\Query;
 
+/**
+ * 数据库操作类
+ */
 class Db
 {
     private static ?object $link = null;

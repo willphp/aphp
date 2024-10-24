@@ -1,17 +1,19 @@
 <?php
 /*------------------------------------------------------------------
- | 生成命令类 2024-08-14 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\cli;
+
 use aphp\core\Tool;
 
+/**
+ * 命令生成
+ */
 class Make extends Command
 {
     protected array $replace = [];
@@ -53,7 +55,7 @@ class Make extends Command
         $replace['table_engine'] ??= 'InnoDB';
         $replace['table_charset'] ??= 'utf8mb4';
         $replace['table_collate'] ??= 'utf8mb4_general_ci';
-        $replace['table_comment'] ??= $name.'表';
+        $replace['table_comment'] ??= $name . '表';
         $sql = file_get_contents($tpl_file);
         if (!empty($sql)) {
             $this->replace = $replace;
@@ -202,7 +204,7 @@ class Make extends Command
             if (!is_dir($path . '/' . $dir)) mkdir($path . '/' . $dir, 0755, true);
         }
         if (!file_exists(ROOT_PATH . '/app/common.php')) {
-            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n//自定义函数");
+            file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n// 自定义函数");
         }
         if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
             Tool::dir_init(ROOT_PATH . '/route/');
@@ -223,7 +225,7 @@ class Make extends Command
         if ($app != APP_NAME) {
             $view_path = config_get('app.app_view_path', [], true);
             $multi_theme = config_get('app.app_multi_theme', [], true);
-            $path = !empty($view_path[$app]) ? ROOT_PATH . '/'. $view_path[$app] : ROOT_PATH . '/app/' . $app . '/view';
+            $path = !empty($view_path[$app]) ? ROOT_PATH . '/' . $view_path[$app] : ROOT_PATH . '/app/' . $app . '/view';
             if (in_array($app, $multi_theme)) {
                 $path .= '/default';
             }

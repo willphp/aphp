@@ -1,15 +1,16 @@
 <?php
 /*------------------------------------------------------------------
- | 模板引擎类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core;
+/**
+ * 模板引擎类
+ */
 class Template
 {
     public static function compile(string $content, string $viewPath): string
@@ -21,8 +22,8 @@ class Template
         $b_limit = $config['{'] ?? '{';
         $e_limit = $config['}'] ?? '}';
         $suffix = Config::init()->get('view.suffix', '.html');
-        $config['regex_layout'] ??= '/{\s*layout\s+name\s*=\s*[\"\']?([a-zA-Z0-9_\/]*'.$suffix.')[\"\']?\s*}/i';
-        $config['regex_include'] ??= '/{\s*include\s+file\s*=\s*[\"\']?([a-zA-Z0-9_\/]*'.$suffix.')[\"\']?\s*}/i';
+        $config['regex_layout'] ??= '/{\s*layout\s+name\s*=\s*[\"\']?([a-zA-Z0-9_\/]*' . $suffix . ')[\"\']?\s*}/i';
+        $config['regex_include'] ??= '/{\s*include\s+file\s*=\s*[\"\']?([a-zA-Z0-9_\/]*' . $suffix . ')[\"\']?\s*}/i';
         $config['regex_literal'] ??= '/{literal}(.*?){\/literal}/s';
         $config['regex_replace'] ??= [];
         $config['str_replace'] ??= [];

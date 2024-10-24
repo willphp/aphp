@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 删除命令类 2024-08-14 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -13,6 +11,9 @@ namespace aphp\cli;
 
 use aphp\core\Tool;
 
+/**
+ * 删除命令
+ */
 class Remove extends Command
 {
     public function cli(): bool
@@ -60,7 +61,7 @@ class Remove extends Command
         }
         [$app, $name] = parse_app_name($name);
         $method = $req[1] ?? '*'; // 方法名
-        $dir = $this->getViewPath($app). '/' . $name;
+        $dir = $this->getViewPath($app) . '/' . $name;
         if ($method == '*') {
             $r = Tool::dir_delete($dir, true);
         } else {
@@ -77,7 +78,7 @@ class Remove extends Command
             $app = APP_NAME;
         }
         $view_path = config_get('app.app_view_path', [], true); // 路径设置
-        return !empty($view_path[$app]) ? ROOT_PATH . '/'. $view_path[$app] : ROOT_PATH . '/app/' . $app . '/view';
+        return !empty($view_path[$app]) ? ROOT_PATH . '/' . $view_path[$app] : ROOT_PATH . '/app/' . $app . '/view';
     }
 
     // 删除部件
@@ -107,7 +108,7 @@ class Remove extends Command
         if (empty($app)) {
             return $this->error('参数不足');
         }
-        $route = ROOT_PATH.'/route/'.$app.'.php';
+        $route = ROOT_PATH . '/route/' . $app . '.php';
         if (file_exists($route)) {
             unlink($route);
         }

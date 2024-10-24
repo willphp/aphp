@@ -1,16 +1,15 @@
 <?php
 /*------------------------------------------------------------------
- | 数据库连接类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core\db;
 
+use aphp\core\Cache;
 use aphp\core\Config;
 use aphp\core\DebugBar;
 use Closure;
@@ -18,6 +17,9 @@ use Exception;
 use PDO;
 use aphp\core\Single;
 
+/**
+ * 数据库连接类
+ */
 class Connection
 {
     use Single;
@@ -110,8 +112,20 @@ class Connection
         DebugBar::init()->trace($sql, 'sql'); // 调试
     }
 
-    public function query(string $sql, array $bind = [], bool $getObj = false)
+    public function query(string $sql, array $bind = [], array $options = [])
     {
+        $expire = $options['expire'] ?? -1;
+        if ($expire >= 0) {
+            $realSql = empty($bind) ? $sql : $this->getRealSql($sql, $bind); // 获取真实SQL
+            $cache_sign = md5($realSql); // 缓存标识
+            return Cache::init()->make('common@widget/' . $options['table'] . '/' . $cache_sign, fn() => $this->get_query($sql, $bind, $options), $expire);
+        }
+        return $this->get_query($sql, $bind, $options);
+    }
+
+    public function get_query(string $sql, array $bind = [], array $options = [])
+    {
+        $getObj = $options['obj'] ?? false;
         if (APP_TRACE) {
             $this->trace($sql, $bind);
         }

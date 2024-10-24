@@ -1,12 +1,13 @@
 <?php
 /*------------------------------------------------------------------
- | 路由配置 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
+/**
+ * 路由配置
+ */
 return [
     'default_controller' => 'index', // 默认控制器
     'default_action' => 'index', // 默认方法
@@ -21,12 +22,13 @@ return [
         ':alpha' => '[a-zA-Z\x7f-\xff0-9-_]+', // alpha
         ':keyword' => '[a-zA-Z\x7f-\xff0-9-%\+]+', // keyword
     ],
-    'empty_to' => [
-        'class' => 'app\\index\\controller\\Index', // 空控制器
-        'action' => 'index', // 空方法
-        'params' => 'route', // 空参数
+    'empty_jump_to' => false, // 开启空跳转
+    'jump_to' => [
+        'class' => 'app\\index\\controller\\Error', // 空控制器
+        'action' => 'empty', // 空方法
+        'params' => 'path', // 原路径参数
     ],
-    'auto_rewrite' => true, // 自动重写路由
+    'auto_rewrite' => true, // 路由自动重写
     'rewrite_rule' => [
         '([a-zA-Z]+)_([0-9]+)' => '${1}/index/p/${2}',
         '([a-zA-Z]+)/([a-zA-Z]+)_([0-9]+)' => '${1}/${2}/id/${3}',

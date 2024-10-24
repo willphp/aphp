@@ -3,7 +3,7 @@
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 大松栩<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -14,6 +14,9 @@ use Iterator;
 use ReflectionFunction;
 use aphp\core\db\Query;
 
+/**
+ * 模型基类
+ */
 abstract class Model implements ArrayAccess, Iterator
 {
     protected string $table = ''; //表名
@@ -275,7 +278,7 @@ abstract class Model implements ArrayAccess, Iterator
     // 验证单个字段值
     public function validateField(string $field, $value): array
     {
-        $validate = array_filter($this->validate, fn($v)=>$v[0] == $field);
+        $validate = array_filter($this->validate, fn($v) => $v[0] == $field);
         return !empty($validate) ? validate($validate, [$field => $value])->getError() : [];
     }
 

@@ -4,20 +4,21 @@ APHP框架(原WillPHP框架)是一个MVC超轻量级PHP8开发框架
 
 ### 框架特点
 
-- 大小200KB+，新手快速入门
-- ORM，数据交互简单
+- 极简200KB+，新手快速入门
+- ORM数据交互，简单方便
 - 模型可自动验证，处理，过滤数据
+- 超简单模板标签，自由定制
 
 ### 环境要求
 
 - PHP 7.4~PHP 8.3
 - MySQL5.6~8.0
 
-### 开发手册
+### 开发指南
 
-内置文档：查看`_doc/aphp`目录
+内置文档：查看`_doc`目录
 
-在线手册： [https://www.aphp.top/md_1.html](https://www.aphp.top/md_1.html)
+在线文档： [https://doc.aphp.top](https://doc.aphp.top)
 
 ### 更新日志
 

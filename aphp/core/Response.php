@@ -1,15 +1,16 @@
 <?php
 /*------------------------------------------------------------------
- | 请求响应类 2024-08-14 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
 namespace aphp\core;
+/**
+ * 响应类
+ */
 class Response
 {
     // 输出响应
@@ -31,14 +32,14 @@ class Response
                         $res = DebugBar::init()->appendDebugBar($res);
                     }
                     if (Config::init()->get('debug_bar.show_html_footer', false)) {
-                        $res .= "\n".DebugBar::init()->getHtmlFooter();
+                        $res .= "\n" . DebugBar::init()->getHtmlFooter();
                     }
                 } elseif (is_bool($res)) {
                     $res = '';
                 }
                 echo $res;
                 if (IS_CLI && $trace) {
-                    echo "\n[Command: ".CLI_COMMAND."]\n";
+                    echo "\n[Command: " . CLI_COMMAND . "]\n";
                 }
             }
         } else {
@@ -80,7 +81,7 @@ class Response
         if (IS_AJAX) {
             self::json($code, $msg);
         }
-        $class = '\\app\\'. APP_NAME. '\\controller\\Error';
+        $class = '\\app\\' . APP_NAME . '\\controller\\Error';
         if (class_exists($class)) {
             $res = call_user_func_array([App::make($class), '_' . $code], [$msg, $params]);
             self::output($res);

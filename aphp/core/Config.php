@@ -1,17 +1,20 @@
 <?php
 /*------------------------------------------------------------------
- | 配置类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace aphp\core;
+/**
+ * 配置处理类
+ */
 class Config
 {
     use Single;
+
     protected static array $items = []; // 配置项
     protected string $cachePath; // 缓存路径
     protected array $fileList = []; // 配置文件列表

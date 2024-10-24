@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 查询器类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -24,6 +22,9 @@ use aphp\core\Middleware;
 use aphp\core\Pagination;
 use aphp\core\Single;
 
+/**
+ * 查询构造器
+ */
 class Query implements ArrayAccess, Iterator
 {
     use Single;
@@ -174,10 +175,10 @@ class Query implements ArrayAccess, Iterator
     }
 
     //sql查询
-    public function query(string $sql, array $bind = [], bool $getObj = false)
+    public function query(string $sql, array $bind = [], array $options = [])
     {
         $this->recordLog($sql, $bind);
-        return $this->db->query($sql, $bind, $getObj);
+        return $this->db->query($sql, $bind, $options);
     }
 
     //sql操作
@@ -225,6 +226,7 @@ class Query implements ArrayAccess, Iterator
         $options['distinct'] ??= false;
         $options['sql'] ??= false;
         $options['obj'] ??= false;
+        $options['expire'] ??= -1;
         $params = ['join', 'union', 'group', 'having', 'limit', 'force', 'comment', 'extra', 'using', 'duplicate'];
         foreach ($params as $name) {
             $options[$name] ??= '';
@@ -255,6 +257,13 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
+    // 缓存有效时间(秒)
+    public function cache(int $expire = 0): object
+    {
+        $this->options['expire'] = $expire;
+        return $this;
+    }
+
     //查询多条
     public function select()
     {
@@ -264,7 +273,7 @@ class Query implements ArrayAccess, Iterator
         if ($options['sql']) {
             return $this->getRealSql($sql, $bind);
         }
-        return $this->query($sql, $bind, $options['obj']);
+        return $this->query($sql, $bind, $options);
     }
 
     //分页查询
@@ -283,17 +292,16 @@ class Query implements ArrayAccess, Iterator
         return $this;
     }
 
-    //获取分页属性
-    public function pageAttr(string $type = '')
-    {
-        return !is_null($this->page) ? $this->page->getAttr($type) : '';
-    }
-
-    //获取分页连接html
-    public function pageLink(): string
+    // 分页链接html
+    public function links(): string
     {
         return !is_null($this->page) ? $this->page->getHtml() : '';
+    }
 
+    // 分页属性
+    public function attr(string $type = '')
+    {
+        return !is_null($this->page) ? $this->page->getAttr($type) : '';
     }
 
     //查询单条
@@ -324,7 +332,7 @@ class Query implements ArrayAccess, Iterator
     public function getColumn(string $setting)
     {
         if (preg_match('/^(\w+)\.(\w+)=(\w+)@?(.*)$/', $setting, $match)) {
-            [,$table, $pk, $field, $where] = $match;
+            [, $table, $pk, $field, $where] = $match;
             return $this->table($table)->where($where)->column($field, $pk);
         }
         return false;
@@ -497,6 +505,7 @@ class Query implements ArrayAccess, Iterator
         $options['table'] = $this->options['table'] ?? '';
         $options['where'] = $this->options['where'] ?? [];
         $options['sql'] = $this->options['sql'] ?? false;
+        $options['expire'] = $this->options['expire'] ?? -1;
         $this->options = $options;
         $res = $this->field($type . '(' . $field . ') AS ' . $alias)->find();
         if (is_string($res)) {

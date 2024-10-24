@@ -1,14 +1,16 @@
 <?php
 /*------------------------------------------------------------------
- | 类自动加载 2024-08-13 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
-defined('ROOT_PATH') or die('Access Denied');
+declare(strict_types=1);
+defined('ROOT_PATH') or die('Access Denied'); // 检测常量
 
+/**
+ * 自动加载器
+ */
 class Autoloader
 {
     public static function boot(): void
@@ -18,11 +20,11 @@ class Autoloader
 
     public function autoload(string $class): void
     {
-        $file = strtr(ROOT_PATH . '/' . $class . '.php', '\\', '/'); // 路径
+        $file = strtr(ROOT_PATH . '/' . $class . '.php', '\\', '/');
         if (is_file($file)) {
-            include $file; // 加载
+            include $file; // 加载文件
         }
     }
 }
 
-Autoloader::boot(); // 启动自动加载
+Autoloader::boot(); // 启动加载器

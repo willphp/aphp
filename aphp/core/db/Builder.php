@@ -1,11 +1,9 @@
 <?php
 /*------------------------------------------------------------------
- | 生成器类 2024-08-15 by 无念
- |------------------------------------------------------------------
  | Software: APHP - A PHP TOP Framework
  | Site: https://aphp.top
  |------------------------------------------------------------------
- | CopyRight(C)2020-2024 无念<24203741@qq.com>,All Rights Reserved.
+ | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
 
@@ -14,6 +12,9 @@ namespace aphp\core\db;
 use aphp\core\Single;
 use aphp\core\Tool;
 
+/**
+ * 查询生成器
+ */
 class  Builder
 {
     use Single;
@@ -204,8 +205,8 @@ class  Builder
                     $result[$item] = $val;
                 } else {
                     $key = str_replace('.', '_', $key);
-                    $this->query->bind('data__' . $key.'__', $val);
-                    $result[$item] = ':data__' . $key.'__';
+                    $this->query->bind('data__' . $key . '__', $val);
+                    $result[$item] = ':data__' . $key . '__';
                 }
             }
         }
@@ -226,7 +227,7 @@ class  Builder
         $express = $logic = [];
         $i = 0;
         foreach ($where as $wh) {
-            $i ++;
+            $i++;
             $arg_count = count($wh); // 参数数量
             $whereOr = isset($wh[3]) ? strtoupper($wh[3]) : 'AND'; // 默认逻辑连接符
             if ($arg_count == 1) {
@@ -248,9 +249,9 @@ class  Builder
                     foreach ($fieldList as $field) {
                         $express[$i] = $this->getExpress($field, $value, $op);
                         $logic[$i] = $whereOr;
-                        $i ++;
+                        $i++;
                     }
-                    $logic[$i-1] = 'AND';
+                    $logic[$i - 1] = 'AND';
                 } else {
                     $express[$i] = $this->getExpress($wh[0], $value, $op);
                     $logic[$i] = $whereOr;
@@ -293,11 +294,11 @@ class  Builder
         $logic = array_values($logic);
         $where = '';
         foreach ($express as $k => $v) {
-            $link = isset($logic[$k+1]) ? ' '.$logic[$k].' ' : '';
-            $logic[$k-1] ??= 'AND';
-            $left = ($logic[$k] != 'AND' && $logic[$k-1] == 'AND')  ? '(' : '';
-            $right = ($logic[$k] == 'AND' && $logic[$k-1] != 'AND') ? ')' : '';
-            $where .= $left . $v . $right.$link;
+            $link = isset($logic[$k + 1]) ? ' ' . $logic[$k] . ' ' : '';
+            $logic[$k - 1] ??= 'AND';
+            $left = ($logic[$k] != 'AND' && $logic[$k - 1] == 'AND') ? '(' : '';
+            $right = ($logic[$k] == 'AND' && $logic[$k - 1] != 'AND') ? ')' : '';
+            $where .= $left . $v . $right . $link;
         }
         return $where;
     }

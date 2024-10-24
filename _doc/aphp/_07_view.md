@@ -104,7 +104,8 @@ Powered By __POWERED__ 主题:__THEME__
 {if $id==1:} id=1 {else:} id<>1 {/if}
 {if $id==1:} id=1 {elseif $id==2:} id=2 {else:} id<>1|2 {/if}
 {php $none=''}
-{empty $none:} none {/empty}
+{empty $none:}为空{else:}不为空{/empty}
+{!empty $none:}不为空{/empty}
 ```
 
 #### 偱环语句
@@ -173,15 +174,15 @@ __#POWERED#__ //输出：__POWERED__
 数据为空：
 {empty $list->toArray():}none{/empty}
 偱环输出：
-{foreach $list as $vo}
+{loop $list as $vo}
     {$vo.id}.{$vo.cname}
-{/foreach}
-分页html：{$list->pageLink()}
-总记录数：{$list->pageAttr('total')} 
-当前页码：{$list->pageAttr('current')} 
-开始数：{$list->pageAttr('offset')}
-每页记录数：{$list->pageAttr('page_size')}
-总页数：{$list->pageAttr('page_count')}
+{/loop}
+分页html：{$list->links()}
+总记录数：{$list->attr('total')}
+当前页码：{$list->attr('current')}
+开始数：{$list->attr('offset')}
+每页记录数：{$list->attr('page_size')}
+总页数：{$list->attr('page_count')}
 ```
 
 #### 获取配置
@@ -201,6 +202,7 @@ __#POWERED#__ //输出：__POWERED__
 ```
 {php $vo['ctime']=time()}
 {:date('Y-m-d',$vo['ctime'])} 
+{$vo.ctime|date='Y-m-d'} 
 ```
 
 #### 字符串截取

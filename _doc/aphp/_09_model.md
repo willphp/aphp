@@ -10,7 +10,7 @@ class Cate extends Model
     protected string $table = 'cate'; //表名
     protected string $pk = 'id'; //主键
     
-    //自动格式化时间(create_time字段)
+    //自动格式化(原字段create_time，生成字段_create_time)
     public function getCreateTimeAttr($val, array $data) {
         return date('Y-m-d H:i', $val);
     }
@@ -124,7 +124,7 @@ method      //自定义方法
 ```php
 //格式:'字段', '处理规则', '处理方式', [条件常量], [场景常量]
 protected array $auto = [
-    ['password', 'setPwd', 'method', AT_NOT_NULL, AC_BOTH],    
+    ['password', 'setPwd', 'method', IF_VALUE, AC_BOTH],    
     ['status', '1', 'string', IF_MUST, AC_INSERT],          
     ['add_time', 'time', 'function', 1, 2],     
     ['new_time', 'add_time', 'field', 1, 1],     
