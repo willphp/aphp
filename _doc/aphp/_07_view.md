@@ -10,8 +10,8 @@
 public function index()
 {    
     //view_with('name', 'aphp'); //传值到视图
-    $data = ['id' => 2,'msg' => 'php'];
-    return view()->with($data); //或return view('', $data)
+    $data = ['id' =&gt; 2,'msg' =&gt; 'php'];
+    return view()-&gt;with($data); //或return view('', $data)
 }
 ```
 
@@ -63,7 +63,7 @@ Powered By __POWERED__ 主题:__THEME__
 ```
 {php $hello='hello WillPHP'}
 {php $time=time()}
-{php $list=db('user')->where('status',1)->select()}
+{php $list=db('user')-&gt;where('status',1)-&gt;select()}
 ```
 
 #### 变量输出
@@ -84,7 +84,7 @@ Powered By __POWERED__ 主题:__THEME__
 ```
 {$id|intval}
 {$vo.title|substr=0,10}
-{$list->links()}
+{$list-&gt;links()}
 ```
 
 #### 函数输出
@@ -92,7 +92,7 @@ Powered By __POWERED__ 主题:__THEME__
 ```
 {:date('Y-m-d',$vo['ctime'])} 
 {:url('abc/abc')}
-{:widget('test')->get()}
+{:widget('test')-&gt;get()}
 ```
 
 #### 条件语句
@@ -101,8 +101,8 @@ Powered By __POWERED__ 主题:__THEME__
 {php $id=2}
 {if $id==2 ? '2' : '0'} //三元运算
 {if $id==1 or $id==2:} id=1|2 {/if}
-{if $id==1:} id=1 {else:} id<>1 {/if}
-{if $id==1:} id=1 {elseif $id==2:} id=2 {else:} id<>1|2 {/if}
+{if $id==1:} id=1 {else:} id&lt;&gt;1 {/if}
+{if $id==1:} id=1 {elseif $id==2:} id=2 {else:} id&lt;&gt;1|2 {/if}
 {php $none=''}
 {empty $none:}为空{else:}不为空{/empty}
 {!empty $none:}不为空{/empty}
@@ -111,11 +111,11 @@ Powered By __POWERED__ 主题:__THEME__
 #### 偱环语句
 
 ```
-{php $arr=[['id'=>1,'name'=>'a'],['id'=>2,'name'=>'b']]}
+{php $arr=[['id'=&gt;1,'name'=&gt;'a'],['id'=&gt;2,'name'=&gt;'b']]}
 {foreach $arr as $v} 
 	{$v.id}.{$v.name} |
 {/foreach}
-{foreach $arr[0] as $k=>$v}
+{foreach $arr[0] as $k=&gt;$v}
 	{$k}.{$v} | 
 {/foreach}
 ```
@@ -137,7 +137,7 @@ __#POWERED#__ //输出：__POWERED__
 #### 修改标签，如：
 
 ```
-'regex_literal' => '/{lite}(.*?){\/lite}/s',
+'regex_literal' =&gt; '/{lite}(.*?){\/lite}/s',
 ```
 
 修改后效果：
@@ -152,7 +152,7 @@ __#POWERED#__ //输出：__POWERED__
 
 ```
 //在regex_replace配置中加入{aphp:$变量名}
-'/{\s*aphp:\$var\s*}/i' => '<?php echo $\\1.' aphp'?>',
+'/{\s*aphp:\$var\s*}/i' =&gt; '&lt;?php echo $\\1.' aphp'?&gt;',
 ```
 
 添加后效果：
@@ -162,7 +162,7 @@ __#POWERED#__ //输出：__POWERED__
 {aphp:$hi} //显示 hello aphp
 ```
 
->注意：在regex_replace中 key var { } 是会自动替换成相应配置
+&gt;注意：在regex_replace中 key var { } 是会自动替换成相应配置
 
 ## 开发示例
 
@@ -170,19 +170,19 @@ __#POWERED#__ //输出：__POWERED__
 
 ```
 获取数据：
-{php $list=db('site')->where('id','>',0)->order('id DESC')->paginate(2)}
+{php $list=db('site')-&gt;where('id','&gt;',0)-&gt;order('id DESC')-&gt;paginate(2)}
 数据为空：
-{empty $list->toArray():}none{/empty}
+{empty $list-&gt;toArray():}none{/empty}
 偱环输出：
 {loop $list as $vo}
     {$vo.id}.{$vo.cname}
 {/loop}
-分页html：{$list->links()}
-总记录数：{$list->attr('total')}
-当前页码：{$list->attr('current')}
-开始数：{$list->attr('offset')}
-每页记录数：{$list->attr('page_size')}
-总页数：{$list->attr('page_count')}
+分页html：{$list-&gt;links()}
+总记录数：{$list-&gt;attr('total')}
+当前页码：{$list-&gt;attr('current')}
+开始数：{$list-&gt;attr('offset')}
+每页记录数：{$list-&gt;attr('page_size')}
+总页数：{$list-&gt;attr('page_count')}
 ```
 
 #### 获取配置
@@ -211,3 +211,5 @@ __#POWERED#__ //输出：__POWERED__
 {php $title='hello world'}
 {$title|str_substr=0,5}
 ```
+
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:48:59

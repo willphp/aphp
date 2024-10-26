@@ -1,7 +1,7 @@
 APHP框架开发文档
 ======================================================
 最新文档：https://doc.aphp.top
-下载地址：https://doc.aphp.top/doc/down/id/1.html
+下载地址：https://doc.aphp.top/archive/down_1.html
 ======================================================
 关于框架：aphp/_01_about
 更新日志：aphp/_02_update

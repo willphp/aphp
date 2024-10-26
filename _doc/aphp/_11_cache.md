@@ -5,12 +5,12 @@
 默认`file`缓存，可设置`redis`缓存。配置`config/cache.php`文件：
 
 ```php
-'driver' => 'redis', //默认驱动(支持file,redis)
-'redis' => [
-    'host' => '127.0.0.1',
-    'port' => 6379,
-    'pass' => '123456',
-    'database' => 0,
+'driver' =&gt; 'redis', //默认驱动(支持file,redis)
+'redis' =&gt; [
+    'host' =&gt; '127.0.0.1',
+    'port' =&gt; 6379,
+    'pass' =&gt; '123456',
+    'database' =&gt; 0,
 ],
 ```
 
@@ -25,7 +25,7 @@ cache('t2', date('Y-m-d H:i:s'), 10); //设置10秒更新
 $bool = cache('?test@t1'); //false(检测)
 $t1 = cache('t1'); //获取
 cache('t1', null); //删除
-$t3 = cache_make('t3', fn()=>date('Y-m-d H:i:s'), 20); //获取，不存在则制作
+$t3 = cache_make('t3', fn()=&gt;date('Y-m-d H:i:s'), 20); //获取，不存在则制作
 ```
 
 ### 缓存清理
@@ -64,15 +64,15 @@ class Test extends Widget
 
 ### 部件调用
 
-格式：`widget(名称|应用插件@名称)->get([ID参数], [选项参数])`
+格式：`widget(名称|应用插件@名称)-&gt;get([ID参数], [选项参数])`
 
 ```php
 namespace app\index\controller;
 class Index
     public function index()
     {
-        //widget('test')->refresh(); //刷新部件
-        return widget('test')->get(); //获取缓存时间，刷新后更新        
+        //widget('test')-&gt;refresh(); //刷新部件
+        return widget('test')-&gt;get(); //获取缓存时间，刷新后更新        
     }
 }
 ```
@@ -80,9 +80,11 @@ class Index
 ### 模板调用
 
 ```html
-{:widget('test')->get()}
+{:widget('test')-&gt;get()}
 ```
 
 ### 同步更新
 
 当使用`db`或`model`对表进行更新时，部件表名对应标签(tag)缓存会同步更新。
+
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:51:31

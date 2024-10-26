@@ -21,8 +21,8 @@ class Cate extends Model
 
 ```php
 $cate = model('index.cate'); //跨应用获取
-$cate = model('cate')->find(1); //获取当前模型对象 
-dump($cate->toArray()); //对象转换成数组 
+$cate = model('cate')-&gt;find(1); //获取当前模型对象 
+dump($cate-&gt;toArray()); //对象转换成数组 
 ```
 
 ### 模型属性
@@ -48,8 +48,8 @@ protected string $showError = 'show'; //错误响应show|redirect
 
 ```php
 //前置方法
-protected function _before_insert(array &$data): void {}
-protected function _before_update(array &$data): void {}
+protected function _before_insert(array &amp;$data): void {}
+protected function _before_update(array &amp;$data): void {}
 protected function _before_delete(array $data): void {}
 //后置方法
 protected function _after_insert(array $data): void {}
@@ -60,11 +60,11 @@ protected function _after_delete(array $data): void {}
 使用示例：
 
 ```php
-protected function _before_insert(array &$data): void 
+protected function _before_insert(array &amp;$data): void 
 {
     //验证数据合法或进行其它操作
     if ($data['cid'] == 0) {
-        $this->errors['cid'] = '请选择分类';
+        $this-&gt;errors['cid'] = '请选择分类';
         return;
     }
     $data['status'] = 1; //自动写入字段
@@ -97,14 +97,14 @@ const AC_UPDATE = 3; //更新
 protected array $validate = [    
     ['username', 'required|unique', '用户必须|用户已存在', IF_MUST, AC_INSERT],
     ['password', '/^\w{6,12}$/', '密码6-12位', IF_MUST, AC_INSERT],  
-    ['repassword', 'confirm:password', '确认密码不一致', IF_MUST, AC_INSERT],    
+    ['repassword', 'confirmed:password', '确认密码不一致', IF_MUST, AC_INSERT],    
     ['iq', 'checkIq', 'IQ必须大于100', IF_MUST, AC_BOTH],
     ['email', 'email', '邮箱格式错误', IF_VALUE, AC_BOTH],             
 ];
 //自定义验证规则
 public function checkIq($value, string $field, string $params, array $data): bool
 {
-    return $value > 100;
+    return $value &gt; 100;
 }
 ```
 
@@ -155,31 +155,31 @@ protected array $filter = [
 $cate = model('cate');
 $cate['cname'] = 'cat';
 $cate['sort'] = 1;
-$cate->save();
+$cate-&gt;save();
 
 //或:
-model('cate')->save(['cname'=>'cat', 'sort'=> 2]);
+model('cate')-&gt;save(['cname'=&gt;'cat', 'sort'=&gt; 2]);
 ```
 
 ### 模型修改
 
 ```php
-$cate = model('cate')->find(1);
+$cate = model('cate')-&gt;find(1);
 $cate['cname'] = 'dog';
 $cate['sort'] = 2;
-$cate->save();
+$cate-&gt;save();
 
 //或:
-model('cate')->save(['id'=>1, 'cname'=>'cat', 'sort'=> 2]);
+model('cate')-&gt;save(['id'=&gt;1, 'cname'=&gt;'cat', 'sort'=&gt; 2]);
 ```
 
 ### 模型删除
 
 ```php
-$cate = model('cate')->find(1);
-$cate->del();
+$cate = model('cate')-&gt;find(1);
+$cate-&gt;del();
 //或:
-model('cate')->del(1);
+model('cate')-&gt;del(1);
 ```
 
 ### 错误响应
@@ -194,11 +194,11 @@ protected string $showError = ''; //不做跳转
 当不做跳转时，获取错误：
 
 ```php
-$blog = model('blog')->find(1);
+$blog = model('blog')-&gt;find(1);
 $blog['cid'] = 0;
-$blog->save();
-if ($blog->isFail()) {
-    dump($blog->getError()); // ['cid'=>'请选择分类']
+$blog-&gt;save();
+if ($blog-&gt;isFail()) {
+    dump($blog-&gt;getError()); // ['cid'=&gt;'请选择分类']
 }
 ```
 
@@ -208,19 +208,21 @@ if ($blog->isFail()) {
 
 ```php
 $cate = model('cate');
-$cate->getTable();  //获取模型表名
-$cate->getPk();     //获取表主键
-$cate->getPrefix(); //获取表前缀
-$cate->where('status', 1)->order('id DESC')->paginate(10); //列表分页
-$cate->where('id', 1)->delete(); //删除
-// 过滤 字段 => 值, 允许字段, 禁止字段
-$cate->filterFieldFill(['user' => 'admin'], ['*'], ['user']); //过滤
+$cate-&gt;getTable();  //获取模型表名
+$cate-&gt;getPk();     //获取表主键
+$cate-&gt;getPrefix(); //获取表前缀
+$cate-&gt;where('status', 1)-&gt;order('id DESC')-&gt;paginate(10); //列表分页
+$cate-&gt;where('id', 1)-&gt;delete(); //删除
+// 过滤 字段 =&gt; 值, 允许字段, 禁止字段
+$cate-&gt;filterFieldFill(['user' =&gt; 'admin'], ['*'], ['user']); //过滤
 if (empty($data)) {
-    $this->error('字段禁止修改');
+    $this-&gt;error('字段禁止修改');
 }
 // 验证单个字段
-$errors = $cate->validateField('sort', '11a');
+$errors = $cate-&gt;validateField('sort', '11a');
 if (!empty($errors)) {
-    $this->error(current($errors)); //排序必须为数字
+    $this-&gt;error(current($errors)); //排序必须为数字
 }
 ```
+
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 11:47:50

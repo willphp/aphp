@@ -28,3 +28,5 @@ remove_xss($str); // 清除xss脚本
 get_time_ago(int $time); // 时间多久之前
 str_substr($str, 10); // 字符串截取
 ```
+
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:53:23
