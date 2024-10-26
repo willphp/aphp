@@ -103,10 +103,10 @@
 如获取`admin`应用`test`控制器`index`模板的替换数据：
 
 ```php
-$replace = widget('admin.make_view')-&gt;set('test', ['tpl' =&gt; 'index']);
+$replace = widget('admin.make_view')->set('test', ['tpl' => 'index']);
 ```
 
-&gt; 执行命令后会自动获取替换数据来替换生成模板中的变量
+> 执行命令后会自动获取替换数据来替换生成模板中的变量
 
 ### 应用命令
 
@@ -131,7 +131,7 @@ class Test extends Command
 
 ```
 array(1) {
-  [&quot;id&quot;] =&gt; int(1)
+  ["id"] => int(1)
 }
 app\index\command\Test::cli
 ```
@@ -156,4 +156,4 @@ class Index
 可用`cli`函数来调用命令，格式为：`cli(命令:方法, [应用])`
 
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:52:55
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:07:21

@@ -12,11 +12,11 @@
 $rule = [
     ['email', 'email', '邮箱错误', IF_MUST]
 ];
-$data = ['email' =&gt; 'abc@163'];
+$data = ['email' => 'abc@163'];
 $v=validate($rule, $data);
-$v-&gt;show(); //失败调用Error::_406
-$v-&gt;getError(); //失败返回错误，通过返回空数组
-$v-&gt;isFail(); //失败返回true
+$v->show(); //失败调用Error::_406
+$v->getError(); //失败返回错误，通过返回空数组
+$v->isFail(); //失败返回true
 ```
 
 ### 验证条件
@@ -29,7 +29,7 @@ const IF_ISSET = 4; // 有字段
 const IF_UNSET = 5; // 无字段
 ```
 
-&gt;验证条件可以填写常量或数字，默认为 IF_MUST
+>验证条件可以填写常量或数字，默认为 IF_MUST
 
 ### 内置规则
 
@@ -83,10 +83,10 @@ const IF_UNSET = 5; // 无字段
 |eq:值(=:值)				   |等于 如：=:abc|
 |eq:_[字段]				   |等于字段，如：eq:_password	|
 |neq:10(!=:10)				|不等于|
-|gt:10(&gt;:10)					|大于|
-|egt:10(&gt;=:10)				|大于等于|
-|lt:10(&lt;:10)					|小于|
-|elt:10(&lt;=:10)				|小于等于|
+|gt:10(>:10)					|大于|
+|egt:10(>=:10)				|大于等于|
+|lt:10(<:10)					|小于|
+|elt:10(<=:10)				|小于等于|
 |after:2024-10-01			|是否在某个日期之后|
 |before:2024-10-01			|是否在某个日期之前|
 
@@ -113,14 +113,14 @@ exists:[table.pk,column,where] //存在验证
 
 ```
 //验证user表条件为status=1和group_id=当前分组ID的username是否存在对应值
-exists:user,username,status=1&amp;group_id=_group_id
+exists:user,username,status=1&group_id=_group_id
 ```
 
 ### 特殊规则
 
 ```
 正则表达式，如：/^\d{5,20}$/    
-闭包函数，如：fn($i)=&gt;($i+1)
+闭包函数，如：fn($i)=>($i+1)
 ```
 
 ### 内置函数
@@ -136,13 +136,13 @@ exists:user,username,status=1&amp;group_id=_group_id
 可以在 `config/validate.php` 配置文件中定义自已的正则验证规则，如： 
 
 ```
-'username' =&gt; '/^\w{4,20}$/', //用户4-20位
-'password' =&gt; '/^\w{6,12}$/', //密码6-12位
-'mobile' =&gt; '/^1[3-9]\d{9}$/', //手机号
-'qq' =&gt; '/^[1-9][0-9]{4,12}$/', //QQ号
-'id_card' =&gt; '/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/', //身份证号
-'bankcard' =&gt; '/^[1-9][0-9]{18}$/', //银行卡号
-'money' =&gt; '/^\d+\.?\d*$/', //金额
+'username' => '/^\w{4,20}$/', //用户4-20位
+'password' => '/^\w{6,12}$/', //密码6-12位
+'mobile' => '/^1[3-9]\d{9}$/', //手机号
+'qq' => '/^[1-9][0-9]{4,12}$/', //QQ号
+'id_card' => '/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/', //身份证号
+'bankcard' => '/^[1-9][0-9]{18}$/', //银行卡号
+'money' => '/^\d+\.?\d*$/', //金额
 ```
 
 ###  验证示例 
@@ -153,12 +153,12 @@ $rule = [
     ['pwd', '/^\w{5,12}$/', '密码5~12位', IF_VALUE], //有值时
     ['mobile', 'mobile', '手机号错误', IF_MUST], //必须
     ['email', 'email', '邮箱错误', IF_ISSET], //有字段时
-    ['age', fn($val)=&gt;($val&gt;=18 &amp;&amp; $val&lt;=60), '年龄18~60'],
+    ['age', fn($val)=>($val>=18 && $val<=60), '年龄18~60'],
 ];
-$data = ['name'=&gt;'', 'pwd'=&gt;'123', 'mobile'=&gt;'x12323332333', 'age'=&gt;12];
+$data = ['name'=>'', 'pwd'=>'123', 'mobile'=>'x12323332333', 'age'=>12];
 //$data['email'] = 'aaa';
-$errors = validate($rule, $data, true)-&gt;getError();
+$errors = validate($rule, $data, true)->getError();
 dump($errors);
 ```
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:50:54
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:08:07

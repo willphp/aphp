@@ -14,11 +14,11 @@ class Index
     }
     public function hello(string $name = 'php')
     {
-        return view()-&gt;with('name', $name); //html模板
+        return view()->with('name', $name); //html模板
     }    
     public function api()
     {
-        return ['code'=&gt;200, 'msg'=&gt;'ok', 'data'=&gt;['id'=&gt;1]]; //Json数据
+        return ['code'=>200, 'msg'=>'ok', 'data'=>['id'=>1]]; //Json数据
     }    
 }
 ```
@@ -26,14 +26,14 @@ class Index
 模板 `app/index/view/index/hello.html`：
 
 ```html
-&lt;h1&gt;Hello {$name}!&lt;/h1&gt;
+<h1>Hello {$name}!</h1>
 ```
 
 访问 `index/index` 显示： `Hello world!`
 
-访问 `index/hello?name=aphp` 显示： `&lt;h1&gt;Hello aphp!&lt;/h1&gt;`
+访问 `index/hello?name=aphp` 显示： `<h1>Hello aphp!</h1>`
 
-访问 `index/api` 显示：`{&quot;code&quot;:200,&quot;msg&quot;:&quot;ok&quot;,&quot;data&quot;:{&quot;id&quot;:1}}`
+访问 `index/api` 显示：`{"code":200,"msg":"ok","data":{"id":1}}`
 
 ### 错误处理
 
@@ -50,7 +50,7 @@ class Error
     {
         $msg = $arguments[0] ?? '';
         $code = str_starts_with($name, '_') ? substr($name, 1) : 400;
-        $this-&gt;error($msg, (int)$code);
+        $this->error($msg, (int)$code);
     }
     //自定义404页面
     public function _404(string $msg, array $args = []) {
@@ -63,13 +63,13 @@ class Error
 访问 `abc/abc` 时显示：
 
 ```
-string(17) &quot;abc/abc 不存在&quot;
+string(17) "abc/abc 不存在"
 array(1) {
-  [&quot;path&quot;] =&gt; string(7) &quot;abc/abc&quot;
+  ["path"] => string(7) "abc/abc"
 }
 ```
 
-&gt;更多错误码可查看 config/response.php 中的 code_msg
+>更多错误码可查看 config/response.php 中的 code_msg
 
 ### 跳转模块
 
@@ -88,7 +88,7 @@ class Index
     public function ok()
     {
     	//成功提示(自动判断是否返回Json数据)
-        $this-&gt;success('Successful', 'index/index');
+        $this->success('Successful', 'index/index');
     }
     //error($msg,$code,$url) //失败提示
 	//_jump($info,$status,$url) //合并成功失败提示
@@ -142,31 +142,31 @@ class Index
 可在 `config/filter.php` 中设置`$req`过滤：
 
 ```php
-'auto_filter_req' =&gt; true, //自动过滤req参数
-'except_key' =&gt; [], //排除主键(可写入script脚本)
-'auto' =&gt; [
-    '/^(id|p)$/' =&gt; 'intval', //id分页自动转换数字
-    '/^content(_\w+|\d+)?$/' =&gt; 'remove_xss', //html内容xss过滤
-	'pwd' =&gt; 'intval|md5', //演示字段md5
-	'*' =&gt; 'clear_html', //其他处理(必须放在最后)：去除html代码
+'auto_filter_req' => true, //自动过滤req参数
+'except_key' => [], //排除主键(可写入script脚本)
+'auto' => [
+    '/^(id|p)$/' => 'intval', //id分页自动转换数字
+    '/^content(_\w+|\d+)?$/' => 'remove_xss', //html内容xss过滤
+	'pwd' => 'intval|md5', //演示字段md5
+	'*' => 'clear_html', //其他处理(必须放在最后)：去除html代码
 ],
 ```
 
 请求参数：
 
 ```
-?id=aa&amp;name=&lt;b&gt;bbb&lt;/b&gt;&amp;p=bb
+?id=aa&name=<b>bbb</b>&p=bb
 ```
 
 过滤结果：
 
 ```
 int(0) //id
-string(10) &quot;&lt;b&gt;bbb&lt;/b&gt;&quot;  //name
+string(10) "<b>bbb</b>"  //name
 array(3) {
-  [&quot;id&quot;] =&gt; int(0)
-  [&quot;name&quot;] =&gt; string(3) &quot;bbb&quot;
-  [&quot;p&quot;] =&gt; int(0)
+  ["id"] => int(0)
+  ["name"] => string(3) "bbb"
+  ["p"] => int(0)
 }
 ```
 
@@ -180,8 +180,8 @@ class Index
 {
     protected array $middleware = [ 
         'common', //所有方法
-        'auth' =&gt; ['except' =&gt; ['login']], //除login外
-        'test' =&gt; ['only' =&gt; ['test']], //仅test 
+        'auth' => ['except' => ['login']], //除login外
+        'test' => ['only' => ['test']], //仅test 
     ]; 
     public function index() {           
         return 'index';
@@ -198,14 +198,14 @@ class Index
 可在`config/middleware.php`中配置控制器中间件，如：
 
 ```php
-'controller' =&gt; [
-    'common' =&gt; [
+'controller' => [
+    'common' => [
         \middleware\controller\Filter::class, //过滤
     ],
-    'auth' =&gt; [
+    'auth' => [
         \middleware\controller\Auth::class, //验证
     ],
-    'test' =&gt; [
+    'test' => [
         \middleware\controller\Test::class, //测试
     ],
 ],   
@@ -233,4 +233,4 @@ class Filter
 - index/test 显示：-Filter--Auth--Test-test
 
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:48:08
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:09:13

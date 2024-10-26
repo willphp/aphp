@@ -3,8 +3,8 @@
 #### APHPv5.2.5 2024-10-24
 
 - 新增：email.smtp扩展
-- 新增：扩展调用函数extend()，如：extend('email.smtp')-&gt;send(...)
-- 新增：db()查询支持cahce($expire=0)缓存，如：db('news')-&gt;cahce(10)-&gt;find()
+- 新增：扩展调用函数extend()，如：extend('email.smtp')->send(...)
+- 新增：db()查询支持cahce($expire=0)缓存，如：db('news')->cahce(10)->find()
 
 #### APHPv5.2.3 2024-10-05
 
@@ -31,9 +31,9 @@
 
 #### APHPv5.2.0 2024-08-19
 
-- 优化：重命名条件常量AT_常量为IF_常量，如：AT_MUST =&gt; IF_MUST
-- 优化：重命名场景常量IN_常量为AC_常量， 如：IN_UPDAET =&gt; AC_UPDATE
-- 新增：db()-&gt;getColumn('表名.主键=字段@条件')
+- 优化：重命名条件常量AT_常量为IF_常量，如：AT_MUST => IF_MUST
+- 优化：重命名场景常量IN_常量为AC_常量， 如：IN_UPDAET => AC_UPDATE
+- 新增：db()->getColumn('表名.主键=字段@条件')
 - 新增：模型属性：string $tag 对应相关widget的tag
 - 修复：一些BUG
 
@@ -57,7 +57,7 @@
 - 新增：模型可验证单个字段值`validateField($field, $value)`
 - 修复：未设置操作场景时验证规则不能跳过
 - 加强：模型过滤字段
-- 加强：`Tool::str_to_array`优先处理`&quot;\n&quot;`-0723
+- 加强：`Tool::str_to_array`优先处理`"\n"`-0723
 - 新增：where条件支持多字段如：`where('username|email', '1@qq.com')` -0723
 - 优化：`Tool::str_to_array` 自动转换`[eq]`为`=`和`[or]`为`|` -0726
 
@@ -85,4 +85,4 @@
 - 优化代码
 - 修复BUG
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 12:29:14
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:09:48

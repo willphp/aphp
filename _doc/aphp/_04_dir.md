@@ -62,4 +62,4 @@ www  WEB部署目录
 └─url_rewrite.txt       伪静态规则说明
 ```
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 15:46:42
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:09:30

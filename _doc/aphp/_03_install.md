@@ -52,13 +52,13 @@ location / {
 Apache规则：
 
 ```
-&lt;IfModule mod_rewrite.c&gt;
+<IfModule mod_rewrite.c>
   Options +FollowSymlinks -Multiviews
   RewriteEngine On
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^(.*)$ index.php? [L,E=PATH_INFO:$1]
-&lt;/IfModule&gt;
+</IfModule>
 ```
 
 ### 小技巧
@@ -69,4 +69,4 @@ Apache规则：
 - 可查看`runtime/应用名/log`目录中的日志来确保项目正常运行
 
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-25 12:28:32
+>本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:09:40
