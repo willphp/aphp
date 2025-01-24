@@ -63,7 +63,16 @@ class Template
     {
         $content = preg_replace_callback(
             $regex_include,
-            fn($match) => is_file($viewPath . '/' . $match[1]) ? file_get_contents($viewPath . '/' . $match[1]) : $match[1],
+            function ($match) use ($viewPath) {
+                $content = $match[1];
+                if (is_file($viewPath . '/' . $match[1])) {
+                    $content = file_get_contents($viewPath . '/' . $match[1]);
+                    if (isset($match[3])) {
+                        $content = str_replace('['.$match[2].']', $match[3], $content);
+                    }
+                }
+                return $content;
+            },
             $content
         );
         if (preg_match($regex_include, $content)) {

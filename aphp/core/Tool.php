@@ -102,6 +102,56 @@ class Tool
         return !$delRoot || rmdir($dir);
     }
 
+    // copy directory
+    public static function dir_copy(string $source, string $dest): bool
+    {
+        $dest = self::dir_init($dest);
+        $list = glob($source.'/*');
+        foreach ($list as $v) {
+            $to = $dest.'/'.basename($v);
+            is_file($v) ? copy($v, $to) : self::dir_copy($v, $to);
+        }
+        return true;
+    }
+
+    // move directory
+    public static function dir_move(string $source, string $dest): bool
+    {
+        if (self::dir_copy($source, $dest)) {
+            self::dir_delete($source, true);
+            return true;
+        }
+        return false;
+    }
+
+    // copy file
+    public static function file_copy(string $file, string $dir): bool
+    {
+        $dir = self::dir_init($dir);
+        if (is_file($file)) {
+            copy($file, $dir . '/' . basename($file));
+            return true;
+        }
+        return false;
+    }
+
+    // move file
+    public static function file_move(string $file, string $dir): bool
+    {
+        if (self::file_copy($file, $dir)) {
+            unlink($file);
+            return true;
+        }
+        return false;
+    }
+
+    // get directory glob
+    public static function dir_glob(string $pattern, int $flags = 0, bool $get_base_name = false): array
+    {
+        $list = glob($pattern, $flags);
+        return $get_base_name ? array_map(fn($v) => basename($v), $list) : $list;
+    }
+
     // initialization directory
     public static function dir_init(string $dir, int $auth = 0755): string
     {

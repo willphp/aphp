@@ -20,9 +20,9 @@ class Auth
     {
         if (!session('?user')) {
             if (IS_AJAX) {
-                halt('', 401); // 验证登录
+                halt('', 401); // AJAX未登录提示
             }
-            header('Location:' . url('login/login'));
+            header('Location:' . url('login/login')); // 转跳到登录页面
             exit();
         }
         $next();

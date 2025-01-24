@@ -414,12 +414,13 @@ abstract class Model implements ArrayAccess, Iterator
         return $res;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->autoData[$offset] ?? null;
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->data[$offset] = $value;
         $this->autoData[$offset] = $value;
@@ -431,33 +432,36 @@ abstract class Model implements ArrayAccess, Iterator
         return isset($this->data[$offset]);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if (isset($this->data[$offset])) unset($this->data[$offset]);
         if (isset($this->autoData[$offset])) unset($this->autoData[$offset]);
         if (isset($this->saveData[$offset])) unset($this->saveData[$offset]);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->data);
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return key($this->autoData);
     }
 
-    public function next()
+    public function next(): void
     {
-        return next($this->autoData);
+        next($this->autoData);
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return current($this->autoData);
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return current($this->autoData);

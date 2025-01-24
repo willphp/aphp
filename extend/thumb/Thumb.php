@@ -65,7 +65,7 @@ class Thumb
                 $color = imagecolorallocate($thumbRes, 255, 0, 0);
                 imagecolortransparent($thumbRes, $color);
             }
-            is_dir(dirname($outFile)) or mkdir(dirname($outFile), 0755, true);
+            is_dir(dirname($outFile)) || mkdir(dirname($outFile), 0755, true);
             $result = $funcOut($thumbRes, $outFile);
             if (isset($imgRes)) {
                 imagedestroy($imgRes);

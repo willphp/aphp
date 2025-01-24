@@ -11,7 +11,7 @@ APHP框架(原WillPHP框架)是一个MVC超轻量级PHP8开发框架
 
 ### 环境要求
 
-- PHP 7.4~PHP 8.3
+- PHP 7.4~PHP 8.4
 - MySQL5.6~8.0
 
 ### 开发指南

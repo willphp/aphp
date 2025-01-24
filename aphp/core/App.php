@@ -70,6 +70,10 @@ final class App
                 Cli::run('make:app ' . $app, $app, true);
             }
         }
+        // 加载应用函数
+        if (is_file(APP_PATH.'/common.php')) {
+            include APP_PATH.'/common.php';
+        }
     }
 
     // 解析应用名称
@@ -121,7 +125,7 @@ final class App
 
     // 获取类单例，不存在则创建
     public static function make(string $class, array $args = []): object
-    {
+    {		
         if (empty($args)) {
             return self::$instances[$class] ??= new $class;
         }

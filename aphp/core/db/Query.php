@@ -343,7 +343,7 @@ class Query implements ArrayAccess, Iterator
     {
         $isGetOne = !empty($fields) && $fields != '*' && !str_contains($fields, ','); //是否获取一维数组
         $isClearKey = false;
-        if (!empty($key)) {
+        if (!empty($key) && $fields != '*') {
             $fields = explode(',', $fields);
             if (!in_array($key, $fields)) {
                 $fields[] = $key;
@@ -854,12 +854,13 @@ class Query implements ArrayAccess, Iterator
         return ['table'];
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->data[$offset] ?? null;
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->data[$offset] = $value;
     }
@@ -869,31 +870,34 @@ class Query implements ArrayAccess, Iterator
         return isset($this->data[$offset]);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if (isset($this->data[$offset])) unset($this->data[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return key($this->data);
     }
 
-    public function next()
+    public function next(): void
     {
-        return next($this->data);
+        next($this->data);
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return current($this->data);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->data);
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return current($this->data);

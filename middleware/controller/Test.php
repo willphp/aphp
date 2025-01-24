@@ -12,7 +12,7 @@ namespace middleware\controller;
 use Closure;
 
 /**
- * 测试
+ * 测试trace
  */
 class Test
 {

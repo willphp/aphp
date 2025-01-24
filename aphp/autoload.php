@@ -20,7 +20,8 @@ class Autoloader
 
     public function autoload(string $class): void
     {
-        $file = strtr(ROOT_PATH . '/' . $class . '.php', '\\', '/');
+		
+        $file = strtr(ROOT_PATH . '/' . $class . '.php', '\\', '/');		
         if (is_file($file)) {
             include $file; // 加载文件
         }

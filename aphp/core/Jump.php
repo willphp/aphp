@@ -25,7 +25,7 @@ trait Jump
         $this->_msg($msg, $code, $url);
     }
 
-    protected function _jump($info, $status = 1, string $url = null): void
+    protected function _jump($info, $status = 1, ?string $url = null): void
     {
         if (is_array($info)) {
             [$msg200, $msg400] = $info;
@@ -63,7 +63,7 @@ trait Jump
         exit();
     }
 
-    protected function _json(int $code = 200, string $msg = '', array $data = null, array $extend = []): void
+    protected function _json(int $code = 200, string $msg = '', ?array $data = null, array $extend = []): void
     {
         Response::json($code, $msg, $data, $extend);
     }

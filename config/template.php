@@ -16,7 +16,8 @@ return [
     'var' => '([a-zA-Z_][a-zA-Z0-9_]*)', // 变量名正则
     'key' => '([a-zA-Z0-9_]*)', // 键名正则
     'regex_layout' => '/{\s*layout\s+name\s*=\s*[\"\']?([a-zA-Z0-9_\/]*\.html)[\"\']?\s*}/i', // 布局模板正则
-    'regex_include' => '/{\s*include\s+file\s*=\s*[\"\']?([a-zA-Z0-9_\/]*\.html)[\"\']?\s*}/i', // 模板包含正则
+    'regex_include00' => '/{\s*include\s+file\s*=\s*[\"\']?([a-zA-Z0-9_\/]*\.html)[\"\']?\s*}/i', // 模板包含正则
+    'regex_include' => "/{\s*include\s+file\s*=\s*'([^']*)'(?:\s*(\w+)\s*=\s*'([^']*)')*\s*}/i", // 模板包含正则
     //正则替换
     'regex_replace' => [
         '/__(\w+)__/i' => '<?php echo __\\1__?>', //__常量__

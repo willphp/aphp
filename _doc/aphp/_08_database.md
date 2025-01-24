@@ -94,6 +94,7 @@ where($map); //数组方式
 ```php
 db('news')->order('id ASC,cid DESC'); //支持数组['id'=>'asc','cid'=>'desc']
 db('news')->order('id','desc');
+db('news')->order('[rand]'); // 随机排序
 ```
 
 查询条数：

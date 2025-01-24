@@ -201,7 +201,8 @@ class Route
             }
         }
         $route['params'] = array_merge($arg_path, $arg_query, $params);
-        $route['params'] = array_diff($route['params'], ['']); //filter none
+        //$route['params'] = array_diff($route['params'], ['']); //filter none
+        $route['params'] = array_filter($route['params'], fn($v) => $v !== '');
         $route['path'] = ($route['is_plugin'] ? $route['app'] : $route['app'] . '/') . $route['controller'] . '/' . $route['action'];
         $route['rewrite'] = $route['controller'] . '/' . $route['action'];
         if (!empty($route['params'])) {

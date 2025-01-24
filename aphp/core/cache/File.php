@@ -46,7 +46,7 @@ class File extends Base
     public function del(string $name): bool
     {
         $file = $this->parseName($name);
-        return !is_file($file) or unlink($file);
+        return !is_file($file) || unlink($file);
     }
 
     public function has(string $name): bool

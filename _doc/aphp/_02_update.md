@@ -1,5 +1,21 @@
 ## 更新日志
 
+#### APHPv5.2.8 2024-12-20
+
+- 兼容：PHP8.4.1
+- 修复：若干BUG
+
+#### APHPv5.2.7 2024-11-22
+
+- 模板：支持如：{include file='user/_header.html' title='会员登录'}
+- 新增：Tool类dir_copy,dir_move,file_copy,file_move方法
+- 优化：主题配置从config/site.php中单独分离成一个文件config/theme.php
+
+#### APHPv5.2.6 2024-10-28
+
+- 优化：自动加载应用函数文件 app/应用名/common.php
+- 优化：切换的模板不存在时，则使用default模板
+
 #### APHPv5.2.5 2024-10-24
 
 - 新增：email.smtp扩展

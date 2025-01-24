@@ -208,7 +208,7 @@ class Make extends Command
         }
         if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
             Tool::dir_init(ROOT_PATH . '/route/');
-            file_put_contents(ROOT_PATH . '/route/' . $app . '.php', "<?php\nreturn [\n\t'index' => 'index/index',\n];");
+            file_put_contents(ROOT_PATH . '/route/' . $app . '.php', "<?php\nreturn [];");
         }
         cli('make:ctrl ' . $app . '@index index');
         cli('make:ctrl ' . $app . '@error error');

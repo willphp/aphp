@@ -41,13 +41,16 @@ class View
 
     protected function getTheme(): string
     {
-        $default = Config::init()->get('site.theme', 'default');
+        $default = Config::init()->get('theme.name', 'default');
+        if ($default != 'default' && !is_dir(VIEW_PATH . '/' . $default)) {
+            $default = 'default';
+        }
         $get_var = Config::init()->get('app.theme_get_var');
         if (empty($get_var)) {
             return $default;
         }
         $theme = input('get.' . $get_var, '', 'clear_html');
-        if (!empty($theme)) {
+        if (!empty($theme) && is_dir(VIEW_PATH . '/' . $theme)) {
             Cookie::init()->set('__theme__', $theme);
             return $theme;
         }

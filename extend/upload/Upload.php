@@ -197,20 +197,24 @@ class Upload
     protected function _move(array $file): array
     {
         $file_type = $this->_file_type($this->config['allow_type'], $file['ext']); // 文件类型
+        $file_name = mt_rand(1000, 9999) . time() . '.' . $file['ext']; // 文件名
         $path = $this->config['path'] ?? $file_type; // 文件路径
-        $save_to = Tool::dir_init($this->dir . '/' . $path) . '/' . mt_rand(1000, 9999) . time() . '.' . $file['ext'];
+        $save_to = $real_save_to = Tool::dir_init($this->dir.'/'.$path) . '/' . $file_name;
+        if (isset($this->config['real_path'])) {
+            $real_save_to = Tool::dir_init(ROOT_PATH.'/download/'.$this->config['real_path']) . '/' . $file_name;
+        }
         if (in_array($file['ext'], $this->imageExt)) {
             $save_to = $this->_image_rewrite($file['tmp_name'], $file['ext'], $save_to);
             if ($this->config['image_auto_cut']) {
-                $save_to = $this->_image_auto_cut($save_to); // 图片自动裁剪
+                $save_to = $real_save_to = $this->_image_auto_cut($save_to); // 图片自动裁剪
             }
-        } elseif (!move_uploaded_file($file['tmp_name'], $save_to) && is_file($save_to)) {
+        } elseif (!move_uploaded_file($file['tmp_name'], $real_save_to) && is_file($real_save_to)) {
             $this->error = '文件上传失败';
             return [];
         }
         unset($file['tmp_name']);
         $file['path'] = substr($save_to, strlen(ROOT_PATH . '/public'));
-        $file['size'] = filesize($save_to);
+        $file['size'] = filesize($real_save_to);
         $file['file_type'] = $file_type;
         $file['api_type'] = $this->config['api_type'];
         $file['upload_time'] = time();

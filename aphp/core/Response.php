@@ -88,7 +88,12 @@ class Response
         } else {
             ob_clean();
             header('Content-type: text/html; charset=utf-8');
-            include ROOT_PATH . '/aphp/tpl/response_halt.php';
+            $halt_file = ROOT_PATH . '/aphp/tpl/response_halt.php';
+            if (file_exists($halt_file)) {
+                include $halt_file;
+            } else {
+                echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Error!</title></head><body><h1>):</h1><p style="color:#c00;">' . $msg . '</p><p><a href="javascript:history.back(-1);">Go Back</a></p></body></html>';
+            }
         }
         exit;
     }

@@ -56,7 +56,7 @@ class DebugBar
     public function getHtmlFooter(): string
     {
         $trace = $this->trace;
-        return '<!--Processed in ' . $trace['time'] . ', Memory ' . $trace['memory'] . ', ' . count($this->items['sql']) . ' queries, ' . $trace['total'] . ' files(' . $trace['filesize'] . ')-->';
+        return '<!--By APHP. Processed in ' . $trace['time'] . ', Memory ' . $trace['memory'] . ', ' . count($this->items['sql']) . ' queries, ' . $trace['total'] . ' files(' . $trace['filesize'] . ')-->';
     }
 
     // 格式化文件名(大小)

@@ -62,6 +62,7 @@ return [
             'allow_type' => 'zip', // 允许后缀类型
             'allow_size' => 10485760, // 最大10MB
             'path' => 'zip', // 上传目录
+            'real_path' => 'zip', // 真实上传目录
         ],
         // 上传文档
         'doc' => [

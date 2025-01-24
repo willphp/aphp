@@ -1,13 +1,13 @@
-Nginx:
-
+Nginx(nginx.htaccess):
+======================================
 location / {
     if (!-e $request_filename) {
         rewrite  ^(.*)$  /index.php/$1  last;
     }
 }
-
-Apache:
-
+======================================
+Apache(.htaccess):
+======================================
 <IfModule mod_rewrite.c>
   Options +FollowSymlinks -Multiviews
   RewriteEngine On
@@ -15,5 +15,5 @@ Apache:
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^(.*)$ index.php? [L,E=PATH_INFO:$1]
 </IfModule>
-
+======================================
 
