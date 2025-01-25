@@ -43,10 +43,7 @@ class Cli
                 }
                 Filter::init()->input($args); // 过滤输入
             }
-            //$obj = $isCmd ? call_user_func_array([$class, 'init'], [$isCall]) : App::make($class);
-            $obj = call_user_func_array([$class, 'init'], [$isCall]);
-            log_value($class);
-            log_value($method);
+            $obj = $isCmd ? call_user_func_array([$class, 'init'], [$isCall]) : App::make($class);
             $res = empty($args) ? $obj->$method() : $obj->$method($args);
             if ($isCall) {
                 return $res;
