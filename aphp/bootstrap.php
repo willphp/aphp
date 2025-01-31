@@ -8,7 +8,7 @@
 defined('ROOT_PATH') or exit('Access Denied'); // 安全退出
 define('START_MEMORY', memory_get_usage()); // 开始内存
 define('START_TIME', microtime(true)); // 开始时间
-const __VERSION__ = 'v5.2.8'; // 版本
+const __VERSION__ = 'v5.2.9'; // 版本
 const __POWERED__ = 'APHP ' . __VERSION__; // 版权
 version_compare(PHP_VERSION, '7.4.3', '<') and exit(__POWERED__ . ' requires PHP 7.4.3 or newer.'); // 检测PHP版本
 // 条件常量

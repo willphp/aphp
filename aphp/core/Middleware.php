@@ -34,6 +34,7 @@ class Middleware
             $this->params = $params;
             return $this->exec($middleware);
         }
+
         return true;
     }
 

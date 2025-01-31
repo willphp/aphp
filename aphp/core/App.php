@@ -18,7 +18,7 @@ final class App
     // 单例模式
     private static array $instances = []; // 单例列表
     private string $app; // 应用名称
-    private string $uri; // URI请求
+    public string $uri; // URI请求
 
     private function __construct(array $binds = [])
     {
@@ -34,7 +34,9 @@ final class App
         if (IS_CLI) {
             Cli::run($this->uri, $this->app); // 运行命令行
         } else {
-            Middleware::init()->execute('common'); // 运行全局中间件
+            if ($this->uri != 'error/403?') {
+                Middleware::init()->execute('common'); // 运行全局中间件
+            }
             $res = Route::init($this->app, $this->uri)->dispatch(); // 获取路由转发返回响应
             Response::output($res, APP_TRACE); // 输出响应
         }

@@ -8,21 +8,36 @@
 declare(strict_types=1);
 
 namespace aphp\cli;
-
-use aphp\core\Single;
-
 /**
  * 命令基类
  */
 abstract class Command
 {
-    use Single;
-
-    protected bool $isCall;
+    protected static object $single; // 单例实例
+    protected bool $isCall = false;
 
     private function __construct(bool $isCall = false)
     {
         $this->isCall = $isCall;
+    }
+
+    // 禁止克隆
+    private function __clone()
+    {
+    }
+
+    // 获取单例实例，不存在创建
+    public static function init(...$args): object
+    {
+        static $class = [];
+        if (empty($args)) {
+            $sign = md5(static::class);
+            $class[$sign] ??= new static();
+        } else {
+            $sign = md5(serialize($args) . static::class);
+            $class[$sign] ??= new static(...$args);
+        }
+        return static::$single = $class[$sign];
     }
 
     abstract public function cli();
