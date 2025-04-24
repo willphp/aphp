@@ -49,10 +49,32 @@ class Error
                 echo '<p style="color:#900">[ERROR] ' . $info . ' [' . $data['file'] . ':' . $line . ']<p>';
             }
         } elseif (!in_array($code, [E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED])) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            array_shift($trace);
+            $data['trace'] = $this->format_trace($trace);
             $this->_show_error($data);
         } else {
             Log::init()->write($data['msg'], $data['type']);
         }
+    }
+
+    // 格式化trace
+    protected function format_trace(array $trace): array
+    {
+        $trace = array_reverse($trace);
+        $data = [];
+        foreach ($trace as $i => $frame) {
+            $str = '';
+            if (isset($frame['file'])) {
+                $str .= substr($frame['file'], strlen(ROOT_PATH . '/')) . '(' . $frame['line'] . '): ';
+            }
+            if (isset($frame['class'])) {
+                $str .= $frame['class'] . $frame['type'];
+            }
+            $str .= $frame['function'] . '()';
+            $data[$i] = $str;
+        }
+        return $data;
     }
 
     // 异常处理
@@ -64,6 +86,7 @@ class Error
         $line = $exception->getLine();
         $data = $this->_parse_error($code, $info, $file, $line, true);
         $this->setError($data['msg']);
+        $data['trace'] = $this->format_trace($exception->getTrace());
         $this->_show_error($data);
     }
 

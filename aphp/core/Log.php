@@ -40,7 +40,7 @@ class Log
 
     public function __destruct()
     {
-        if (!empty($this->log)) {
+        if (!empty($this->log) && is_dir($this->dir)) {
             error_log(implode('', $this->log), 3, $this->dir . '/' . date('Y_m_d') . '.log');
         }
     }

@@ -439,8 +439,9 @@ function trace($msg, string $type = 'debug'): void
 
 // =======================加强函数===========================
 // 字符串截取
-function str_substr($str, $length, $start = 0, $suffix = true, $charset = 'utf-8'): string
+function str_substr(string $str, int $length, int $start = 0, bool $suffix = true, string $charset = 'utf-8'): string
 {
+	$str = clear_html($str);
     if (function_exists("mb_substr")) {
         $slice = mb_substr($str, $start, $length, $charset);
     } elseif (function_exists('iconv_substr')) {

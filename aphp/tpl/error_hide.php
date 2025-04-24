@@ -18,7 +18,7 @@
         .error-page-main h2{font-size:24px;color:#a94442;font-weight:400;padding-bottom:20px;border-bottom:1px dashed #999}
         .error-page-main h2 strong{font-size:54px;font-weight:400;margin-right:20px}
         .error-page-head{text-align:right}
-        .error-page-head a{font-size:14px;color:#999}
+        .error-page-head a{font-size:14px;color:#666;}
         .error-page-body{padding-top:10px}
         .error-page-body p{font-size:14px;padding:10px 0;color:#666;line-height:25px}
         .error-page-body h4{font-size:18px;padding:5px 0 20px 0;font-weight:400;color:#a94442}
@@ -36,7 +36,7 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="https://www.aphp.top" title="Aphp框架" target="_blank" rel="noopenner noreferrer">Aphp框架</a>
+                <a href="https://www.aphp.top" title="APHP官网" target="_blank" rel="noopenner noreferrer"><?php echo __POWERED__?></a>
             </div>
             <h2><strong>:(</strong> <?php echo $msg?></h2>
             <div class="error-page-body">

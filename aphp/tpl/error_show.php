@@ -11,6 +11,7 @@
         a{color:#4288ce;text-decoration:none}
         a:hover{text-decoration:none}
         .blue{color:#4288ce}
+        .green{color:#4cae4c}
         .error-page{max-width:580px;padding:10px;margin:60px auto 0;background:#f0f1f3;overflow:hidden;word-break:keep-all;word-wrap:break-word}
         .error-page-container{position:relative;z-index:1}
         .error-page-main{position:relative;background:#f9f9f9;margin:0 auto;-ms-box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;padding:25px 30px 30px 30px}
@@ -18,10 +19,14 @@
         .error-page-main h2{font-size:24px;color:#a94442;font-weight:400;padding-bottom:20px;border-bottom:1px dashed #999}
         .error-page-main h2 strong{font-size:54px;font-weight:400;margin-right:20px}
         .error-page-head{text-align:right}
-        .error-page-head a{font-size:14px;color:#999}
+        .error-page-head a{font-size:14px;color:#666}
         .error-page-body{padding-top:10px}
         .error-page-body p{font-size:14px;padding:10px 0;color:#666;line-height:25px}
-        .error-page-body h4{font-size:18px;padding:5px 0 20px 0;font-weight:400;color:#a94442}
+        .error-page-body .trace {padding: 0 5px;background:#f5f2f0;border:1px dashed #E4E4E4;margin-bottom: 5px;}
+        .error-page-body ol{padding-left:15px}
+        .error-page-body ul{padding:0 0 15px 0;list-style-type: none;}
+        .error-page-body li{font-size:14px;padding: 0 0 5px 0;color:#666;line-height:20px}
+        .error-page-body h4{font-size:18px;padding:5px 0 10px 0;font-weight:400;color:#a94442}
         .error-page-foot{padding:15px 0 25px 0;border-top:1px dashed #999}
         .error-page-foot a{float:right;height:30px;line-height:30px;padding:0 15px;font-size:14px;border:none;margin:0 0 0 5px}
         .error-page-foot a.green{background:#4cae4c;color:#fff}
@@ -36,13 +41,21 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="https://www.aphp.top" title="Aphp框架" target="_blank" rel="noopenner noreferrer">Aphp框架</a>
+                <a href="https://www.aphp.top" title="APHP官网" target="_blank" rel="noopenner noreferrer"><?php echo __POWERED__?></a>
             </div>
             <h2><strong>:(</strong> <?php echo $data['type']?></h2>
             <div class="error-page-body">
-                <p>[<?php echo $data['code']?>]Error in <a href="javascript:;" class="blue" title="<?php echo $data['file']; ?>"><?php echo basename($data['file'])?></a>
+                <p>[<?php echo $data['code']?>]Error in <span class="blue" ><?php echo $data['file']?></span>
                     Line <span class="blue"><?php echo $data['line']?></span>:</p>
                 <h4><?php echo $data['error']?></h4>
+                <div class="trace">
+                <p>Debug Trace:</p>
+                <ul>
+                    <?php foreach ($data['trace'] as $i => $dt):?>
+                    <li>#<?php echo $i?> <?php echo $dt?></li>
+                    <?php endforeach?>
+                </ul>
+                </div>
             </div>
             <div class="error-page-foot">
                 <a href="<?php echo __URL__; ?>" class="green">返回首页</a>

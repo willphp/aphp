@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>欢迎使用{:site('site_title')}</title>
+    <title>{:site('site_title')} - 一鱼PHP框架</title>
     <link rel="shortcut icon" href="__ROOT__/favicon.ico" type="image/x-icon"/>
     <style>
         body,code,dd,div,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,input,legend,li,ol,p,pre,td,textarea,th,ul{margin:0;padding:0}
@@ -24,11 +24,12 @@
         .aphp-page-menu{padding:10px;border-bottom:1px dashed #999}
         .aphp-page-body{}
         .aphp-page-body p{font-size:14px;padding:5px 0;color:#666;line-height:25px}
+        .aphp-page-body .about {padding: 0 5px;background:#f5f2f0;border:1px dashed #E4E4E4;margin-bottom: 5px;}
         .aphp-page-body ol{padding-left:15px}
-        .aphp-page-body ul{padding-left:15px}
-        .aphp-page-body li{font-size:14px;padding:5px 0;color:#666;line-height:20px}
-        .aphp-page-body h4{font-size:15px;padding:10px 0;font-weight:400;}
-        .aphp-page-foot{padding:0 0 10px 0;border-bottom:1px dashed #999}
+        .aphp-page-body ul{padding:0 0 15px 0;list-style-type: none;}
+        .aphp-page-body li{font-size:14px;padding: 0 0 5px 0;color:#666;line-height:20px}
+        .aphp-page-body h4{font-size:15px;padding:10px 0;font-weight:400;color:#333;}
+        .aphp-page-foot{padding:10px 0 10px 0;border-bottom:1px dashed #999}
         .aphp-page-foot a{float:right;height:30px;line-height:30px;padding:0 15px;margin:0;font-size:14px;border:none;margin-left:5px;text-decoration:none}
         .aphp-page-foot a.green{background:#4cae4c;color:#fff}
         .aphp-page-foot a.blue{background:#4288ce;color:#fff}
@@ -44,9 +45,9 @@
     <div class="aphp-page-container">
         <div class="aphp-page-main">
             <div class="aphp-page-head">
-                <a href="https://www.aphp.top" title="aphp官网" target="_blank">APHP框架</a>
+                <a href="https://www.aphp.top" title="APHP官网" target="_blank">__POWERED__</a>
             </div>
-            <h2><strong>Σ( ° △ °|||)︴</strong>欢迎使用__POWERED__</h2>
+            <h2><strong>Σ( ° △ °|||)︴</strong>欢迎使用一鱼PHP框架</h2>
             <div class="aphp-page-foot cl">
                 <a href="https://qm.qq.com/cgi-bin/qm/qr?k=U7SzseDDXSbG9sB1CTEf5U10oFJOKR8-&jump_from=webapi" target="_blank" class="red">Q群:325825297</a>
                 <a href="https://gitee.com/willphp/aphp" target="_blank" class="blue">下载新版</a>
@@ -56,18 +57,23 @@
                 <a href="{:url('index/index')}">首页</a> | <a href="{:url('abc/abc')}">404</a>
             </div>
             <div class="aphp-page-body cl">
-                <p style="color:red;">公告：{:site('site_notice')}</p>
-                <h4>开始使用 <small>[内置文档：查看_doc目录]</small></h4>
-                <ol>
-                    <li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>
-                    <li>[本地]打开<code class="blue">.env</code>文件配置本地数据库</li>
-                    <li>[上线]打开<code class="blue">config/database.php</code>配置服务器数据库</li>
-                    <li>[上线]删除<code class="blue">.env</code>文件或不上传<code class="blue">.env</code>文件</li>
-                </ol>
+                <div class="about">
+                    <p>公告：<span style="color:#c00;">{:site('site_notice')}</span></p>
+                </div>
+                <p>本地文档： <code class="blue">/_doc</code> | 开启调试：<code class="blue">'debug'=&gt;true,</code> | 显示调试栏：<code class="blue">'trace'=&gt;true,</code> </p>
+                <div class="about">
+                    <p>配置数据库：</p>
+                    <ul>
+                        <li>[本地]重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>命今行：<code class="blue">rename env.example.env .env</code></li>
+                        <li>[本地]打开<code class="blue">.env</code>文件配置本地数据库</li>
+                        <li>[上线]打开<code class="blue">config/database.php</code>配置服务器数据库</li>
+                        <li>[上线]删除<code class="blue">.env</code>文件或不上传<code class="blue">.env</code>文件</li>
+                    </ul>
+                </div>
                 <p>时间: {:date('Y-m-d H:i:s')}</p>
             </div>
             <div class="aphp-copyright cl">
-                CopyRight &copy; 2020-{:date('Y')} <a href="https://www.aphp.top" title="aphp官网" target="_blank">aphp.top</a>
+                CopyRight &copy; 2020-{:date('Y')} <a href="https://www.aphp.top" title="APHP官网" target="_blank">aphp.top</a>
                 by 无念
             </div>
         </div>

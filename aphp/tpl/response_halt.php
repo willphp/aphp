@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8"/>
@@ -36,7 +36,7 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="https://www.aphp.top" title="Aphp框架" target="_blank" rel="noopenner noreferrer">Aphp框架</a>
+                <a href="https://www.aphp.top" title="APHP官网" target="_blank" rel="noopenner noreferrer"><?php echo __POWERED__?></a>
             </div>
             <h2><strong>:(</strong> <?php echo $msg?></h2>
             <div class="error-page-body">

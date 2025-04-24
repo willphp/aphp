@@ -36,7 +36,7 @@
     <div class="error-page-container">
         <div class="error-page-main">
             <div class="error-page-head">
-                <a href="https://www.aphp.top" title="Aphp框架" target="_blank" rel="noopenner noreferrer">Aphp框架</a>
+                <a href="https://www.aphp.top" title="APHP官网" target="_blank" rel="noopenner noreferrer">__POWERED__</a>
             </div>
             {if $status==1:}
                 <h2 style="color:#4288ce;"><strong>:)</strong> {$msg}</h2>

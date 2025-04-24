@@ -1,25 +1,10 @@
 ## 表单验证
 
-规则格式：
+一般通来模型来进行自动验证，也可以在控制器进行表单验证。
 
-```
-'表单字段', '验证规则[|...]', '错误提示[|...]', '[验证条件]'
-```
+### 条件常量
 
-示例代码：
-
-```php
-$rule = [
-    ['email', 'email', '邮箱错误', IF_MUST]
-];
-$data = ['email' => 'abc@163'];
-$v=validate($rule, $data);
-$v->show(); //失败调用Error::_406
-$v->getError(); //失败返回错误，通过返回空数组
-$v->isFail(); //失败返回true
-```
-
-### 验证条件
+在设置验证规则时，需要用到以下常量 ：
 
 ```php
 const IF_MUST = 1;  // 必须(默认)
@@ -29,16 +14,24 @@ const IF_ISSET = 4; // 有字段
 const IF_UNSET = 5; // 无字段
 ```
 
->验证条件可以填写常量或数字，默认为 IF_MUST
+### 验证示例
 
-### 内置规则
+```php
+// 验证规则：'表单字段', '验证规则[|...]', '错误提示[|...]', '[条件常量]'
+$rule = [
+    ['email', 'email', '邮箱错误', IF_MUST]
+];
+$data = ['email' => 'abc@163']; // 验证的数据
+$result = validate($rule, $data); // 验证结果
+$result->show(); //失败调用Error::_406
+$result->getError(); //失败返回错误，通过返回空数组
+$result->isFail(); //失败返回true
+```
 
-框架已内置多种验证规则，可直接使用。
+### 验证必填
 
-#### 必填验证
-
-|  规则 |说明   |
-| ------------ | ------------ |
+| 规则 | 说明 |
+| ------ | ------ |
 | required | 必填 |
 | required_if:field,value | 当field值为value时必填 |
 | required_with:field,field... | 任一field有值时必填 |
@@ -46,8 +39,7 @@ const IF_UNSET = 5; // 无字段
 | required_without:field,field... | 任一field无值时必填 |
 | required_without_all:field,field... | 所有field无值时必填 |
 
-
-#### 格式验证
+### 验证格式
 
 | 规则 | 说明 |
 | ---- | --- |
@@ -90,50 +82,43 @@ const IF_UNSET = 5; // 无字段
 |after:2024-10-01			|是否在某个日期之后|
 |before:2024-10-01			|是否在某个日期之前|
 
-验证当前操作有效期（注意不是某个值）：
+### 操作有效期
 
-```
-expire:2024-01-01,2024-10-01	验证当前操作是否在有效日期
-```
-
-图像验证码验证：
-
-```
-captcha     验证码验证
+```php
+expire:2024-01-01,2024-10-01	// 不是验证值
 ```
 
-#### 数据库验证
+### 验证码
 
-```
-unique:[table.pk,column,where] //唯一验证 
-exists:[table.pk,column,where] //存在验证
+```php
+captcha     // 内置验证码扩展验证
 ```
 
-示例：
+### 数据库验证
 
-```
-//验证user表条件为status=1和group_id=当前分组ID的username是否存在对应值
-exists:user,username,status=1&group_id=_group_id
+```php
+unique:[table.pk,column,where] // 唯一(存在时不通过) 
+exists:[table.pk,column,where] // 存在(不存在时不通过)
 ```
 
 ### 特殊规则
 
-```
-正则表达式，如：/^\d{5,20}$/    
-闭包函数，如：fn($i)=>($i+1)
+```php
+/^\d{5,20}$/   // 正则表达式 
+fn($i)=>($i>1) // 闭包函数
 ```
 
 ### 内置函数
 
 可使用自定义函数或PHP内置函数进行验证，如：
 
-```
-使用PHP内置函数：is_numeric
+```php
+is_numeric // PHP内置函数
 ```
 
 ### 自定规则
 
-可以在 `config/validate.php` 配置文件中定义自已的正则验证规则，如： 
+可以在 `config/validate.php` 文件中定义自已的正则验证规则，如： 
 
 ```
 'username' => '/^\w{4,20}$/', //用户4-20位
@@ -149,11 +134,11 @@ exists:user,username,status=1&group_id=_group_id
 
 ```php
 $rule = [
-    ['name', 'required|unique:user.id,name', '必须|用户已存在', IF_VALUE], //有值时
-    ['pwd', '/^\w{5,12}$/', '密码5~12位', IF_VALUE], //有值时
-    ['mobile', 'mobile', '手机号错误', IF_MUST], //必须
-    ['email', 'email', '邮箱错误', IF_ISSET], //有字段时
-    ['age', fn($val)=>($val>=18 && $val<=60), '年龄18~60'],
+    ['name', 'required|unique:user.id,name', 'name必须|name已存在', IF_VALUE], // 有值时
+    ['pwd', '/^\w{5,12}$/', '密码5~12位', IF_VALUE], // 有值时
+    ['mobile', 'mobile', '手机号错误', IF_MUST], // 必须
+    ['email', 'email', '邮箱错误', IF_ISSET], // 有字段时
+    ['age', fn($val)=>($val>=18 && $val<=60), '年龄18~60'], // 必须
 ];
 $data = ['name'=>'', 'pwd'=>'123', 'mobile'=>'x12323332333', 'age'=>12];
 //$data['email'] = 'aaa';
@@ -161,4 +146,6 @@ $errors = validate($rule, $data, true)->getError();
 dump($errors);
 ```
 
->本文档由 [APHP文档系统](https://doc.aphp.top) 生成，文档更新于：2024-10-26 14:08:07
+---
+
+本文档由 [AphpDoc](https://doc.aphp.top) 生成，更新于：2025-04-03 20:29:09
