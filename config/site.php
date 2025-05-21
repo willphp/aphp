@@ -9,9 +9,8 @@
  * 站点配置
  */
 return [
-    'version' => '20250423',
-    'theme' => 'default',
-    'site_title' => '欢迎使用一鱼PHP框架(APHP)',
+    'version' => '20250513',
+    'site_title' => '一鱼PHP框架APHP',
     'site_kw' => '一鱼PHP框架,aphp,PHP框架,MVC框架,php博客',
     'site_desc' => '一个简单易用的轻量级php框架',
     'site_h1' => '一鱼PHP框架',

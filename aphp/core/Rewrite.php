@@ -37,7 +37,7 @@ class Rewrite
                 return $v;
             }
         }
-        return $uri;
+        return trim($uri, '/');
     }
 
     protected function parseRule(string $app): array
@@ -46,9 +46,9 @@ class Rewrite
         $routing = ['just' => [], 'flip' => []];
         $route = file_exists($file) ? include $file : [];
         // 自动重写路由
-        $auto_rewrite = Config::init()->get('route.auto_rewrite', true);
-        if ($auto_rewrite) {
-            $rewrite_rule = Config::init()->get('route.rewrite_rule', []);
+        $is_auto_rewrite = Config::init()->get('route.is_auto_rewrite', true);
+        if ($is_auto_rewrite) {
+            $rewrite_rule = Config::init()->get('route.auto_rewrite_rule', []);
             $route += $rewrite_rule;
         }
         if (empty($route)) {

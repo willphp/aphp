@@ -6,13 +6,10 @@
  | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
-
 namespace middleware\controller;
-
 use Closure;
-
 /**
- * 登录验证
+ * 通用登录验证
  */
 class Auth
 {
@@ -22,7 +19,7 @@ class Auth
             if (IS_AJAX) {
                 halt('', 401); // AJAX未登录提示
             }
-            header('Location:' . url('login/login')); // 转跳到登录页面
+            header('Location:' . url('login/login')); // 转跳到登录页
             exit();
         }
         $next();

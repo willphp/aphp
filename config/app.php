@@ -21,4 +21,5 @@ return [
     'app_multi_theme' => [], // 多主题应用 如：'index'
     'theme_get_var' => '', // 主题切换$_GET变量t 为空关闭切换
     'error_msg' => '页面出错！请稍后再试～', // 关闭Debug后错误提示
+    'app_check_install' => [], // 需要检测是否安装的应用(用于跳转安装界面)
 ];

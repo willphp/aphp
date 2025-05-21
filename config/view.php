@@ -9,7 +9,7 @@
  * 视图配置
  */
 return [
-    'cache' => false, // 是否开启模板缓存
+    'is_cache' => false, // 是否开启模板缓存
     'expire' => 30, // 缓存时间(0,永久)秒
     'suffix' => '.html', // 模板文件后缀
 ];

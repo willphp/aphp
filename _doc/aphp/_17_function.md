@@ -34,4 +34,4 @@ str_substr($str, 10); // 字符串截取
 
 ---
 
-本文档由 [AphpDoc](https://doc.aphp.top) 生成，更新于：2025-04-04 12:54:45
+本文档由 [AphpDoc](https://doc.aphp.top) 生成，更新于：2025-05-04 09:30:12

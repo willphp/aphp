@@ -6,13 +6,10 @@
  | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
-
 namespace middleware\controller;
-
 use Closure;
-
 /**
- * 测试trace
+ * 测试示例
  */
 class Test
 {

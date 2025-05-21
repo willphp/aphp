@@ -34,7 +34,7 @@ class DebugBar
     public function getTrace(): array
     {
         $trace = [];
-        $trace['path'] = Route::init()->getPath();
+        $trace['path'] = Route::init()->get('path');
         $trace['time'] = round((microtime(true) - START_TIME), 4) . ' s';
         $trace['memory'] = Tool::size2kb(memory_get_usage() - START_MEMORY);
         $files = get_included_files();

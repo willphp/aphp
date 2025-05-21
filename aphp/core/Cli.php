@@ -35,16 +35,30 @@ class Cli
             if (!$isCall && !defined('CLI_COMMAND')) {
                 define('CLI_COMMAND', $class . ':' . $method);
             }
-            $args = [];
+            $args = []; // 实参
+            $_param = []; // 形参
             if (empty(!$uri)) {
                 foreach ($uri as $k => $v) {
                     [$k, $v] = split_prefix_name($v, strval($k), ':');
-                    $args[$k] = $v;
+                    if (!str_starts_with($v, '-')) { // 去除形参
+                        $args[$k] = $v;
+                    } else {
+                        $_param[] = $v;
+                    }
                 }
                 Filter::init()->input($args); // 过滤输入
             }
             $obj = $isCmd ? call_user_func_array([$class, 'init'], [$isCall]) : App::make($class);
-            $res = empty($args) ? $obj->$method() : $obj->$method($args);
+            if (empty($args)) {
+                $res = $obj->$method();
+            } else {
+                if (in_array('-p', $_param)) {
+                    $res = call_user_func_array([$obj, $method], $args);
+                } else {
+                    $args = array_merge($args, $_param);
+                    $res = $obj->$method($args);
+                }
+            }
             if ($isCall) {
                 return $res;
             }

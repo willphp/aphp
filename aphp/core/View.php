@@ -28,7 +28,7 @@ class View
 
     private function __construct()
     {
-        $this->route = Route::init()->getRoute();
+        $this->route = Route::init()->get();
         if (Config::init()->get('view.cache', false)) {
             $this->expire = Config::init()->get('view.expire', 0);
         }

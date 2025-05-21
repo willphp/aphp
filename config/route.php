@@ -22,14 +22,14 @@ return [
         ':alpha' => '[a-zA-Z\x7f-\xff0-9-_]+', // alpha
         ':keyword' => '[a-zA-Z\x7f-\xff0-9-%\+]+', // keyword
     ],
-    'empty_jump_to' => false, // 开启空跳转
+    'is_empty_jump' => false, // 是否开启空跳转
     'jump_to' => [
         'class' => 'app\\index\\controller\\Error', // 空控制器
         'action' => 'empty', // 空方法
-        'params' => 'path', // 原路径参数
+        'params' => '_path', // 参数-原路径参数
     ],
-    'auto_rewrite' => true, // 路由自动重写
-    'rewrite_rule' => [
+    'is_auto_rewrite' => true, // 是否开启自动重写
+    'auto_rewrite_rule' => [
         '([a-zA-Z]+)_([0-9]+)' => '${1}/index/p/${2}',
         '([a-zA-Z]+)/([a-zA-Z]+)_([0-9]+)' => '${1}/${2}/id/${3}',
     ],

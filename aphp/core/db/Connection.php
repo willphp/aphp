@@ -118,7 +118,7 @@ class Connection
         if ($expire >= 0) {
             $realSql = empty($bind) ? $sql : $this->getRealSql($sql, $bind); // 获取真实SQL
             $cache_sign = md5($realSql); // 缓存标识
-            return Cache::init()->make('common@widget/' . $options['table'] . '/' . $cache_sign, fn() => $this->get_query($sql, $bind, $options), $expire);
+            return Cache::init()->make('widget/' . $options['table'] . '/' . $cache_sign, fn() => $this->get_query($sql, $bind, $options), $expire);
         }
         return $this->get_query($sql, $bind, $options);
     }

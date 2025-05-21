@@ -340,13 +340,13 @@ function url(string $route = '', array $params = [], string $suffix = '*'): stri
 // 获取当前控制器
 function get_controller(): string
 {
-    return Route::init()->getController();
+    return Route::init()->get('controller');
 }
 
 // 获取当前方法
 function get_action(): string
 {
-    return Route::init()->getAction();
+    return Route::init()->get('action');
 }
 
 // 调用控制器方法
@@ -416,7 +416,10 @@ function extend(string $name, array $args = [])
     if (method_exists($class, $method)) {
         return call_user_func_array([$class, $method], $args);
     }
-    return null;
+    if (class_exists($class)) {
+        return app($class, $args);
+    }
+    return NULL;
 }
 
 // 错误响应输出并中止
@@ -568,7 +571,7 @@ function get_curl(string $url, array $post = [], array $header = [], bool $get_h
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
     }
-    $http = ['Accept: */*', 'Accept-Encoding: gzip,deflate,sdch', 'Accept-Language: zh-CN,zh;q=0.8', 'Connection: close'];
+    $http = ['Accept: */*', 'Accept-Encoding: gzip,deflate,sdch', 'Accept-Language: zh-CN,zh;q=0.8', 'Connection: close', 'X-API-Client: curl'];
     $header = array_merge($http, $header);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
     if ($get_header) {

@@ -15,7 +15,7 @@ return [
             \middleware\controller\Auth::class, // 登录验证
         ],
         'test' => [
-            \middleware\controller\Test::class, // 测试中间件
+            \middleware\controller\Test::class, // 测试示例
         ],
     ],
     // 全局中间件
@@ -25,7 +25,7 @@ return [
     // 框架中间件
     'framework' => [
         'controller_start' => [], // 控制器开始
-        'database_query' => [], // 数据库查询sql
-        'database_execute' => [], // 数据库执行sql
+        'database_query' => [], // 查询sql
+        'database_execute' => [], // 执行sql
     ],
 ];

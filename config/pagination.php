@@ -10,7 +10,7 @@
  */
 return [
     'page_var' => 'p', // 分页$_GET变量
-    'unset_get_var' => ['csrf_token','route'], // 不需要保留的get参数
+    'unset_get_var' => ['csrf_token','_path'], // 不需要保留的get参数
     'page_size' => 10, // 每页显示数量
     'show_num' => 5, // 页面显示页码数量
     'options' => [

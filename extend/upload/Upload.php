@@ -105,6 +105,7 @@ class Upload
         $file = [];
         $file['name'] = $save_name;
         $file['path'] = substr($save_to, strlen(ROOT_PATH . '/public'));
+        $file['url'] = __HOST__.$file['path']; // URL路径 2025-03-31
         $file['size'] = filesize($save_to);
         $file['type'] = $mime;
         $file['ext'] = $ext;
@@ -214,6 +215,7 @@ class Upload
         }
         unset($file['tmp_name']);
         $file['path'] = substr($save_to, strlen(ROOT_PATH . '/public'));
+        $file['url'] = __HOST__.$file['path']; // URL路径 2025-03-31
         $file['size'] = filesize($real_save_to);
         $file['file_type'] = $file_type;
         $file['api_type'] = $this->config['api_type'];

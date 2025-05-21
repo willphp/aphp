@@ -21,7 +21,7 @@ class Filter
     private function __construct()
     {
         $this->except = Config::init()->get('filter.except_field', []);
-        $this->auto = Config::init()->get('filter.auto', []);
+        $this->auto = Config::init()->get('filter.auto_filter', []);
         $this->auto = array_filter($this->auto);
     }
 

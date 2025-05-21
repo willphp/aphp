@@ -44,17 +44,18 @@ GitHub地址： https://github.com/willphp/aphp
 1. 添加站点：域名 已解析到IP的域名或IP:端口 数据库Mysql
 2. 上传并解压安装包到网站目录
 3. 设置—>网站目录-运行目录到`/public`
-4. 设置—>伪静态规则(看`url_rewrite.txt`)
-5. 修改`config/database.php`中数据库配置
-6. 访问域名
-7. 可设置定时任务shell命令：`php aphpcli [应用@]命令类:方法 参数值`
+4. 设置—>伪静态规则
+5. 修改`config/database.php`中的数据库配置
+6. 或重命名`env.example.env`为`.env`并修改其中的数据库配置
+7. 访问域名
+8. 可设置定时任务shell命令：`php aphpcli [应用@]命令类:方法 参数值`
 
 ### phpstudy
 
 1. 创建网站：添加域名，如`www.aphp.io` 勾选创建数据库
 2. 解压安装包到网站目录
 3. 修改网站根目录到`/public`
-4. 设置伪静态规则(看`url_rewrite.txt`)
+4. 设置伪静态规则
 5. 重命名`env.example.env`为`.env`并修改其中数据库配置
 6. 访问`http://www.aphp.io`
 

@@ -38,4 +38,4 @@ App::init(['*' => 'index', 'cp' => 'admin', 'api.aphp.io' => 'api'])->boot();
 
 ---
 
-本文档由 [AphpDoc](https://doc.aphp.top) 生成，更新于：2025-04-01 23:31:55
+本文档由 [AphpDoc](https://doc.aphp.top) 生成，更新于：2025-05-04 09:33:52

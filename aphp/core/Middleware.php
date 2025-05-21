@@ -75,7 +75,7 @@ class Middleware
         if (empty($types)) {
             $middleware = $all;
         } else {
-            $action = Route::init()->getAction();
+            $action = Route::init()->get('action');
             if (isset($types['only']) && in_array($action, $types['only'])) {
                 $middleware = array_merge($middleware, $all);
             }

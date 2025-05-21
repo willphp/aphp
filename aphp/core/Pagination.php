@@ -194,8 +194,9 @@ class Pagination
     private function getCurrentNum(): int
     {
         $currentNum = 1;
-        if (isset($_GET[$this->getVar])) {
-            $currentNum = max(1, intval($_GET[$this->getVar]));
+        $params = Route::init()->get('params');
+        if (isset($params[$this->getVar])) {
+            $currentNum = max(1, intval($params[$this->getVar]));
         }
         return ($this->totalPage > 0) ? min($this->totalPage, $currentNum) : $currentNum;
     }

@@ -84,6 +84,15 @@ abstract class Model implements ArrayAccess, Iterator
         return $this;
     }
 
+    // 设置过滤字段
+    public function filter(array $denyFill = []): Model
+    {
+        if (!empty($denyFill)) {
+            $this->denyFill = array_merge($this->denyFill, $denyFill);
+        }
+        return $this;
+    }
+
     //自动处理对应字段数据
     protected function parseAutoFieldData(array $data): array
     {
@@ -148,9 +157,15 @@ abstract class Model implements ArrayAccess, Iterator
     final public function save(array $data = [])
     {
         $action_scene = $this->getActionScene(); //当前操作
-        $this->saveData = array_merge($this->saveData, $this->filterFieldFill($data)); //1.过滤填充
+        $validate = $this->validate;
+        if (!empty($data)) {
+            $this->saveData = array_merge($this->saveData, $this->filterFieldFill($data)); //1.过滤填充
+        } elseif ($action_scene == AC_UPDATE) {
+            $validate = array_values(array_filter($validate, fn($item) => in_array($item[0], array_keys($this->saveData))));
+            $this->saveData[$this->pk] ??= $this->data[$this->pk] ??= 0;
+        }
         //2.自动验证
-        if (!$this->autoValidate($action_scene)) {
+        if (!empty($validate) && !$this->autoValidate($action_scene, $validate)) {
             return $this->respond();
         }
         //3.自动处理
@@ -191,7 +206,11 @@ abstract class Model implements ArrayAccess, Iterator
             }
         }
         $this->saveData = [];
-        return $res ? $this : false;
+        if (!$res) {
+            $this->errors[] = $action_scene == AC_INSERT ? '添加失败' : '更新失败';
+            return false;
+        }
+        return $this;
     }
 
     //模型操作：删除
@@ -266,10 +285,10 @@ abstract class Model implements ArrayAccess, Iterator
     }
 
     //2.自动验证字段 need_where
-    final public function autoValidate(int $action_scene): bool
+    final public function autoValidate(int $action_scene, array $validate = []): bool
     {
-        if (!empty($this->validate)) {
-            $this->errors = Validate::init($this)->setScene($action_scene)->setWhere($this->_validate_where($this->saveData))->make($this->validate, $this->saveData, $this->isBatch)->getError();
+        if (!empty($validate)) {
+            $this->errors = Validate::init($this)->setScene($action_scene)->setWhere($this->_validate_where($this->saveData))->make($validate, $this->saveData, $this->isBatch)->getError();
             return empty($this->errors);
         }
         return true;
