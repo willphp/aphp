@@ -6,20 +6,25 @@
  | (C)2020-2025 无念<24203741@qq.com>,All Rights Reserved.
  |-----------------------------------------------------------------*/
 declare(strict_types=1);
+
 namespace aphp\core;
+
+use ReflectionException;
 use ReflectionMethod;
-/*
+
+/**
  * 路由类
  */
 class Route
 {
     use Single;
+
     protected array $conf; // 路由配置
     protected array $request; // 路由请求
 
     private function __construct(string $app = '', string $uri = '?')
     {
-        $this->conf = config_get('route');
+        $this->conf = Config::init()->get('route', []);
         $this->request = $this->parseRequest($uri, [], $app);
     }
 
@@ -42,7 +47,7 @@ class Route
         ];
         $param_1 = $param_2 = [];
         if (empty($uri) || $uri == '?') {
-            $uri = $request['controller'].'/'.$request['action'];
+            $uri = $request['controller'] . '/' . $request['action'];
         } elseif (str_contains($uri, '?')) {
             [$uri, $query] = explode('?', $uri, 2);
             parse_str($query, $param_2);
@@ -70,7 +75,7 @@ class Route
         }
         $request['params'] = array_merge($param_1, $param_2, $params);
         $request['params'] = array_filter($request['params'], fn($v) => $v !== '');
-        $request['path'] = $request['app'] . '/'. $request['controller'] . '/' . $request['action'];
+        $request['path'] = $request['app'] . '/' . $request['controller'] . '/' . $request['action'];
         $request['rewrite'] = $request['controller'] . '/' . $request['action'];
         if (!empty($request['params'])) {
             $args_str = http_build_query($request['params']);
@@ -104,6 +109,7 @@ class Route
             if (IS_GET && $view = View::init()->make('', [], true)->toString()) {
                 return $view;
             }
+            $this->conf['is_empty_jump'] ??= false;
             if ($this->conf['is_empty_jump']) {
                 $class = $this->conf['jump_to']['class'] ?? 'app\\index\\controller\\Empty';
                 $action = $this->conf['jump_to']['action'] ?? 'empty';
@@ -167,7 +173,7 @@ class Route
                 }
             }
             return $classAction->invokeArgs($class, $binds);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             $this->error(500, ['path' => $path], $e->getMessage());
         }
         return null;
@@ -177,7 +183,7 @@ class Route
     protected function parseReq(): array
     {
         $req = Request::init()->getRequest();
-        if (config_get('filter.is_filter_req', true)) {
+        if (Config::init()->get('filter.is_filter_req', true)) {
             Filter::init()->input($req);
         }
         return $req;
@@ -220,7 +226,7 @@ class Route
         }
         $clear_suffix = $this->conf['url_clear_suffix'] ?? '.html';
         $uri = !empty($clear_suffix) ? str_replace($clear_suffix, '', $uri) : $uri;
-        [$app, $uri] = parse_app_name($uri, $this->request['app']);
+        [$app, $uri] = name_parse($uri, $this->request['app']);
         $request = $this->parseRequest($uri, $params, $app);
         $url = Rewrite::init($request['app'])->replace($request['rewrite'], true);
         if (str_ends_with($url, '/index')) {

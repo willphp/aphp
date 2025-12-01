@@ -8,9 +8,6 @@
 declare(strict_types=1);
 
 namespace aphp\core\session;
-
-use aphp\core\Tool;
-
 /**
  * 文件驱动Session类
  */
@@ -21,7 +18,7 @@ class File extends Base
 
     public function connect(): void
     {
-        $this->dir = Tool::dir_init(ROOT_PATH . '/runtime/session', 0777);
+        $this->dir = dir_init(ROOT_PATH . '/runtime/session', 0777);
         $this->file = $this->dir . '/' . $this->session_id . '.php';
     }
 

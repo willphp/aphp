@@ -65,8 +65,7 @@
                     <p>配置数据库：</p>
                     <ul>
                         <li>打开<code class="blue">config/database.php</code>进行配置</li>
-                        <li>或重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>(命令：<code class="blue">rename env.example.env .env</code>)后</li>
-                        <li>打开<code class="blue">.env</code>进行配置</li>
+                        <li>或重命名<code class="blue">env.example.env</code>为<code class="blue">.env</code>(命令：<code class="blue">rename env.example.env .env</code>)配置</li>
                     </ul>
                 </div>
                 <p>时间: {:date('Y-m-d H:i:s')}</p>

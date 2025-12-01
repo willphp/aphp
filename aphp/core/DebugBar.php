@@ -36,7 +36,7 @@ class DebugBar
         $trace = [];
         $trace['path'] = Route::init()->get('path');
         $trace['time'] = round((microtime(true) - START_TIME), 4) . ' s';
-        $trace['memory'] = Tool::size2kb(memory_get_usage() - START_MEMORY);
+        $trace['memory'] = size_to_kb(memory_get_usage() - START_MEMORY);
         $files = get_included_files();
         $trace['file'] = array_map(fn(string $file): string => $this->formatFileName($file), $files);
         $trace['total'] = count($files);
@@ -141,7 +141,7 @@ class DebugBar
             '路由参数：' . $this->trace['path'],
             '内存开销：' . $this->trace['memory'] . ' <a href="' . Route::init()->buildUrl('api/clear') . '" style="color:green;">清除缓存</a>',
             '调试统计：文件_' . $this->trace['total'] . '(' . $this->trace['filesize'] . ')' . $totalExtend,
-            '运行时间：' . $this->trace['time'] . ' at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="https://www.aphp.top" style="color:green;" target="_blank" rel="noopenner noreferrer">APHP' . __VERSION__ . '</a>',
+            '运行时间：' . $this->trace['time'] . ' at ' . date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) . ' <a href="https://aphp.top" style="color:green;" target="_blank" rel="noopenner noreferrer">APHP v' . __VERSION__ . '</a>',
         ];
         $list = [];
         foreach ($tabs as $k => $v) {

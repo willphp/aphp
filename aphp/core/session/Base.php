@@ -12,7 +12,6 @@ namespace aphp\core\session;
 use aphp\core\Config;
 use aphp\core\Cookie;
 use aphp\core\Single;
-use aphp\core\Tool;
 
 /**
  * session基类
@@ -29,9 +28,10 @@ abstract class Base
 
     private function __construct()
     {
-        $this->session_name = Config::init()->get('session.name', 'aphp_session');
-        $this->expire = Config::init()->get('session.expire', 86400);
-        $this->session_id = $this->getSessionId();
+        $config = Config::init()->get('session', []);
+        $this->session_name = $config['name'] ?? 'aphp_session';
+        $this->expire = $config['expire'] ?? 86400;
+        $this->session_id = $this->getSessionId($config['domain'] ?? '');
         $this->connect();
         $this->items = $this->read();
         self::$startTime = microtime(true);
@@ -45,19 +45,19 @@ abstract class Base
 
     abstract public function gc(): void;
 
-    private function getSessionId(): string
+    private function getSessionId(string $domain = ''): string
     {
         $id = Cookie::init()->get($this->session_name);
         if (!$id) {
             $id = 'aphp' . md5(microtime(true) . mt_rand(1, 6));
-            Cookie::init()->set($this->session_name, $id, ['expire' => $this->expire, 'domain' => Config::init()->get('session.domain')]);
+            Cookie::init()->set($this->session_name, $id, ['expire' => $this->expire, 'domain' => $domain]);
         }
         return $id;
     }
 
     public function set(string $name, $value = '')
     {
-        return Tool::arr_set($this->items, $name, $value);
+        return arr_set($this->items, $name, $value);
     }
 
     public function setBatch(array $data): void
@@ -69,7 +69,7 @@ abstract class Base
 
     public function get(string $name = '', $default = '')
     {
-        return empty($name) ? $this->items : Tool::arr_get($this->items, $name, $default);
+        return empty($name) ? $this->items : arr_get($this->items, $name, $default);
     }
 
     public function all(): array

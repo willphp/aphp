@@ -24,7 +24,7 @@ abstract class Base
         $this->connect();
     }
 
-    public function make(string $name, ?Closure $closure = null, int $expire = 0)
+    public function make(string $name, ?Closure $closure = null, int $expire = 0): mixed
     {
         $data = $this->get($name);
         if (empty($data) && $closure instanceof Closure) {
@@ -36,9 +36,9 @@ abstract class Base
 
     abstract public function connect(): void;
 
-    abstract public function set(string $name, $value, int $expire = 0): bool;
+    abstract public function set(string $name, mixed $value, int $expire = 0): bool;
 
-    abstract public function get(string $name, $default = null);
+    abstract public function get(string $name, mixed $default = null): mixed;
 
     abstract public function del(string $name): bool;
 

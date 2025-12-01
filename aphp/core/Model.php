@@ -276,10 +276,10 @@ abstract class Model implements ArrayAccess, Iterator
             return [];
         }
         if (!empty($this->allowFill) && $this->allowFill[0] != '*') {
-            $data = Tool::arr_key_filter($data, $this->allowFill, true);
+            $data = arr_key_filter($data, $this->allowFill, true);
         }
         if (!empty($this->denyFill)) {
-            $data = ($this->denyFill[0] == '*') ? [] : Tool::arr_key_filter($data, $this->denyFill);
+            $data = ($this->denyFill[0] == '*') ? [] : arr_key_filter($data, $this->denyFill);
         }
         return $data;
     }
@@ -298,7 +298,7 @@ abstract class Model implements ArrayAccess, Iterator
     public function validateField(string $field, $value): array
     {
         $validate = array_filter($this->validate, fn($v) => $v[0] == $field);
-        return !empty($validate) ? validate($validate, [$field => $value])->getError() : [];
+        return !empty($validate) ? Validate::init()->make($validate, [$field => $value])->getError() : [];
     }
 
     // 验证附加条件设置
@@ -316,10 +316,10 @@ abstract class Model implements ArrayAccess, Iterator
         $data = &$this->saveData;
         foreach ($this->auto as $auto) {
             $auto[2] ??= 'string'; // 处理方式：string field method function
-            $auto[3] ??= IF_ISSET;
+            $auto[3] ??= FV_ISSET;
             $auto[4] ??= AC_BOTH;
-            [$field, $rule, $type, $if, $scene] = $auto;
-            if (check_if_skip($if, $data, $field)) {
+            [$field, $rule, $type, $fv, $scene] = $auto;
+            if (field_validate_skip($fv, $data, $field)) {
                 continue;
             }
             if ($scene > AC_BOTH && $scene != $action_scene) {
@@ -354,10 +354,10 @@ abstract class Model implements ArrayAccess, Iterator
         }
         $data = &$this->saveData;
         foreach ($this->filter as $filter) {
-            $filter[1] ??= IF_ISSET;
+            $filter[1] ??= FV_ISSET;
             $filter[2] ??= AC_BOTH;
             [$field, $if, $scene] = $filter;
-            if (check_if_skip($if, $data, $field)) {
+            if (field_validate_skip($if, $data, $field)) {
                 continue;
             }
             if ($scene == $action_scene || $scene == AC_BOTH) {
@@ -433,8 +433,8 @@ abstract class Model implements ArrayAccess, Iterator
         return $res;
     }
 
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+
+    public function offsetGet($offset): mixed
     {
         return $this->autoData[$offset] ?? null;
     }
@@ -474,14 +474,13 @@ abstract class Model implements ArrayAccess, Iterator
         next($this->autoData);
     }
 
-    #[\ReturnTypeWillChange]
-    public function current()
+    public function current(): mixed
     {
         return current($this->autoData);
     }
 
     #[\ReturnTypeWillChange]
-    public function valid()
+    public function valid(): mixed
     {
         return current($this->autoData);
     }

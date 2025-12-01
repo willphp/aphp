@@ -31,16 +31,13 @@ class Response
                     if ($trace) {
                         $res = DebugBar::init()->appendDebugBar($res);
                     }
-                    if (Config::init()->get('debug_bar.show_html_footer', false)) {
-                        $res .= "\n" . DebugBar::init()->getHtmlFooter();
-                    }
                 } elseif (is_bool($res)) {
                     $res = '';
                 }
-                echo $res;
-                if (IS_CLI && $trace) {
-                    echo "\n[Command: " . CLI_COMMAND . "]\n";
+                if (Config::init()->get('debug_bar.show_html_footer', false)) {
+                    $res .= "\n" . DebugBar::init()->getHtmlFooter();
                 }
+                echo $res;
             }
         } else {
             header('Content-type: application/json; charset=utf-8');
@@ -49,7 +46,7 @@ class Response
         }
     }
 
-    public static function json(int $code, string $msg = '', ?array $data = null, array $extend = []): void
+    public static function json(int $code, string $msg = '', ?array $data = null, array $extend = []): never
     {
         header('Content-type: application/json; charset=utf-8');
         if (empty($msg)) {
@@ -67,7 +64,7 @@ class Response
         exit(json_encode($res, JSON_UNESCAPED_UNICODE));
     }
 
-    public static function halt(string $msg = '', int $code = 400, array $params = []): void
+    public static function halt(string $msg = '', int $code = 400, array $params = []): never
     {
         if (empty($msg)) {
             $msg = Config::init()->get('response.code_msg.' . $code, 'Error...');
@@ -76,10 +73,10 @@ class Response
             $msg = preg_replace_callback('/{\s*\$([a-zA-Z_][a-zA-Z0-9_]*)\s*}/i', fn($v) => $params[$v[1]] ?? '', $msg);
         }
         if (IS_CLI) {
-            die(PHP_EOL . "\033[;36m " . $code . ': ' . $msg . " \x1B[0m\n" . PHP_EOL);
+            exit(PHP_EOL . "\033[;36m " . $code . ': ' . $msg . " \x1B[0m\n" . PHP_EOL); // 命令行
         }
         if (IS_AJAX) {
-            self::json($code, $msg);
+            self::json($code, $msg); // ajax
         }
         $class = '\\app\\' . APP_NAME . '\\controller\\Error';
         if (class_exists($class)) {
@@ -88,14 +85,14 @@ class Response
         } else {
             ob_clean();
             header('Content-type: text/html; charset=utf-8');
-            $halt_file = ROOT_PATH . '/aphp/tpl/response_halt.php';
-            if (file_exists($halt_file)) {
-                include $halt_file;
+            $halt_tpl = ROOT_PATH . '/aphp/tpl/response_halt.php';
+            if (file_exists($halt_tpl)) {
+                include $halt_tpl;
             } else {
-                echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Error!</title></head><body><h1>):</h1><p style="color:#c00;">' . $msg . '</p><p><a href="javascript:history.back(-1);">Go Back</a></p></body></html>';
+                echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Error!</title></head><body><h1>):</h1><p><strong style="color:#c00;">' . $msg . '</strong></p><p><a href="javascript:history.back(-1);">Go Back</a></p></body></html>';
             }
         }
-        exit;
+        exit();
     }
 
     public static function validate(array $errors = []): void

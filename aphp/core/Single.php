@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace aphp\core;
 /**
- * 单例核心类
+ * 单例调用类
  */
 trait Single
 {
@@ -26,11 +26,11 @@ trait Single
     }
 
     // 获取单例实例，不存在创建
-    public static function init(...$args): object
+    public static function init(...$args): static
     {
         static $class = [];
         if (empty($args)) {
-            return static::$single ??= new static();
+            return static::$single ??= new static(); // 无参数时直接返回已有实例
         }
         $sign = md5(serialize($args));
         $class[$sign] ??= new static(...$args);

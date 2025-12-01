@@ -15,14 +15,14 @@ class Filter
 {
     use Single;
 
-    protected array $except;
-    protected array $auto;
+    protected array $exceptField; // 例外字段
+    protected array $filterField; // 过滤字段
 
     private function __construct()
     {
-        $this->except = Config::init()->get('filter.except_field', []);
-        $this->auto = Config::init()->get('filter.auto_filter', []);
-        $this->auto = array_filter($this->auto);
+        $config = Config::init()->get('filter', []);
+        $this->exceptField = $config['except_field'] ?? [];
+        $this->filterField = array_filter($config['filter_field'] ?? []);
     }
 
     public function input(array &$data): void
@@ -38,19 +38,19 @@ class Filter
 
     public function filter_input(&$val, $key): void
     {
-        if (empty($val) || in_array($key, $this->except)) {
+        if (empty($val) || in_array($key, $this->exceptField)) {
             return;
         }
-        if (is_numeric($key) && isset($this->auto['*'])) {
-            $func = $this->auto['*'];
-            $val = str_contains($func, '|') ? run_batch_func($val, $func) : $func(strval($val));
+        if (is_numeric($key) && isset($this->filterField['*'])) {
+            $func = $this->filterField['*'];
+            $val = str_contains($func, '|') ? exec_batch_func($val, $func) : $func(strval($val));
             return;
         }
         $ok_key = [];
-        foreach ($this->auto as $regx => $func) {
+        foreach ($this->filterField as $regx => $func) {
             if ($regx == $key || (str_starts_with($regx, '/') && preg_match($regx, $key)) || (!in_array($key, $ok_key) && $regx == '*')) {
                 $ok_key[] = $key;
-                $val = str_contains($func, '|') ? run_batch_func($val, $func) : $func(strval($val));
+                $val = str_contains($func, '|') ? exec_batch_func($val, $func) : $func(strval($val));
             }
         }
     }

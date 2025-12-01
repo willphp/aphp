@@ -44,6 +44,23 @@ class Pagination
         $this->offset = $this->pageSize * ($this->currentNum - 1);
     }
 
+    public function set(string|array $name, mixed $value = ''): void
+    {
+        if (is_array($name)) {
+            foreach ($name as $k => $v) {
+                if (isset($this->options[$k])) {
+                    $this->options[$k] = $v;
+                }
+            }
+        } elseif (!empty($value)) {
+            if ($name == 'html') {
+                $this->html = $value;
+            } elseif (isset($this->options[$name])) {
+                $this->options[$name] = $value;
+            }
+        }
+    }
+
     public function __toString(): string
     {
         return $this->getHtml();

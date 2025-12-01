@@ -9,6 +9,6 @@ class {{$class}}
     {
         cache_clear();
         cli('clear:runtime {{$app|default='index'}}');
-        $this->success('清除缓存成功', 'index/index');
+        $this->success('清除缓存成功', '[history]');
     }
 }

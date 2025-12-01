@@ -58,10 +58,10 @@ class Validate
         }
         foreach ($validate as $verify) {
             $verify[2] ??= '';
-            $verify[3] ??= ($this->scene == 0) ? IF_MUST : IF_ISSET;
+            $verify[3] ??= ($this->scene == 0) ? FV_MUST : FV_ISSET;
             $verify[4] ??= AC_BOTH;
             [$field, $rules, $tips, $if, $scene] = $verify;
-            if (check_if_skip($if, $data, $field)) {
+            if (field_validate_skip($if, $data, $field)) {
                 continue;
             }
             // 修复未设置场景可跳过BUG
@@ -204,7 +204,7 @@ class Validate
     private function _get_check_data(string $params, array $data): array
     {
         $keys = explode(',', $params);
-        $check = Tool::arr_key_filter($data, $keys, true);
+        $check = arr_key_filter($data, $keys, true);
         return array_map(fn($v) => empty($v) ? 0 : 1, $check);
     }
 

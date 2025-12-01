@@ -21,7 +21,7 @@ location / {
 
 环境要求
 
-- PHP环境：PHP7.4 ~ PHP8.4
+- PHP环境：PHP8.1 ~ PHP8.5
 - 数据库：MySQL5.6 ~ MySQL8.0
 
 宝塔bt安装
@@ -43,3 +43,7 @@ phpstudy安装
 4. 设置伪静态规则
 5. 重命名`env.example.env`为`.env`并修改其中数据库配置
 6. 访问`http://www.aphp.io`
+
+清理缓存
+
+如提示错误，删除runtime目录下所有文件。

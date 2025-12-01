@@ -3,4 +3,4 @@
 use aphp\core\App;
 define('ROOT_PATH', strtr(realpath(__DIR__ . '/'), '\\', '/'));
 require ROOT_PATH . '/aphp/bootstrap.php';
-App::init(['index'])->boot();
+App::init('index')->boot();

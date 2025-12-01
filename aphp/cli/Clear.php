@@ -8,9 +8,6 @@
 declare(strict_types=1);
 
 namespace aphp\cli;
-
-use aphp\core\Tool;
-
 /**
  * 清理命令
  */
@@ -30,10 +27,10 @@ class Clear extends Command
     public function runtime(array $req = []): ?bool
     {
         if (empty($req)) {
-            Tool::dir_delete(ROOT_PATH . '/runtime/');
+            dir_delete(ROOT_PATH . '/runtime/');
         } else {
             foreach ($req as $app) {
-                Tool::dir_delete(ROOT_PATH . '/runtime/' . $app, true);
+                dir_delete(ROOT_PATH . '/runtime/' . $app, true);
             }
         }
         return $this->success();

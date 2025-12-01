@@ -9,23 +9,23 @@ declare(strict_types=1);
 
 namespace aphp\core;
 /**
- * 跳转类
+ * 跳转加强类
  */
 trait Jump
 {
     protected bool $isApi = false;
 
-    protected function success($msg = '', string $url = ''): void
+    protected function success(string|array $msg = '', string $url = ''): void
     {
         $this->_msg($msg, 200, $url);
     }
 
-    protected function error($msg = '', int $code = 400, ?string $url = null): void
+    protected function error(string|array $msg = '', int $code = 400, ?string $url = null): void
     {
         $this->_msg($msg, $code, $url);
     }
 
-    protected function _jump($info, $status = 1, ?string $url = null): void
+    protected function _jump(string|array $info, $status = 1, ?string $url = null): void
     {
         if (is_array($info)) {
             [$msg200, $msg400] = $info;
@@ -37,7 +37,7 @@ trait Jump
         $this->_msg($msg, $code, $url);
     }
 
-    protected function _msg($msg = '', int $code = 400, ?string $url = null): void
+    protected function _msg(string|array $msg = '', int $code = 400, ?string $url = null): never
     {
         if (is_array($msg)) {
             $msg = current($msg);
@@ -56,7 +56,6 @@ trait Jump
         if ($this->isAjax()) {
             $this->_json($code, $msg, null, ['url' => $url]);
         }
-
         $vars = ['status' => ($code < 400) ? 1 : 0, 'msg' => $msg, 'url' => $url];
         header('Content-type: text/html; charset=utf-8');
         echo View::init()->fetch('public/jump', $vars);
@@ -68,7 +67,7 @@ trait Jump
         Response::json($code, $msg, $data, $extend);
     }
 
-    protected function _url(string $url, int $time = 0): void
+    protected function _url(string $url, int $time = 0): never
     {
         $url = Route::init()->buildUrl($url);
         if ($time > 0) {
@@ -102,5 +101,10 @@ trait Jump
     protected function isDelete(): bool
     {
         return IS_DELETE;
+    }
+
+    protected function isCurl(): bool
+    {
+        return IS_CURL;
     }
 }

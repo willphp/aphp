@@ -10,7 +10,7 @@
  */
 return [
     'driver' => 'file', // 支持file,redis驱动
-    'name' => 'aphp_session',
+    'name' => 'aphp_session', // 名称前缀
     'expire' => 86400, //1 day
     'domain'   => '',
     'redis' => [

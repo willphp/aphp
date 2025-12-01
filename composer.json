@@ -1,14 +1,14 @@
 {
   "name": "willphp/aphp",
-  "description": "一鱼PHP框架 APHP Framework",
+  "description": "一鱼APHP框架 A PHP TOP Framework",
   "type": "project",
   "keywords": [
-    "aphp",
+    "APHP",
     "一鱼框架",
     "framework",
     "ORM"
   ],
-  "homepage": "https://www.aphp.top/",
+  "homepage": "https://aphp.top",
   "license": "Apache-2.0",
   "authors": [
     {
@@ -18,7 +18,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": ">=7.4.3",
+    "php": ">=8.1.0",
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-mbstring": "*",
@@ -30,7 +30,7 @@
   "autoload": {
     "psr-4": {
       "app\\": "app",
-      "aphp\\core\\": "aphp/core",
+      "aphp\\": "aphp",
       "middleware\\": "middleware",
       "extend\\": "extend"
     }

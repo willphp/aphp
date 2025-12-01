@@ -14,7 +14,6 @@ namespace aphp\core;
 class Cookie
 {
     use Single;
-
     protected array $items;
     private string $prefix;
     private string $path;

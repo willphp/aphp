@@ -146,7 +146,8 @@ class Connection
             if ($getObj) {
                 return $this->stmt;
             }
-            $res = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+            $pdo_fetch = $options['pdo_fetch'] ?? PDO::FETCH_ASSOC;
+            $res = $this->stmt->fetchAll($pdo_fetch);
             $this->numRows = count($res);
             return $res ?: [];
         } catch (Exception $e) {
@@ -244,7 +245,7 @@ class Connection
         return $this;
     }
 
-    public function __sleep()
+    public function __serialize()
     {
         return ['prefix'];
     }

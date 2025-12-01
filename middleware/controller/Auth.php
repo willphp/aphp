@@ -19,7 +19,7 @@ class Auth
             if (IS_AJAX) {
                 halt('', 401); // AJAX未登录提示
             }
-            header('Location:' . url('login/login')); // 转跳到登录页
+            header('Location:' . url('user/login')); // 转跳到登录页
             exit();
         }
         $next();

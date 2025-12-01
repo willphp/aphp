@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace aphp\core;
 /**
- * 请求类
+ * 请求处理
  */
 class Request
 {
@@ -23,7 +23,7 @@ class Request
         $this->items['post'] = $_POST;
     }
 
-    public function getRequest(string $name = '', $default = null, $batchFunc = [])
+    public function getRequest(string $name = '', mixed $default = null, array|string $batchFunc = []): mixed
     {
         if (empty($name)) {
             $value = array_merge($this->items['get'], $this->items['post']);
@@ -34,20 +34,20 @@ class Request
         } else {
             $name = trim($name, '.');
             if (str_contains($name, '.')) {
-                $value = Tool::arr_get($this->items, $name, $default);
+                $value = arr_get($this->items, $name, $default);
             } else {
                 $value = $this->items['post'][$name] ?? $this->items['get'][$name] ?? $default;
             }
         }
-        return empty($batchFunc) ? $value : run_batch_func($value, $batchFunc);
+        return empty($batchFunc) ? $value : exec_batch_func($value, $batchFunc);
     }
 
-    public function setRequest(string $name, $value = ''): bool
+    public function setRequest(string $name, mixed $value = ''): bool
     {
-        return Tool::arr_set($this->items, $name, $value);
+        return arr_set($this->items, $name, $value);
     }
 
-    public function setGet($name, $value = ''): void
+    public function setGet(string|array $name, mixed $value = ''): void
     {
         if (is_array($name)) {
             $this->items['get'] = array_merge($this->items['get'], $name);
@@ -63,5 +63,30 @@ class Request
             $this->items['get'][$name] = $value;
             $_GET[$name] = $value;
         }
+    }
+
+    public function getHost(string $url = ''): string
+    {
+        if (empty($url)) return $_SERVER['HTTP_HOST'];
+        $arr = parse_url($url);
+        return $arr['host'] ?? '';
+    }
+
+    public function getHeader(string $name = '', string $default = ''): string|array
+    {
+        $server = $_SERVER;
+        if(str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache') && function_exists('apache_response_headers')) {
+            $response = call_user_func('apache_response_headers');
+            $server = array_merge($server, $response);
+        }
+        $headers = [];
+        foreach ($server as $key => $value) {
+            if (str_starts_with($key, 'HTTP_')) {
+                $headers[str_replace(' ', '-', strtolower(str_replace('_', ' ', substr($key, 5))))] = $value;
+            }
+        }
+        if (empty($name)) return $headers;
+        $name = strtolower($name);
+        return $headers[$name] ?? $default;
     }
 }

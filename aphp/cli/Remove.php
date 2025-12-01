@@ -8,9 +8,6 @@
 declare(strict_types=1);
 
 namespace aphp\cli;
-
-use aphp\core\Tool;
-
 /**
  * 删除命令
  */
@@ -59,11 +56,11 @@ class Remove extends Command
         if (empty($name)) {
             return $this->error('参数不足');
         }
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $method = $req[1] ?? '*'; // 方法名
         $dir = $this->getViewPath($app) . '/' . $name;
         if ($method == '*') {
-            $r = Tool::dir_delete($dir, true);
+            $r = dir_delete($dir, true);
         } else {
             $file = $dir . '/' . $method . '.html';
             $r = !file_exists($file) || unlink($file);
@@ -113,9 +110,9 @@ class Remove extends Command
             unlink($route);
         }
         $viewPath = $this->getViewPath($app);
-        Tool::dir_delete($viewPath, true); // 删除视图
+        dir_delete($viewPath, true); // 删除视图
         $dir = ROOT_PATH . '/app/' . $app;
-        $r = Tool::dir_delete($dir, true);
+        $r = dir_delete($dir, true);
         return $r ? $this->success() : $this->error();
     }
 
@@ -139,7 +136,7 @@ class Remove extends Command
         if (!in_array($type, ['controller', 'model', 'view', 'widget', 'command'])) {
             return false;
         }
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $class = name_to_camel($name); // 类名
         $file = ROOT_PATH . '/app/' . $app . '/' . $type . '/' . $class . '.php';
         return !file_exists($file) || unlink($file);

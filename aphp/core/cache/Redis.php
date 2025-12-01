@@ -29,7 +29,7 @@ class Redis extends Base
         $this->redis->select((int)$config['database']);
     }
 
-    public function set(string $name, $value, int $expire = 0): bool
+    public function set(string $name, mixed $value, int $expire = 0): bool
     {
         $name = $this->parseName($name);
         if ($this->redis->set($name, serialize($value))) {
@@ -38,7 +38,7 @@ class Redis extends Base
         return false;
     }
 
-    public function get(string $name, $default = null)
+    public function get(string $name, mixed $default = null): mixed
     {
         $name = $this->parseName($name);
         $data = $this->redis->get($name);
@@ -72,7 +72,7 @@ class Redis extends Base
 
     private function parseName(string $name): string
     {
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         return rtrim($app . '@cache/' . $name, '*');
     }
 }

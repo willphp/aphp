@@ -29,7 +29,7 @@ class View
     private function __construct()
     {
         $this->route = Route::init()->get();
-        if (Config::init()->get('view.cache', false)) {
+        if (Config::init()->get('view.is_cache', false)) {
             $this->expire = Config::init()->get('view.expire', 0);
         }
         if (MULTI_THEME) {
@@ -49,7 +49,7 @@ class View
         if (empty($get_var)) {
             return $default;
         }
-        $theme = input('get.' . $get_var, '', 'clear_html');
+        $theme = Request::init()->getRequest('get.' . $get_var, '', 'clear_html');
         if (!empty($theme) && is_dir(VIEW_PATH . '/' . $theme)) {
             Cookie::init()->set('__theme__', $theme);
             return $theme;
@@ -62,10 +62,10 @@ class View
         if (!empty($vars)) {
             if (is_array($vars)) {
                 foreach ($vars as $k => $v) {
-                    Tool::arr_set(self::$vars, $k, $v);
+                    arr_set(self::$vars, $k, $v);
                 }
             } else {
-                Tool::arr_set(self::$vars, $vars, $value);
+                arr_set(self::$vars, $vars, $value);
             }
         }
         return $this;
@@ -140,11 +140,19 @@ class View
     protected function compile(): object
     {
         if (!is_file($this->compileFile) || (filemtime($this->viewFile) > filemtime($this->compileFile))) {
-            Tool::dir_init(dirname($this->compileFile), 0777);
+            dir_init(dirname($this->compileFile), 0777);
             $content = file_get_contents($this->viewFile);
             $content = Template::compile($content, $this->viewPath);
+            if (config_get('view.is_form_csrf', false)) {
+                $content = $this->csrf($content);
+            }
             file_put_contents($this->compileFile, $content);
         }
         return $this;
+    }
+
+    protected function csrf(string $content): string
+    {
+        return preg_replace('#(<form.*>)#', '$1'.PHP_EOL.'<?php echo csrf_field();?>', $content);
     }
 }

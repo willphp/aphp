@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace aphp\cli;
 
-use aphp\core\Tool;
-
 /**
  * 命令生成
  */
@@ -40,7 +38,7 @@ class Make extends Command
         $name = $req[0] ?? 'index@test'; // 应用@表名
         $tpl = $req[1] ?? '_def'; // 来源模板
         $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $tpl_file = $this->_get_tpl_file($app, $tpl, 'table'); // 获取模板文件
         if (!is_file($tpl_file)) {
             return $this->error('模板文件不存在');
@@ -75,12 +73,11 @@ class Make extends Command
         return $this->error('表创建失败');
     }
 
-
     // 生成控制器：make:ctrl 应用名@控制器名 来源模板 -f 覆盖生成
     public function ctrl(array $req = []): ?bool
     {
         $name = $req[0] ?? 'index@test'; // 应用@控制器名
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $tpl = $req[1] ?? '_def'; // 默认模板
         $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
         $namespace = 'app\\' . $app; // 命名空间
@@ -93,6 +90,7 @@ class Make extends Command
         if (class_exists($widget_class)) {
             $replace = app($widget_class)->set($name); //获取替换数据配置
         }
+        $replace['name'] ??= $name;
         $replace['namespace'] ??= $namespace;
         $replace['class'] ??= $class;
         $replace['app'] ??= $app;
@@ -106,7 +104,7 @@ class Make extends Command
         $pk = $req[1] ?? 'id'; // 主键
         $tpl = $req[2] ?? '_def'; // 模板
         $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $namespace = 'app\\' . $app; // 命名空间
         $class = name_to_camel($name); // 类名
         $tpl_file = $this->_get_tpl_file($app, $tpl, 'model'); // 获取模板文件
@@ -128,7 +126,7 @@ class Make extends Command
     public function view(array $req = []): ?bool
     {
         $name = $req[0] ?? 'index@index'; // 应用@控制器名
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $method = $req[1] ?? $name; // 方法名
         $tpl = $req[2] ?? $method; // 模板
         $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
@@ -147,7 +145,7 @@ class Make extends Command
     public function widget(array $req = []): ?bool
     {
         $name = $req[0] ?? 'index@test'; // 应用@部件名
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $tag = $req[1] ?? $name; // 标签名
         $tpl = $req[2] ?? '_def'; // 模板
         $is_cover = isset($req[3]) && $req[3] == '-f'; // 是否覆盖
@@ -171,7 +169,7 @@ class Make extends Command
     public function command(array $req = []): ?bool
     {
         $name = $req[0] ?? 'index@test'; // 应用@命令名
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $tpl = $req[1] ?? $name; // 模板
         $is_cover = isset($req[2]) && $req[2] == '-f'; // 是否覆盖
         $namespace = 'app\\' . $app; // 命名空间
@@ -198,7 +196,7 @@ class Make extends Command
         if (is_dir($path)) {
             return $this->error($app . ' already exists');
         }
-        Tool::dir_init($path);
+        dir_init($path);
         $build = ['command', 'config', 'controller', 'model', 'widget'];
         foreach ($build as $dir) {
             if (!is_dir($path . '/' . $dir)) mkdir($path . '/' . $dir, 0755, true);
@@ -207,7 +205,7 @@ class Make extends Command
             file_put_contents(ROOT_PATH . '/app/common.php', "<?php\ndeclare(strict_types=1);\n// 自定义函数");
         }
         if (!file_exists(ROOT_PATH . '/route/' . $app . '.php')) {
-            Tool::dir_init(ROOT_PATH . '/route/');
+            dir_init(ROOT_PATH . '/route/');
             file_put_contents(ROOT_PATH . '/route/' . $app . '.php', "<?php\nreturn [];");
         }
         cli('make:ctrl ' . $app . '@index index');
@@ -230,7 +228,7 @@ class Make extends Command
                 $path .= '/default';
             }
         }
-        return Tool::dir_init($path . '/' . $class) . '/' . $method . '.html';
+        return dir_init($path . '/' . $class) . '/' . $method . '.html';
     }
 
     // 获取模板文件
@@ -259,7 +257,7 @@ class Make extends Command
         if (!$is_cover && is_file($make_file)) {
             return $this->error($make . ' File Already Exist');
         }
-        Tool::dir_init(dirname($make_file)); // 生成目录
+        dir_init(dirname($make_file)); // 生成目录
         $content = file_get_contents($tpl_file);
         if (!empty($content)) {
             $this->replace = $replace;

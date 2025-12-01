@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace aphp\core;
 /**
- * 命令行运行类
+ * 命令处理
  */
 class Cli
 {
@@ -32,14 +32,12 @@ class Cli
             }
         }
         if (method_exists($class, $method)) {
-            if (!$isCall && !defined('CLI_COMMAND')) {
-                define('CLI_COMMAND', $class . ':' . $method);
-            }
-            $args = []; // 实参
-            $_param = []; // 形参
+            $args = $_param = []; // 实参与形参
             if (empty(!$uri)) {
                 foreach ($uri as $k => $v) {
-                    [$k, $v] = split_prefix_name($v, strval($k), ':');
+                    if (str_contains($v, ':')) {
+                        [$k, $v] = explode(':', $v, 2);
+                    }
                     if (!str_starts_with($v, '-')) { // 去除形参
                         $args[$k] = $v;
                     } else {

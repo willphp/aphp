@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace extend\upload;
 defined('ROOT_PATH') or die('Access Denied');
 
-use aphp\core\Tool;
 use extend\thumb\Thumb;
 use aphp\core\Config;
 use aphp\core\Single;
@@ -92,7 +91,7 @@ class Upload
         if (empty($save_name)) {
             $save_name = mt_rand(1000, 9999) . time();
         }
-        $save_to = Tool::dir_init($this->dir . '/image') . '/' . $save_name . '.' . $ext;
+        $save_to = dir_init($this->dir . '/image', 0777) . '/' . $save_name . '.' . $ext;
         $save = file_put_contents($save_to, base64_decode($data), LOCK_EX);
         if (!$save) {
             $this->error = '文件上传失败';
@@ -105,7 +104,7 @@ class Upload
         $file = [];
         $file['name'] = $save_name;
         $file['path'] = substr($save_to, strlen(ROOT_PATH . '/public'));
-        $file['url'] = __HOST__.$file['path']; // URL路径 2025-03-31
+        $file['url'] = __HOST__ . $file['path']; // URL路径 2025-03-31
         $file['size'] = filesize($save_to);
         $file['type'] = $mime;
         $file['ext'] = $ext;
@@ -166,7 +165,7 @@ class Upload
             return false;
         }
         if ($file['size'] > $this->config['allow_size']) {
-            $this->error = '文件大小不能超过 ' . Tool::size2kb($this->config['allow_size']);
+            $this->error = '文件大小不能超过 ' . size_to_kb($this->config['allow_size']);
             return false;
         }
         if (in_array($file['ext'], $this->imageExt) && !getimagesize($file['tmp_name'])) {
@@ -200,9 +199,9 @@ class Upload
         $file_type = $this->_file_type($this->config['allow_type'], $file['ext']); // 文件类型
         $file_name = mt_rand(1000, 9999) . time() . '.' . $file['ext']; // 文件名
         $path = $this->config['path'] ?? $file_type; // 文件路径
-        $save_to = $real_save_to = Tool::dir_init($this->dir.'/'.$path) . '/' . $file_name;
+        $save_to = $real_save_to = dir_init($this->dir . '/' . $path, 0777) . '/' . $file_name;
         if (isset($this->config['real_path'])) {
-            $real_save_to = Tool::dir_init(ROOT_PATH.'/download/'.$this->config['real_path']) . '/' . $file_name;
+            $real_save_to = dir_init(ROOT_PATH . '/download/' . $this->config['real_path'], 0777) . '/' . $file_name;
         }
         if (in_array($file['ext'], $this->imageExt)) {
             $save_to = $this->_image_rewrite($file['tmp_name'], $file['ext'], $save_to);
@@ -215,7 +214,7 @@ class Upload
         }
         unset($file['tmp_name']);
         $file['path'] = substr($save_to, strlen(ROOT_PATH . '/public'));
-        $file['url'] = __HOST__.$file['path']; // URL路径 2025-03-31
+        $file['url'] = __HOST__ . $file['path']; // URL路径 2025-03-31
         $file['size'] = filesize($real_save_to);
         $file['file_type'] = $file_type;
         $file['api_type'] = $this->config['api_type'];

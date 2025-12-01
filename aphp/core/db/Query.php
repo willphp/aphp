@@ -329,7 +329,7 @@ class Query implements ArrayAccess, Iterator
     }
 
     //根据设置获取column
-    public function getColumn(string $setting)
+    public function getColumn(string $setting): bool|array
     {
         if (preg_match('/^(\w+)\.(\w+)=(\w+)@?(.*)$/', $setting, $match)) {
             [, $table, $pk, $field, $where] = $match;
@@ -555,6 +555,13 @@ class Query implements ArrayAccess, Iterator
     public function getObj(): object
     {
         $this->options['obj'] = true;
+        return $this;
+    }
+
+    // 设置返回
+    public function setFetch(int $fetch = 2): object
+    {
+        $this->options['pdo_fetch'] = $fetch;
         return $this;
     }
 
@@ -849,7 +856,7 @@ class Query implements ArrayAccess, Iterator
         return $this->data;
     }
 
-    public function __sleep()
+    public function __serialize()
     {
         return ['table'];
     }

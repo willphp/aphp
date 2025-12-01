@@ -8,10 +8,6 @@
 declare(strict_types=1);
 
 namespace aphp\core\cache;
-
-use aphp\core\Config;
-use aphp\core\Tool;
-
 /**
  * 文件缓存类
  */
@@ -21,14 +17,14 @@ class File extends Base
     {
     }
 
-    public function set(string $name, $value, int $expire = 0): bool
+    public function set(string $name, mixed $value, int $expire = 0): bool
     {
         $file = $this->parseName($name, true);
         $content = sprintf("%010d", $expire) . json_encode($value);
         return (bool)file_put_contents($file, $content);
     }
 
-    public function get(string $name, $default = null)
+    public function get(string $name, mixed $default = null): mixed
     {
         $file = $this->parseName($name);
         if (!is_file($file) || !is_writable($file)) {
@@ -56,35 +52,33 @@ class File extends Base
 
     public function flush(string $path = ''): bool
     {
-        //clear all
+        // 清除当前应用
+        if (empty($path)) {
+            return dir_delete(ROOT_PATH . '/runtime/' . APP_NAME . '/cache');
+        }
+        // 清除所有应用
         if ($path == '*') {
-            $appList = Config::init()->get('app.app_list', []);
-            $appList[] = 'common';
-            foreach ($appList as $app) {
-                Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache');
+            $dirs = glob(ROOT_PATH . '/runtime/*', GLOB_ONLYDIR);
+            foreach ($dirs as $dir) {
+                dir_delete($dir . '/cache');
             }
             return true;
         }
-        //clear current app
-        if (empty($path)) {
-            return Tool::dir_delete(ROOT_PATH . '/runtime/' . APP_NAME . '/cache');
-        }
-        [$app, $path] = parse_app_name($path);
+        // 清除指定应用中指定标识
+        [$app, $path] = name_parse($path, APP_NAME);
         if ($path == '*') {
-            //clear app
-            return Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache');
+            return dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache');
         }
         $path = rtrim($path, '*');
-        //clear path
-        return Tool::dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache/' . $path, true);
+        return dir_delete(ROOT_PATH . '/runtime/' . $app . '/cache/' . $path, true);
     }
 
     private function parseName(string $name, bool $dirMake = false): string
     {
-        [$app, $name] = parse_app_name($name);
+        [$app, $name] = name_parse($name, APP_NAME);
         $file = ROOT_PATH . '/runtime/' . $app . '/cache/' . $name . '.php';
         if ($dirMake) {
-            Tool::dir_init(dirname($file), 0777);
+            dir_init(dirname($file), 0777);
         }
         return $file;
     }

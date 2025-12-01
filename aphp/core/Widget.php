@@ -28,10 +28,10 @@ abstract class Widget
     }
 
     // 设置缓存
-    abstract public function set($id = '', array $options = []);
+    abstract public function set(string|int $id = '', array $options = []);
 
     // 获取缓存
-    public function get($id = '', array $options = [])
+    public function get(string|int $id = '', array $options = [])
     {
         $name = $id;
         if (!empty($options)) {

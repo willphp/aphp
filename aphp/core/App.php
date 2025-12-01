@@ -9,22 +9,22 @@ declare(strict_types=1);
 
 namespace aphp\core;
 /**
- * 框架核心类
+ * 应用核心类
  */
-final class App
+class App
 {
     use Single;
 
-    // 单例模式
     private static array $instances = []; // 单例列表
     private string $app; // 应用名称
-    public string $uri; // URI请求
+    private string $uri; // URI请求
 
-    private function __construct(array $binds = [])
+    // 初始化
+    private function __construct(string|array $bind = '')
     {
-        $this->app = $this->parseName($binds); // 解析名称
+        $this->app = $this->parseName($bind); // 解析应用名称
         $this->uri = IS_CLI ? $this->getCliUri() : $this->getHttpUri(); // 获取请求URI
-        $this->initConst($this->app); // 初始化常量
+        $this->initApp($this->app); // 应用初始化
         Error::init(); // 初始化错误处理
     }
 
@@ -42,27 +42,27 @@ final class App
         }
     }
 
-    private function initConst(string $app): void
+    // 初始化应用
+    private function initApp(string $app): void
     {
-        define('APP_NAME', $app);
-        define('APP_PATH', ROOT_PATH . '/app/' . $app);
-        define('RUNTIME_PATH', ROOT_PATH . '/runtime/' . $app);
-        // 加载配置
-        $config = Config::init([ROOT_PATH . '/config', APP_PATH . '/config', ROOT_PATH . '/.env'])->get('app', []);
-        date_default_timezone_set($config['default_timezone'] ?? 'PRC');
-        define('APP_DEBUG', (bool)($config['debug'] ?? false));
-        define('APP_TRACE', (bool)($config['trace'] ?? false));
-        define('URL_REWRITE', (bool)($config['url_rewrite'] ?? false));
-        define('IS_API', !empty($config['app_api']) && in_array($app, $config['app_api'], true));
-        define('VIEW_PATH', !empty($config['app_view_path'][$app]) ? ROOT_PATH . '/' . $config['app_view_path'][$app] : APP_PATH . '/view');
-        define('MULTI_THEME', !empty($config['app_multi_theme']) && in_array($app, $config['app_multi_theme'], true));
+        define('APP_NAME', $app); // 应用名称
+        define('APP_PATH', ROOT_PATH . '/app/' . $app); // 应用路径
+        define('RUNTIME_PATH', ROOT_PATH . '/runtime/' . $app); // 应用运行路径
+        $config = Config::init([ROOT_PATH . '/config', APP_PATH . '/config', ROOT_PATH . '/.env'])->get('app'); // 加载配置获取app
+        date_default_timezone_set($config['default_timezone'] ?? 'PRC'); // 设置时区
+        define('APP_DEBUG', (bool)($config['debug'] ?? false)); // 调试模式
+        define('APP_TRACE', (bool)($config['trace'] ?? false)); // 调试栏
+        define('URL_REWRITE', (bool)($config['url_rewrite'] ?? false)); // URL重写(伪静态)
+        define('IS_API', !empty($config['app_api']) && in_array($app, $config['app_api'], true)); // 是否为API
+        define('VIEW_PATH', !empty($config['app_view_path'][$app]) ? ROOT_PATH . '/' . $config['app_view_path'][$app] : APP_PATH . '/view'); // 模板路径
+        define('MULTI_THEME', !empty($config['app_multi_theme']) && in_array($app, $config['app_multi_theme'], true)); // 是否多主题
         if (!IS_CLI) {
+            $_SERVER['SCRIPT_NAME'] ??= '';
             if (!empty($_SERVER['PATH_INFO'])) {
                 $_SERVER['SCRIPT_NAME'] = str_replace($_SERVER['PATH_INFO'], '', $_SERVER['SCRIPT_NAME']);
             }
             $_SERVER['HTTP_HOST'] ??= 'localhost';
             define('__HOST__', (IS_HTTPS ? 'https://' : 'http://') . $_SERVER['HTTP_HOST']);
-            $_SERVER['SCRIPT_NAME'] ??= '';
             define('__WEB__', URL_REWRITE ? str_replace('/index.php', '', $_SERVER['SCRIPT_NAME']) : $_SERVER['SCRIPT_NAME']);
             define('__URL__', __HOST__ . __WEB__);
             define('__HISTORY__', $_SERVER['HTTP_REFERER'] ?? '');
@@ -74,28 +74,40 @@ final class App
                 Cli::run('make:app ' . $app, $app, true);
             }
         }
-        if (is_file(APP_PATH.'/common.php')) include APP_PATH.'/common.php'; // 加载应用函数
+        is_file(APP_PATH . '/common.php') && require APP_PATH . '/common.php'; // 加载应用自定义函数
+    }
+
+    // 解析应用名称
+    private function parseName(string|array $bind = ''): string
+    {
+        if (empty($bind)) {
+            $app = basename($_SERVER['SCRIPT_FILENAME'] ?? 'index', '.php');
+        } elseif (is_string($bind)) {
+            $app = $bind;
+        } elseif (count($bind) === 1) {
+            $app = current($bind);
+        } else {
+            $host = $_SERVER['HTTP_HOST'] ?? '';
+            $subdomain = ($host !== '') ? strtolower(explode('.', $host, 2)[0]) : '';
+            $app = $bind[$host] ?? $bind[$subdomain] ?? current($bind);
+        }
+        return preg_match('/^[A-Za-z]+$/', $app) ? strtolower($app) : 'index';
     }
 
     // 获取cli请求URI
     private function getCliUri(): string
     {
-        if (empty($_SERVER['argv'])) {
-            return '';
+        array_shift($_SERVER['argv']);
+        if (isset($_SERVER['argv'][0])) {
+            $cmd = trim(strtolower($_SERVER['argv'][0]), '@');
+            if (str_contains($cmd, '@')) {
+                [$app, $cmd] = explode('@', $cmd, 2);
+                $this->app = $app;
+            }
+            $_SERVER['argv'][0] = $cmd;
+            return implode(' ', $_SERVER['argv']);
         }
-        $args = array_slice($_SERVER['argv'], 1);
-        if (empty($args)) {
-            return '';
-        }
-        $firstArg = strtolower(trim($args[0]));
-        if (str_contains($firstArg, '@')) {
-            [$app, $command] = explode('@', $firstArg, 2);
-            $this->app = trim($app);
-            $args[0] = trim($command);
-        } else {
-            $args[0] = $firstArg;
-        }
-        return implode(' ', array_filter($args, 'trim'));
+        return '';
     }
 
     // 获取http请求URI
@@ -120,27 +132,9 @@ final class App
         return $uri . '?' . $query;
     }
 
-    // 解析应用名称
-    private function parseName(array $binds = []): string
-    {
-        $default = 'index';
-        if (empty($binds)) {
-            return basename($_SERVER['SCRIPT_FILENAME'] ?? $default, '.php');
-        }
-        if (count($binds) === 1) {
-            return current($binds);
-        }
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        if ($host !== '') {
-            $subdomain = strtolower(explode('.', $host, 2)[0]);
-            return $binds[$host] ?? $binds[$subdomain] ?? current($binds);
-        }
-        return current($binds);
-    }
-
     // 获取类单例，不存在则创建
     public static function make(string $class, array $args = []): object
-    {		
+    {
         if (empty($args)) {
             return self::$instances[$class] ??= new $class;
         }

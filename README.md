@@ -12,28 +12,18 @@
 
 ### 环境要求
 
-- PHP环境：PHP7.4 ~ PHP8.4
+- PHP环境：PHP8.1 ~ PHP8.5
 - 数据库：MySQL5.6 ~ MySQL8.0
 
-### 开发文档
+### 相关文档
 
-内置文档：查看`_doc`目录
+开发文档与更新日志： [https://doc.aphp.top](https://doc.aphp.top)
 
-在线文档： [https://doc.aphp.top](https://doc.aphp.top)
-
-### 更新日志
-
-内置文档：`_doc/aphp/_02_update.md`
-
-### 下载地址
+### 仓库地址
 
 Gitee地址： https://gitee.com/willphp/aphp
 
 GitHub地址： https://github.com/willphp/aphp
-
-### 安装指南
-
-下载压缩包解压到网站环境目录，设置运行目录至 `/public` ，再配置 `伪静态` 规则。
 
 ### 环境推荐
 
@@ -44,7 +34,7 @@ GitHub地址： https://github.com/willphp/aphp
 1. 添加站点：域名 已解析到IP的域名或IP:端口 数据库Mysql
 2. 上传并解压安装包到网站目录
 3. 设置—>网站目录-运行目录到`/public`
-4. 设置—>伪静态规则
+4. 设置—>`伪静态`规则
 5. 修改`config/database.php`中的数据库配置
 6. 或重命名`env.example.env`为`.env`并修改其中的数据库配置
 7. 访问域名
@@ -52,12 +42,12 @@ GitHub地址： https://github.com/willphp/aphp
 
 ### phpstudy
 
-1. 创建网站：添加域名，如`www.aphp.io` 勾选创建数据库
+1. 创建网站：添加域名，如`www.aphp.to` 勾选创建数据库
 2. 解压安装包到网站目录
 3. 修改网站根目录到`/public`
-4. 设置伪静态规则
+4. 设置`伪静态`规则
 5. 重命名`env.example.env`为`.env`并修改其中数据库配置
-6. 访问`http://www.aphp.io`
+6. 访问`http://www.aphp.to`
 
 ### 伪静态规则
 

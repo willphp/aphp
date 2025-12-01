@@ -25,7 +25,7 @@ class Rewrite
 
     public function replace(string $uri, bool $flip = false): string
     {
-        $route = $flip ? $this->rule['flip'] : $this->rule['just'];
+        $route = $flip ? $this->rule['flip'] : $this->rule['keep'];
         if (isset($route[$uri])) {
             return $route[$uri];
         }
@@ -43,7 +43,7 @@ class Rewrite
     protected function parseRule(string $app): array
     {
         $file = ROOT_PATH . '/route/' . $app . '.php';
-        $routing = ['just' => [], 'flip' => []];
+        $routing = ['keep' => [], 'flip' => []];
         $route = file_exists($file) ? include $file : [];
         // 自动重写路由
         $is_auto_rewrite = Config::init()->get('route.is_auto_rewrite', true);
@@ -62,9 +62,9 @@ class Rewrite
                 $k = str_replace($aliasKey, $aliasVal, $k);
             }
             $k = trim(strtolower($k), '/');
-            $routing['just'][$k] = trim(strtolower($v), '/');
+            $routing['keep'][$k] = trim(strtolower($v), '/');
         }
-        $flip = array_flip($routing['just']);
+        $flip = array_flip($routing['keep']);
         foreach ($flip as $k => $v) {
             if (preg_match_all('/\(.*?\)/i', $v, $res)) {
                 $pattern = array_map(fn(int $n): string => '/\$\{' . $n . '\}/i', range(1, count($res[0])));

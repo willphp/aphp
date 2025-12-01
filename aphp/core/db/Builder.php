@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace aphp\core\db;
 
 use aphp\core\Single;
-use aphp\core\Tool;
 
 /**
  * 查询生成器
@@ -141,7 +140,7 @@ class  Builder
         $insertFields = $values = [];
         foreach ($dataSet as $data) {
             if (is_array($fields)) {
-                $data = Tool::arr_key_filter($data, $fields, true);
+                $data = arr_key_filter($data, $fields, true);
             }
             if (empty($insertFields)) {
                 $insertFields = array_keys($data);
@@ -404,9 +403,10 @@ class  Builder
     protected function parseLock(): string
     {
         $lock = $this->params['lock'];
-        if (is_bool($lock)) {
-            return $lock ? ' FOR UPDATE ' : '';
-        } elseif (is_string($lock)) {
+        if (true === $lock) {
+            return ' FOR UPDATE ';
+        }
+        if (is_string($lock)) {
             return ' ' . trim($lock) . ' ';
         }
         return '';

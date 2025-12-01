@@ -22,7 +22,7 @@ class Middleware
     protected array $params = [];
 
     // 执行中间件
-    public function execute($name = [], array $params = []): bool
+    public function execute(array|string $name = [], array $params = []): bool
     {
         $middleware = [];
         if (is_string($name)) {
@@ -34,12 +34,11 @@ class Middleware
             $this->params = $params;
             return $this->exec($middleware);
         }
-
         return true;
     }
 
     // 添加应用层中间件
-    public function add(string $name, array $middleware)
+    public function add(string $name, array $middleware): mixed
     {
         $config = Config::init();
         $web = $config->get('middleware.' . $name . $name, []);
