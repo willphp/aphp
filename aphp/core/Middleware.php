@@ -91,7 +91,7 @@ class Middleware
         $class = new ReflectionClass($controller);
         if ($class->hasProperty('middleware')) {
             $property = $class->getProperty('middleware');
-            $property->setAccessible(true);
+            //$property->setAccessible(true);
             $middleware = $property->getValue($controller);
             if (is_array($middleware)) {
                 foreach ($middleware as $k => $v) {
