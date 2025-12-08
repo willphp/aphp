@@ -66,11 +66,6 @@ class Connection
         return $this->config['db_driver'] . ':host=' . $this->config['db_host'] . $port . ';dbname=' . $this->config['db_name'] . $charset;
     }
 
-    public function checkTable(string $table): bool
-    {
-        return (bool)preg_match('/^' . $this->prefix . '\w{1,32}$/', $table);
-    }
-
     public function getConfig(string $name = '')
     {
         if (empty($name)) {
@@ -110,6 +105,32 @@ class Connection
             $sql = $this->getRealSql($sql, $bind);
         }
         DebugBar::init()->trace($sql, 'sql'); // 调试
+    }
+
+    public function checkTable(string $table): bool
+    {
+        return (bool)preg_match('/^' . $this->prefix . '\w{1,32}$/', $table);
+    }
+
+    // 表是否存在
+    public function hasTable(string $table): bool
+    {
+        $res = $this->query("SHOW TABLES LIKE '$this->prefix$table'");
+        return !empty($res);
+    }
+
+    //show status 返因处理
+    public function getResult(string $sql, array $bind = []): array
+    {
+        $res = $this->query($sql, $bind);
+        if (isset($res[0]['Variable_name'])) {
+            $data = [];
+            foreach ($res as $re) {
+                $data[$re['Variable_name']] = $re['Value'];
+            }
+            return $data;
+        }
+        return $res;
     }
 
     public function query(string $sql, array $bind = [], array $options = [])
@@ -245,9 +266,9 @@ class Connection
         return $this;
     }
 
-    public function __serialize()
+    public function __serialize(): array
     {
-        return ['prefix'];
+        return ['prefix' => $this->prefix];
     }
 
     public function __destruct()

@@ -15,7 +15,7 @@ if (!IS_CLI && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); // 允许请求类型
     exit();
 }
-const __VERSION__ = '6.0.0'; // 框架版本号
+const __VERSION__ = '6.0.1'; // 框架版本号
 const __POWERED__ = 'APHP_v' . __VERSION__; // 框架全称
 // 字段验证(Field Validate)条件常量
 const FV_MUST = 1;  // 必须

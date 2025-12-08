@@ -167,13 +167,6 @@ class Query implements ArrayAccess, Iterator
         return $result[0]['Field'] ?? 'id';
     }
 
-    //表是否存在
-    public function hasTable(string $table): bool
-    {
-        $res = $this->db->query("SHOW TABLES LIKE '$this->prefix$table'");
-        return !empty($res);
-    }
-
     //sql查询
     public function query(string $sql, array $bind = [], array $options = [])
     {
@@ -365,20 +358,6 @@ class Query implements ArrayAccess, Iterator
             $data[$k] = $isGetOne ? current($v) : $v;
         }
         return $data;
-    }
-
-    //show status 返因处理
-    public function getResult(string $sql, array $bind = []): array
-    {
-        $res = $this->query($sql, $bind);
-        if (isset($res[0]['Variable_name'])) {
-            $data = [];
-            foreach ($res as $re) {
-                $data[$re['Variable_name']] = $re['Value'];
-            }
-            return $data;
-        }
-        return $res;
     }
 
     //删除记录
@@ -856,9 +835,9 @@ class Query implements ArrayAccess, Iterator
         return $this->data;
     }
 
-    public function __serialize()
+    public function __serialize(): array
     {
-        return ['table'];
+        return ['table' => $this->table];
     }
 
     #[\ReturnTypeWillChange]
